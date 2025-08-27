@@ -1,0 +1,356 @@
+<x-app-layout>
+<div class="container mx-auto py-8">
+    <div class="max-w-4xl mx-auto bg-white shadow rounded-lg p-6">
+        <h2 class="text-2xl font-semibold mb-4">New Prescription</h2>
+
+        @if($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <ul class="list-disc list-inside">
+                    @foreach($errors->all() as $err) <li>{{ $err }}</li> @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('prescriptions.store') }}" method="POST" class="space-y-6">
+            @csrf
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {{-- Doctor --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Doctor <span class="text-red-500">*</span></label>
+                    <select name="doctor_id" id="doctor_id" required class="w-full border rounded px-3 py-2">
+                        <option value="">-- Select Doctor --</option>
+                        @foreach($doctors as $doc)
+                            <option value="{{ $doc->id }}">{{ $doc->name }} {{ $doc->specialization ? "({$doc->specialization})" : '' }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Patient selection or new --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Patient</label>
+                    <select name="patient_id" id="patient_select" class="w-full border rounded px-3 py-2">
+                        <option value="">-- Select existing patient --</option>
+                        <option value="__new">+ Add new patient</option>
+                        @foreach($patients as $pat)
+                            <option value="{{ $pat->id }}">{{ $pat->name }} {{ $pat->phone ? "({$pat->phone})" : '' }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            {{-- New patient block (hidden by default) --}}
+            <div id="new_patient_block" class="hidden bg-gray-50 p-4 rounded">
+                <h3 class="text-sm font-medium mb-2">New Patient Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div><input type="text" name="new_patient[name]" value="{{ old('new_patient.name') }}" placeholder="Patient name" class="w-full border rounded px-3 py-2"></div>
+                    <div><input type="text" name="new_patient[phone]" value="{{ old('new_patient.phone') }}" placeholder="Phone" class="w-full border rounded px-3 py-2"></div>
+                    <div><input type="email" name="new_patient[email]" value="{{ old('new_patient.email') }}" placeholder="Email" class="w-full border rounded px-3 py-2"></div>
+                    <div class="md:col-span-3"><textarea name="new_patient[notes]" placeholder="Notes (optional)" class="w-full border rounded px-3 py-2">{{ old('new_patient.notes') }}</textarea></div>
+                </div>
+            </div>
+
+            {{-- Clinical Findings --}}
+            <div class="bg-gray-50 border rounded p-4">
+                <h3 class="text-lg font-medium mb-3">Clinical Findings</h3>
+
+                {{-- O/E --}}
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700">O/E (On Examination)</label>
+                    <textarea name="oe" rows="3" class="w-full border rounded px-3 py-2" placeholder="General appearance, system findings, etc.">{{ old('oe') }}</textarea>
+                </div>
+
+                {{-- Vitals grid --}}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-sm text-gray-700">BP</label>
+                        <input type="text" name="bp" value="{{ old('bp') }}" placeholder="e.g., 120/80 mmHg" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700">Pulse (bpm)</label>
+                        <input type="number" step="1" min="0" name="pulse" value="{{ old('pulse') }}" placeholder="e.g., 78" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700">Temperature (°C)</label>
+                        <input type="number" step="0.1" name="temperature_c" value="{{ old('temperature_c') }}" placeholder="e.g., 37.0" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700">SpO₂ (%)</label>
+                        <input type="number" step="1" min="0" max="100" name="spo2" value="{{ old('spo2') }}" placeholder="e.g., 98" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700">Respiratory Rate (/min)</label>
+                        <input type="number" step="1" min="0" name="respiratory_rate" value="{{ old('respiratory_rate') }}" placeholder="e.g., 16" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700">Weight (kg)</label>
+                        <input type="number" step="0.1" min="0" id="weight_kg" name="weight_kg" value="{{ old('weight_kg') }}" placeholder="e.g., 70.5" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700">Height (cm)</label>
+                        <input type="number" step="0.1" min="0" id="height_cm" name="height_cm" value="{{ old('height_cm') }}" placeholder="e.g., 170" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700">BMI (kg/m²)</label>
+                        <input type="text" id="bmi" name="bmi" value="{{ old('bmi') }}" readonly class="w-full border rounded px-3 py-2 bg-gray-100">
+                    </div>
+                </div>
+            </div>
+
+            {{-- Problem description --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Problem Description (brief)</label>
+                <textarea name="problem_description" rows="3" class="w-full border rounded px-3 py-2">{{ old('problem_description') }}</textarea>
+            </div>
+
+            {{-- Medicines --}}
+            <div class="space-y-3">
+                <div class="flex items-center gap-2">
+                    <h3 class="text-lg font-medium">Medicines</h3>
+                    <input type="text" id="medicine_search" placeholder="Search medicines…" class="border rounded px-3 py-2 w-full md:w-80" autocomplete="off">
+                    <button type="button" id="medicine_clear" class="px-3 py-2 border rounded">Clear</button>
+                </div>
+
+                <div id="medicine_selected_wrap" class="hidden">
+                    <div class="text-sm text-gray-600 mb-1">Selected medicines</div>
+                    <div id="medicine_selected" class="space-y-2"></div>
+                </div>
+
+                <div>
+                    <div class="text-sm text-gray-600 mb-1">Search results</div>
+                    <div id="medicine_pool" class="space-y-2 max-h-60 overflow-auto">
+                        @foreach($medicines as $medicine)
+                            <div id="medrow_{{ $medicine->id }}" class="hidden flex items-center gap-3 p-2 border rounded medicine-row"
+                                 data-name="{{ strtolower($medicine->name) }}"
+                                 data-price="{{ $medicine->price }}"
+                                 data-id="{{ $medicine->id }}"
+                                 data-type="medicine">
+                                <div class="flex items-center gap-2 w-2/5">
+                                    <input type="checkbox" id="med_{{ $medicine->id }}" name="medicines[{{ $medicine->id }}][selected]" value="1" class="medicine-checkbox item-checkbox" data-id="{{ $medicine->id }}" data-kind="medicine">
+                                    <label for="med_{{ $medicine->id }}" class="font-medium">{{ $medicine->name }}</label>
+                                    <span class="text-sm text-gray-500">৳{{ $medicine->price }}</span>
+                                </div>
+                                <div class="flex gap-2 items-center w-3/5">
+                                    <input type="text" name="medicines[{{ $medicine->id }}][duration]" placeholder="Duration (e.g., 5 days)" class="hidden med-input med-duration-{{ $medicine->id }} w-1/2 border rounded px-2 py-1">
+                                    <input type="text" name="medicines[{{ $medicine->id }}][times_per_day]" placeholder="Times/day (e.g., 3x)" class="hidden med-input med-times-{{ $medicine->id }} w-1/2 border rounded px-2 py-1">
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="text-xs text-gray-500">Start typing to see medicine results. Checked items stay above.</p>
+                </div>
+            </div>
+
+            {{-- Tests --}}
+            <div class="space-y-3">
+                <div class="flex items-center gap-2">
+                    <h3 class="text-lg font-medium">Tests</h3>
+                    <input type="text" id="test_search" placeholder="Search tests…" class="border rounded px-3 py-2 w-full md:w-80" autocomplete="off">
+                    <button type="button" id="test_clear" class="px-3 py-2 border rounded">Clear</button>
+                </div>
+
+                <div id="test_selected_wrap" class="hidden">
+                    <div class="text-sm text-gray-600 mb-1">Selected tests</div>
+                    <div id="test_selected" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+                </div>
+
+                <div>
+                    <div class="text-sm text-gray-600 mb-1">Search results</div>
+                    <div id="test_pool" class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-40 overflow-auto">
+                        @foreach($tests as $test)
+                            <label id="testrow_{{ $test->id }}" class="hidden flex items-center gap-2 p-2 border rounded test-row"
+                                   data-name="{{ strtolower($test->name) }}"
+                                   data-price="{{ $test->price ?? '' }}"
+                                   data-id="{{ $test->id }}"
+                                   data-type="test">
+                                <input type="checkbox" class="item-checkbox" name="tests[]" value="{{ $test->id }}" data-id="{{ $test->id }}" data-kind="test">
+                                <div class="flex-1">
+                                    <div class="font-medium">{{ $test->name }}</div>
+                                    <div class="text-sm text-gray-500">৳{{ $test->price ?? '-' }} @if($test->note) — {{ $test->note }} @endif</div>
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                    <p class="text-xs text-gray-500">Start typing to see test results. Checked items stay above.</p>
+                </div>
+            </div>
+
+            {{-- Doctor advice --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Doctor Advice</label>
+                <textarea name="doctor_advice" rows="3" class="w-full border rounded px-3 py-2">{{ old('doctor_advice') }}</textarea>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Create Prescription</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // ---------- Patient toggle ----------
+  const patientSelect = document.getElementById('patient_select');
+  const newPatientBlock = document.getElementById('new_patient_block');
+  function toggleNewPatient() {
+    if (patientSelect && patientSelect.value === '__new') {
+      newPatientBlock.classList.remove('hidden');
+    } else {
+      newPatientBlock.classList.add('hidden');
+    }
+  }
+  if (patientSelect) {
+    patientSelect.addEventListener('change', toggleNewPatient);
+    toggleNewPatient();
+  }
+
+  // ---------- BMI auto-calc ----------
+  const weightEl = document.getElementById('weight_kg');
+  const heightEl = document.getElementById('height_cm');
+  const bmiEl = document.getElementById('bmi');
+  function calcBMI() {
+    const w = parseFloat(weightEl?.value || '');
+    const hcm = parseFloat(heightEl?.value || '');
+    if (!isFinite(w) || !isFinite(hcm) || hcm <= 0) {
+      if (bmiEl) bmiEl.value = '';
+      return;
+    }
+    const hm = hcm / 100.0;
+    const bmi = w / (hm * hm);
+    if (bmiEl) bmiEl.value = bmi.toFixed(1);
+  }
+  if (weightEl) weightEl.addEventListener('input', calcBMI);
+  if (heightEl) heightEl.addEventListener('input', calcBMI);
+  calcBMI(); // initialize from old() if present
+
+  // ---------- Helper: show/hide med dosage inputs ----------
+  function toggleMedInputs(id, checked) {
+    const inputs = document.querySelectorAll('.med-duration-' + id + ', .med-times-' + id);
+    inputs.forEach(i => {
+      if (checked) i.classList.remove('hidden');
+      else { i.classList.add('hidden'); i.value = ''; }
+    });
+  }
+
+  // ---------- Prevent Enter in search inputs from submitting the form ----------
+  function stopEnterSubmit(inputEl) {
+    if (!inputEl) return;
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') e.preventDefault();
+    });
+  }
+
+  // ---------- Generic picker (scoped listeners per section) ----------
+  function setupPicker({ searchInputId, clearBtnId, poolId, selectedWrapId, selectedId, rowClass, kind }) {
+    const searchEl = document.getElementById(searchInputId);
+    const clearBtn = document.getElementById(clearBtnId);
+    const pool = document.getElementById(poolId);
+    const selectedWrap = document.getElementById(selectedWrapId);
+    const selected = document.getElementById(selectedId);
+
+    stopEnterSubmit(searchEl);
+
+    function normalize(s){ return (s || '').toString().trim().toLowerCase(); }
+    function matches(row, q){
+      if (!q) return false; // with empty query, pool stays hidden
+      const name = row.dataset.name || '';
+      const price = (row.dataset.price || '').toString();
+      return name.includes(q) || price.includes(q);
+    }
+    function ensureSelectedWrapVisibility() {
+      selectedWrap.classList.toggle('hidden', selected.children.length === 0);
+    }
+    function refreshPool() {
+      const q = normalize(searchEl.value);
+      const rows = pool.querySelectorAll('.' + rowClass);
+      rows.forEach(row => {
+        const cb = row.querySelector('.item-checkbox');
+        const isChecked = cb && cb.checked;
+        if (isChecked) {
+          row.classList.add('hidden'); // checked rows belong to selected area
+        } else {
+          row.classList.toggle('hidden', !matches(row, q));
+        }
+      });
+    }
+    function moveToSelected(row) {
+      row.classList.remove('hidden');
+      selected.appendChild(row);
+      ensureSelectedWrapVisibility();
+    }
+    function moveToPool(row) {
+      pool.appendChild(row);
+      refreshPool();
+      ensureSelectedWrapVisibility();
+    }
+
+    function refocusSearch() {
+      setTimeout(() => {
+        if (!searchEl) return;
+        searchEl.focus();
+        const v = searchEl.value;
+        try { searchEl.setSelectionRange(v.length, v.length); } catch(e) {}
+      }, 0);
+    }
+
+    // Scoped change handlers
+    function onChange(e) {
+      const cb = e.target.closest('.item-checkbox');
+      if (!cb) return;
+      if (cb.dataset.kind !== kind) return;
+
+      const id = cb.dataset.id;
+      const rowId = (kind === 'medicine' ? 'medrow_' : 'testrow_') + id;
+      const row = document.getElementById(rowId);
+      if (!row) return;
+
+      if (cb.checked) {
+        if (kind === 'medicine') toggleMedInputs(id, true);
+        moveToSelected(row);
+      } else {
+        if (kind === 'medicine') toggleMedInputs(id, false);
+        moveToPool(row);
+      }
+      refocusSearch();
+    }
+
+    pool.addEventListener('change', onChange);
+    selected.addEventListener('change', onChange);
+
+    // Search & Clear
+    searchEl.addEventListener('input', refreshPool);
+    clearBtn.addEventListener('click', () => {
+      searchEl.value = '';
+      refreshPool();
+      refocusSearch();
+    });
+
+    // Initial
+    refreshPool();
+    ensureSelectedWrapVisibility();
+  }
+
+  // Wire both pickers
+  setupPicker({
+    searchInputId: 'medicine_search',
+    clearBtnId: 'medicine_clear',
+    poolId: 'medicine_pool',
+    selectedWrapId: 'medicine_selected_wrap',
+    selectedId: 'medicine_selected',
+    rowClass: 'medicine-row',
+    kind: 'medicine'
+  });
+
+  setupPicker({
+    searchInputId: 'test_search',
+    clearBtnId: 'test_clear',
+    poolId: 'test_pool',
+    selectedWrapId: 'test_selected_wrap',
+    selectedId: 'test_selected',
+    rowClass: 'test-row',
+    kind: 'test'
+  });
+});
+</script>
+</x-app-layout>

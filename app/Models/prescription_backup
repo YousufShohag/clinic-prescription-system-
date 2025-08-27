@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Prescription extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'doctor_id', 'patient_id', 'problem_description', 'doctor_advice'
+    ];
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
+    }
+
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
+
+    public function medicines()
+    {
+        // using pivot table 'prescription_medicines'
+        return $this->belongsToMany(Medicine::class, 'prescription_medicines')
+                    ->withPivot('duration', 'times_per_day')
+                    ->withTimestamps();
+    }
+
+    public function tests()
+    {
+        return $this->belongsToMany(Test::class, 'prescription_tests')
+                    ->withTimestamps();
+    }
+}
