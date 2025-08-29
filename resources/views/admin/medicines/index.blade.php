@@ -105,27 +105,31 @@
             <table class="w-full border border-gray-200 text-sm text-gray-600">
                 <thead class="bg-gray-100">
                     <tr>
-                        <th class="px-4 py-2 border">Image</th>
+                        {{-- <th class="px-4 py-2 border">Image</th> --}}
                         <th class="px-4 py-2 border">Name</th>
                         <th class="px-4 py-2 border">Category</th>
+                        <th class="px-4 py-2 border">Strength</th>
+                        <th class="px-4 py-2 border">generic</th>
+                        <th class="px-4 py-2 border">manufacturer</th>
+                        
                         <th class="px-4 py-2 border">Type</th>
-                        <th class="px-4 py-2 border">Stock</th>
-                        <th class="px-4 py-2 border">Price</th>
-                        <th class="px-4 py-2 border">Expiry</th>
-                        <th class="px-4 py-2 border">Status</th>
+                        {{-- <th class="px-4 py-2 border">Stock</th>
+                        <th class="px-4 py-2 border">Price</th> --}}
+                        {{-- <th class="px-4 py-2 border">Expiry</th> --}}
+                        {{-- <th class="px-4 py-2 border">Status</th> --}}
                         <th class="px-4 py-2 border text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($medicines as $medicine)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2 border text-center">
+                            {{-- <td class="px-4 py-2 border text-center">
                                 @if($medicine->image)
                                     <img src="{{ asset('storage/'.$medicine->image) }}" class="w-12 h-12 object-cover rounded-md mx-auto">
                                 @else
                                     <span class="text-gray-400">No Image</span>
                                 @endif
-                            </td>
+                            </td> --}}
 
                             <!-- Clickable Name -->
                             <td class="px-4 py-2 border">
@@ -133,6 +137,9 @@
                                     @click="medicine = {
                                         id: '{{ $medicine->id }}',
                                         name: '{{ $medicine->name }}',
+                                        strength: '{{ $medicine->strength }}',
+                                        generic: '{{ $medicine->generic }}',
+                                        manufacturer: '{{ $medicine->manufacturer }}',
                                         category: '{{ $medicine->category->name }}',
                                         type: '{{ $medicine->type }}',
                                         stock: '{{ $medicine->stock }}',
@@ -148,40 +155,43 @@
                             </td>
 
                             <td class="px-4 py-2 border">{{ $medicine->category->name }}</td>
+                            <td class="px-4 py-2 border">{{ $medicine->strength }}</td>
+                            <td class="px-4 py-2 border">{{ $medicine->generic }}</td>
+                            <td class="px-4 py-2 border">{{ $medicine->manufacturer }}</td>
                             <td class="px-4 py-2 border">{{ $medicine->type }}</td>
-                            <td class="px-4 py-2 border">{{ $medicine->stock }}</td>
-                            <td class="px-4 py-2 border">${{ $medicine->price }}</td>
+                            {{-- <td class="px-4 py-2 border">{{ $medicine->stock }}</td>
+                            <td class="px-4 py-2 border">${{ $medicine->price }}</td> --}}
                             {{-- <td class="px-4 py-2 border">{{ \Carbon\Carbon::parse($medicine->expiry_date)->format('m/d/Y') }}</td> --}}
-                            <td class="px-4 py-2 border text-center">
-    @php
-        $expiry = \Carbon\Carbon::parse($medicine->expiry_date);
-        $daysLeft = now()->diffInDays($expiry, false);
-    @endphp
+                            {{-- <td class="px-4 py-2 border text-center">
+                                @php
+                                    $expiry = \Carbon\Carbon::parse($medicine->expiry_date);
+                                    $daysLeft = now()->diffInDays($expiry, false);
+                                @endphp
 
-    @if($daysLeft < 0)
-        <span class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700">
-            {{ $expiry->format('m/d/Y') }} ❌ Expired
-        </span>
-    @elseif($daysLeft <= 30)
-        <span class="px-2 py-1 text-xs font-semibold rounded bg-red-200 text-red-800 animate-pulse">
-            {{ $expiry->format('m/d/Y') }} ⚠️ 1 Month Left
-        </span>
-    @elseif($daysLeft <= 60)
-        <span class="px-2 py-1 text-xs font-semibold rounded bg-purple-200 text-purple-800">
-            {{ $expiry->format('m/d/Y') }} ⏳ 2 Months Left
-        </span>
-    @elseif($daysLeft <= 90)
-        <span class="px-2 py-1 text-xs font-semibold rounded bg-yellow-200 text-yellow-800">
-            {{ $expiry->format('m/d/Y') }} ⚠️ 3 Months Left
-        </span>
-    @else
-        <span class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">
-            {{ $expiry->format('m/d/Y') }}
-        </span>
-    @endif
-</td>
+                                @if($daysLeft < 0)
+                                    <span class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700">
+                                        {{ $expiry->format('m/d/Y') }} ❌ Expired
+                                    </span>
+                                @elseif($daysLeft <= 30)
+                                    <span class="px-2 py-1 text-xs font-semibold rounded bg-red-200 text-red-800 animate-pulse">
+                                        {{ $expiry->format('m/d/Y') }} ⚠️ 1 Month Left
+                                    </span>
+                                @elseif($daysLeft <= 60)
+                                    <span class="px-2 py-1 text-xs font-semibold rounded bg-purple-200 text-purple-800">
+                                        {{ $expiry->format('m/d/Y') }} ⏳ 2 Months Left
+                                    </span>
+                                @elseif($daysLeft <= 90)
+                                    <span class="px-2 py-1 text-xs font-semibold rounded bg-yellow-200 text-yellow-800">
+                                        {{ $expiry->format('m/d/Y') }} ⚠️ 3 Months Left
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">
+                                        {{ $expiry->format('m/d/Y') }}
+                                    </span>
+                                @endif
+                            </td> --}}
 
-                            <td class="px-4 py-2 border text-center">
+                            {{-- <td class="px-4 py-2 border text-center">
                                 @php
                                     $isExpired = \Carbon\Carbon::parse($medicine->expiry_date)->isPast();
                                 @endphp
@@ -194,7 +204,7 @@
                                         <span class="px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-700 rounded">Inactive (Disabled)</span>
                                     @endif
                                 @endif
-                            </td>
+                            </td> --}}
                             <td class="px-4 py-2 border text-center space-x-2">
     <!-- Edit Button -->
     <a href="{{ route('medicines.edit', $medicine->id) }}" 
@@ -208,10 +218,10 @@
                      a2 2 0 112.828 2.828L12 20l-4 1 1-4 9.586-9.586z" />
         </svg>
     </a>
-<a href="{{ route('medicines.history', $medicine->id) }}" 
+{{-- <a href="{{ route('medicines.history', $medicine->id) }}" 
    class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs">
    📜 History
-</a>
+</a> --}}
 
     <!-- Delete Button -->
     <form action="{{ route('medicines.destroy', $medicine->id) }}" method="POST" 

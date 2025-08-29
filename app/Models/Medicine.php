@@ -12,6 +12,9 @@ class Medicine extends Model
     protected $fillable = [
         'category_id',
         'name',
+        'generic',
+        'strength',
+        'manufacturer',
         'type',
         'stock',
         'price',

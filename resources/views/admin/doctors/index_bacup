@@ -1,0 +1,354 @@
+<x-app-layout>
+    <div x-data="doctorUI()" x-init="init()" class="container mx-auto py-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div class="flex items-center gap-3">
+                <h2 class="text-2xl font-semibold text-gray-800">Doctors</h2>
+                <span class="text-sm text-gray-500" x-show="filtered.length !== original.length">
+                    Showing <span x-text="filtered.length"></span> of {{ $doctors->count() }}
+                </span>
+            </div>
+            <a href="{{ route('doctors.create') }}"
+               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow-sm">
+                + Add Doctor
+            </a>
+        </div>
+
+        <!-- Controls -->
+        <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <div class="flex flex-col md:flex-row gap-3 md:items-center">
+                <div class="flex-1">
+                    <label class="sr-only">Search</label>
+                    <input x-model="query" @input="apply()"
+                           type="text"
+                           placeholder="Search by name, email, phone, chamber…"
+                           class="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div class="flex gap-3">
+                    <div>
+                        <label class="sr-only">Specialization</label>
+                        @php
+                            $specs = $doctors->pluck('specialization')->filter()->unique()->values();
+                        @endphp
+                        <select x-model="specialization" @change="apply()"
+                                class="rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">All specializations</option>
+                            @foreach($specs as $s)
+                                <option value="{{ $s }}">{{ $s }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="sr-only">Sort</label>
+                        <select x-model="sort" @change="apply()"
+                                class="rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="name-asc">Name ↑</option>
+                            <option value="name-desc">Name ↓</option>
+                            <option value="fee-asc">Fee ↑</option>
+                            <option value="fee-desc">Fee ↓</option>
+                        </select>
+                    </div>
+
+                    <button type="button"
+                            @click="view = (view === 'table' ? 'cards' : 'table')"
+                            class="rounded-lg border px-3 py-2 hover:bg-gray-50">
+                        <span x-show="view==='table'">Card View</span>
+                        <span x-show="view==='cards'">Table View</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <div x-show="view==='table'" class="overflow-x-auto bg-white rounded-lg shadow">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100 sticky top-0 z-10">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialization</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Degree</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chamber</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fee (৳)</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available Time</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                @foreach($doctors as $doctor)
+                    @php
+                        $img = $doctor->image;
+                        if ($img && !str_contains($img, 'doctors/')) {
+                            $img = 'doctors/'.$img;
+                        }
+                        $hasImg = $img && \Illuminate\Support\Facades\Storage::disk('public')->exists($img);
+                        $imgUrl = $hasImg
+                            ? \Illuminate\Support\Facades\Storage::url($img)
+                            : 'https://ui-avatars.com/api/?name=' . urlencode($doctor->name) . '&background=E5E7EB&color=374151&size=128&rounded=true';
+                    @endphp
+
+                    <tr class="hover:bg-gray-50 transition"
+                        x-show="matches({{ json_encode([
+                            'id'=>$doctor->id,
+                            'name'=>$doctor->name,
+                            'specialization'=>$doctor->specialization,
+                            'degree'=>$doctor->degree,
+                            'chamber'=>$doctor->chamber,
+                            'email'=>$doctor->email,
+                            'phone'=>$doctor->phone,
+                            'fee'=>$doctor->consultation_fee,
+                            'available_time'=>$doctor->available_time,
+                            'notes'=>$doctor->notes,
+                        ]) }})">
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <img src="{{ $imgUrl }}" alt="Doctor"
+                                 class="h-12 w-12 rounded-full object-cover ring-2 ring-gray-100">
+                        </td>
+                        <td class="px-4 py-3 text-gray-800 font-medium">
+                            {{ $doctor->name }}
+                        </td>
+                        <td class="px-4 py-3">
+                            @if($doctor->specialization)
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-50 text-blue-700">
+                                    {{ $doctor->specialization }}
+                                </span>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 text-gray-700">{{ $doctor->degree ?? '-' }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ $doctor->chamber ?? '-' }}</td>
+                        <td class="px-4 py-3">
+                            <a href="mailto:{{ $doctor->email }}" class="text-blue-600 hover:underline">
+                                {{ $doctor->email }}
+                            </a>
+                        </td>
+                        <td class="px-4 py-3">
+                            @if($doctor->phone)
+                                <a href="tel:{{ $doctor->phone }}" class="text-gray-700 hover:underline">
+                                    {{ $doctor->phone }}
+                                </a>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 text-gray-700">
+                            {{ $doctor->consultation_fee ? number_format($doctor->consultation_fee) : '-' }}
+                        </td>
+                        <td class="px-4 py-3">
+                            @if($doctor->available_time)
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs bg-emerald-50 text-emerald-700">
+                                    {{ $doctor->available_time }}
+                                </span>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3">
+                            @if($doctor->notes)
+                                <span class="block max-w-[220px] truncate" title="{{ $doctor->notes }}">
+                                    {{ $doctor->notes }}
+                                </span>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <div x-data="{open:false}" class="relative">
+                                <button @click="open=!open" @click.outside="open=false"
+                                        class="px-2 py-1 rounded-md border hover:bg-gray-50 text-sm">
+                                    Actions ▾
+                                </button>
+                                <div x-show="open" x-transition
+                                     class="absolute right-0 mt-2 w-36 bg-white border rounded-md shadow-lg z-20">
+                                    <a href="{{ route('doctors.edit', $doctor->id) }}"
+                                       class="block px-3 py-2 text-sm hover:bg-gray-50">Edit</a>
+                                    <form action="{{ route('doctors.destroy', $doctor->id) }}" method="POST"
+                                          onsubmit="return confirm('Delete this doctor?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+
+            @if($doctors->isEmpty())
+                <div class="p-8 text-center text-gray-500">
+                    No doctors found.
+                    <a href="{{ route('doctors.create') }}" class="text-blue-600 hover:underline ml-1">Add the first one</a>.
+                </div>
+            @endif
+        </div>
+
+        <!-- Card View -->
+        <div x-show="view==='cards'" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @forelse($doctors as $doctor)
+                @php
+                    $img = $doctor->image;
+                    if ($img && !str_contains($img, 'doctors/')) $img = 'doctors/'.$img;
+                    $hasImg = $img && \Illuminate\Support\Facades\Storage::disk('public')->exists($img);
+                    $imgUrl = $hasImg
+                        ? \Illuminate\Support\Facades\Storage::url($img)
+                        : 'https://ui-avatars.com/api/?name=' . urlencode($doctor->name) . '&background=E5E7EB&color=374151&size=256&rounded=true';
+                @endphp
+                <div class="bg-white rounded-xl shadow p-4 flex gap-4"
+                     x-show="matches({{ json_encode([
+                        'id'=>$doctor->id,
+                        'name'=>$doctor->name,
+                        'specialization'=>$doctor->specialization,
+                        'degree'=>$doctor->degree,
+                        'chamber'=>$doctor->chamber,
+                        'email'=>$doctor->email,
+                        'phone'=>$doctor->phone,
+                        'fee'=>$doctor->consultation_fee,
+                        'available_time'=>$doctor->available_time,
+                        'notes'=>$doctor->notes,
+                     ]) }})">
+                    <img src="{{ $imgUrl }}" class="h-16 w-16 rounded-full object-cover ring-2 ring-gray-100" alt="Doctor">
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold text-gray-800">{{ $doctor->name }}</h3>
+                                <div class="mt-1 text-sm text-gray-600 flex flex-wrap gap-2">
+                                    @if($doctor->specialization)
+                                        <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs">
+                                            {{ $doctor->specialization }}
+                                        </span>
+                                    @endif
+                                    @if($doctor->degree)
+                                        <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs">
+                                            {{ $doctor->degree }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="text-right text-sm text-gray-600">
+                                @if($doctor->consultation_fee)
+                                    <div class="font-semibold">৳ {{ number_format($doctor->consultation_fee) }}</div>
+                                @endif
+                                @if($doctor->available_time)
+                                    <div class="mt-1 inline-block px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs">
+                                        {{ $doctor->available_time }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="mt-2 text-sm text-gray-700 space-y-1">
+                            @if($doctor->chamber)
+                                <div><span class="text-gray-500">Chamber:</span> {{ $doctor->chamber }}</div>
+                            @endif
+                            <div class="flex gap-3">
+                                <a href="mailto:{{ $doctor->email }}" class="text-blue-600 hover:underline">{{ $doctor->email }}</a>
+                                @if($doctor->phone)
+                                    <a href="tel:{{ $doctor->phone }}" class="text-gray-700 hover:underline">{{ $doctor->phone }}</a>
+                                @endif
+                            </div>
+                            @if($doctor->notes)
+                                <div class="text-gray-600 line-clamp-2" title="{{ $doctor->notes }}">{{ $doctor->notes }}</div>
+                            @endif
+                        </div>
+
+                        <div class="mt-3 flex gap-2">
+                            <a href="{{ route('doctors.edit', $doctor->id) }}"
+                               class="px-3 py-1.5 rounded-md bg-yellow-500 text-white text-sm hover:bg-yellow-600">Edit</a>
+                            <form action="{{ route('doctors.destroy', $doctor->id) }}" method="POST"
+                                  onsubmit="return confirm('Delete this doctor?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="px-3 py-1.5 rounded-md bg-red-600 text-white text-sm hover:bg-red-700">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-span-full p-8 text-center text-gray-500 bg-white rounded-xl shadow">
+                    No doctors found. <a href="{{ route('doctors.create') }}" class="text-blue-600 hover:underline">Create one</a>.
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Optional: Laravel pagination (only shows if $doctors is paginated) -->
+        @if(method_exists($doctors, 'links'))
+            <div class="mt-6">
+                {{ $doctors->links() }}
+            </div>
+        @endif
+    </div>
+
+    <!-- Alpine logic -->
+    <script>
+        function doctorUI() {
+            return {
+                original: [], // filled in init from DOM data
+                filtered: [],
+                query: '',
+                specialization: '',
+                sort: 'name-asc',
+                view: window.innerWidth < 768 ? 'cards' : 'table',
+                init() {
+                    // build a lightweight index from server-rendered rows/cards
+                    // We’ll scan elements with x-show="matches(...)" and read their JSON argument:
+                    this.original = Array.from(document.querySelectorAll('[x-show^="matches("]'))
+                        .map(el => {
+                            const json = el.getAttribute('x-show').replace(/^matches\((.*)\)$/, '$1');
+                            try { return JSON.parse(json); } catch { return {}; }
+                        });
+                    this.filtered = this.original.slice();
+                },
+                matches(item) {
+                    // runtime filter hook used by both table rows and cards
+                    const q = this.query.trim().toLowerCase();
+                    const specOk = !this.specialization || (item.specialization || '').toLowerCase() === this.specialization.toLowerCase();
+                    const text = [
+                        item.name, item.email, item.phone, item.chamber,
+                        item.specialization, item.degree, item.notes, item.available_time
+                    ].filter(Boolean).join(' ').toLowerCase();
+                    const qOk = !q || text.includes(q);
+                    const keep = specOk && qOk;
+                    // keep internal filtered list in sync for the counter
+                    // (this function is called per-row; we’ll rebuild in apply() too)
+                    return keep;
+                },
+                apply() {
+                    // rebuild filtered for the counter + for future extensions
+                    const q = this.query.trim().toLowerCase();
+                    this.filtered = this.original.filter(item => {
+                        const specOk = !this.specialization || (item.specialization || '').toLowerCase() === this.specialization.toLowerCase();
+                        const text = [
+                            item.name, item.email, item.phone, item.chamber,
+                            item.specialization, item.degree, item.notes, item.available_time
+                        ].filter(Boolean).join(' ').toLowerCase();
+                        const qOk = !q || text.includes(q);
+                        return specOk && qOk;
+                    });
+
+                    const by = this.sort;
+                    const getFee = v => (v?.fee ? Number(v.fee) : 0);
+                    this.filtered.sort((a,b) => {
+                        if (by === 'name-asc') return (a.name||'').localeCompare(b.name||'');
+                        if (by === 'name-desc') return (b.name||'').localeCompare(a.name||'');
+                        if (by === 'fee-asc') return getFee(a) - getFee(b);
+                        if (by === 'fee-desc') return getFee(b) - getFee(a);
+                        return 0;
+                    });
+                    // no need to re-render; x-show runs per element
+                }
+            }
+        }
+    </script>
+</x-app-layout>

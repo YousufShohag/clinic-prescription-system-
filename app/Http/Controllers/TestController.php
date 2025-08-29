@@ -59,13 +59,45 @@ class TestController extends Controller
     /**
      * Quick search API.
      */
-    public function search(Request $request)
-    {
-        $query = $request->get('q', '');
-        $tests = Test::where('name', 'LIKE', "%$query%")
-            ->take(10)
-            ->get();
+    // public function search(Request $request)
+    // {
+    //     $query = $request->get('q', '');
+    //     $tests = Test::where('name', 'LIKE', "%$query%")
+    //         ->take(10)
+    //         ->get();
 
-        return response()->json($tests);
+    //     return response()->json($tests);
+    // }
+
+    public function search(Request $r)
+    {
+        $q    = trim($r->input('term', $r->input('q', '')));
+        $page = max(1, (int) $r->input('page', 1));
+        $per  = 20;
+
+        $builder = Test::query();
+        if ($q !== '') {
+            $builder->where(function ($w) use ($q) {
+                $w->where('name', 'like', "%{$q}%")
+                  ->orWhere('note', 'like', "%{$q}%");
+            });
+        }
+
+        $total   = $builder->count();
+        $results = $builder->orderBy('name')
+            ->skip(($page - 1) * $per)
+            ->take($per)
+            ->get(['id', 'name', 'price', 'note']);
+
+        return response()->json([
+            'results' => $results->map(fn ($t) => [
+                'id'    => $t->id,
+                'text'  => $t->name,
+                'name'  => $t->name,
+                'price' => $t->price,
+                'note'  => $t->note,
+            ]),
+            'pagination' => [ 'more' => ($page * $per) < $total ],
+        ]);
     }
 }

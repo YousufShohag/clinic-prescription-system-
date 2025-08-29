@@ -136,11 +136,11 @@
                 </div>
 
               <div class="mb-4">
-    <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">Next Meeting Date</div>
-    <div class="text-sm leading-6">
-        {{ $prescription->return_date ? \Carbon\Carbon::parse($prescription->return_date)->format('d/m/Y') : '—' }}
-    </div>
-</div>
+                    <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">Next Meeting Date</div>
+                    <div class="text-sm leading-6">
+                        {{ $prescription->return_date ? \Carbon\Carbon::parse($prescription->return_date)->format('d/m/Y') : '—' }}
+                    </div>
+                </div>
 
                 {{-- Optional notes --}}
                 @if(!empty($prescription->patient->notes))
@@ -170,7 +170,7 @@
                                 <li class="flex items-start">
                                     <div class="mt-1 mr-2">•</div>
                                     <div class="flex-1">
-                                        <div class="font-medium">{{ $m->name }}</div>
+                                        <div class="font-medium"><span class="text-sm text-gray-600">{{ $m->type }}</span>. {{ $m->name }} - <span class="text-sm text-gray-600">{{ $m->strength }}</span></div>
                                         <div class="text-sm text-gray-600">
                                             @php
                                                 $parts = [];
@@ -198,10 +198,10 @@
                                     <div class="mt-1 mr-2">•</div>
                                     <div class="flex-1">
                                         <div class="font-medium">{{ $t->name }}</div>
-                                        <div class="text-sm text-gray-600">
+                                        {{-- <div class="text-sm text-gray-600">
                                             @if(!is_null($t->price)) ৳{{ rtrim(rtrim(number_format((float)$t->price, 2, '.', ''), '0'), '.') }} @else — @endif
                                             @if($t->note) <span class="text-xs text-gray-500">— {{ $t->note }}</span> @endif
-                                        </div>
+                                        </div> --}}
                                     </div>
                                 </li>
                             @endforeach

@@ -14,6 +14,20 @@
         </a>
     </div>
 
+    <form action="{{ route('medicines.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+  @csrf
+  <label class="block text-sm font-semibold text-gray-700 mb-1">Import Medicines (CSV)</label>
+  <input type="file" name="csv" accept=".csv"
+         class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
+                file:rounded-md file:border-0 file:text-sm file:font-semibold
+                file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" required>
+  <button type="submit"
+          class="px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700">
+    Import
+  </button>
+</form>
+
+
     <form action="{{ route('medicines.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
 
@@ -37,6 +51,26 @@
                 <input type="text" name="name" required
                        class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
             </div>
+
+            <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Generic</label>
+        <input type="text" name="generic" required placeholder="e.g., Paracetamol"
+               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+    </div>
+
+    <!-- NEW: Strength -->
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Strength</label>
+        <input type="text" name="strength" placeholder="e.g., 500 mg or 5 mg/5 mL"
+               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+    </div>
+
+    <!-- NEW: Manufacturer -->
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Manufacturer</label>
+        <input type="text" name="manufacturer" placeholder="e.g., ACME Pharma"
+               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+    </div>
 
             <!-- Type -->
             <div>
