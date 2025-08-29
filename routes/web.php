@@ -67,6 +67,23 @@ Route::middleware(['auth'])->group(function () {
     // If you truly need a custom show, do:
     // Route::resource('prescriptions', PrescriptionController::class)->except('show');
     // Route::get('/prescriptions/{prescription}', [PrescriptionController::class, 'show'])->name('prescriptions.show');
+
+
+    Route::get('/reports/doctor-patients', [ReportController::class, 'doctorPatients'])
+    ->name('reports.doctorPatients');
+
+    Route::get('/reports/doctor-patients/export', [ReportController::class, 'doctorPatientsExport'])
+        ->name('reports.doctorPatients.export');
+
+        // Detailed prescriptions “story” page
+Route::get('/reports/prescriptions', [ReportController::class, 'prescriptions'])
+    ->name('reports.prescriptions');
+
+// CSV export for the same view
+Route::get('/reports/prescriptions/export', [ReportController::class, 'prescriptionsExport'])
+    ->name('reports.prescriptions.export');
+
+
 });
 
 require __DIR__ . '/auth.php';

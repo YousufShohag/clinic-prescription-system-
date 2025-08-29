@@ -13,7 +13,23 @@
                     </a>
                 </div>
 
-               
+               <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('prescriptions.index')" :active="request()->routeIs('prescriptions.*')">
+                        {{ __('Prescriptions') }}
+                    </x-nav-link>
+                </div>
+
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('patients.index')" :active="request()->routeIs('patients.*')">
+                        {{ __('Patient') }}
+                    </x-nav-link>
+                </div>
+
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('tests.index')" :active="request()->routeIs('tests.*')">
+                        {{ __('Tests') }}
+                    </x-nav-link>
+                </div>
 
                {{-- <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
@@ -45,11 +61,7 @@
                     </x-nav-link>
                 </div> --}}
 
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('tests.index')" :active="request()->routeIs('tests.*')">
-                        {{ __('Tests') }}
-                    </x-nav-link>
-                </div>
+                
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('doctors.index')" :active="request()->routeIs('doctors.*')">
@@ -57,17 +69,9 @@
                     </x-nav-link>
                 </div>
 
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('patients.index')" :active="request()->routeIs('patients.*')">
-                        {{ __('Patient') }}
-                    </x-nav-link>
-                </div>
+                
 
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('prescriptions.index')" :active="request()->routeIs('prescriptions.*')">
-                        {{ __('Prescriptions') }}
-                    </x-nav-link>
-                </div>
+                
 
                  <div x-data="{ open: false }" class="relative hidden sm:-my-px sm:ms-10 sm:flex">
                     <!-- Main Menu Button -->
@@ -150,6 +154,42 @@
 
                         </div>
                     </div>
+                    
+                </div>
+
+<div x-data="{ open: false }" class="relative hidden sm:-my-px sm:ms-10 sm:flex">
+                    <!-- Main Menu Button -->
+                    <button @click="open = !open" @click.away="open = false"
+                        class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out"
+                        :class="{ 'border-indigo-500 text-gray-900': open }">
+                        {{ __('Reports') }}
+                        <svg class="ms-1 h-4 w-4 transform transition-transform duration-200"
+                            :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown Items Below -->
+                    <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="transform opacity-0 scale-95"
+                        x-transition:enter-end="transform opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="transform opacity-100 scale-100"
+                        x-transition:leave-end="transform opacity-0 scale-95"
+                        class="absolute z-50 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+
+                        <div class="py-1">
+                            
+                            <a href="{{route('reports.doctorPatients')}}"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            Patient Report
+                            </a>
+
+                        </div>
+                    </div>
+                    
                 </div>
 
             </div>

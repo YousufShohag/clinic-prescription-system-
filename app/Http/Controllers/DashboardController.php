@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Prescription;
+use App\Models\Patient;
 use App\Models\Medicine;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -19,6 +21,8 @@ class DashboardController extends Controller
         $totalMedicines  = Medicine::count();
         $totalCustomers  = Customer::count();
         $totalInvoices   = Invoice::count();
+        $totalPrescription   = Prescription::count();
+        $totalPatient   = Patient::count();
 
         // Sales summary
         $todaysSales    = Invoice::whereDate('invoice_date', Carbon::today())->sum('grand_total');
@@ -69,7 +73,9 @@ class DashboardController extends Controller
             'lowStockMedicines',
             'expiredMedicines',
             'salesDates',
-            'salesAmounts'
+            'salesAmounts',
+            'totalPrescription',
+            'totalPatient'
         ));
     }
 }

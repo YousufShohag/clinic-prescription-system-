@@ -10,16 +10,16 @@
         <!-- 🔸 KPI Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="bg-white p-6 rounded-lg shadow text-center">
-                <p class="text-sm text-gray-500">Total Categories</p>
-                <h3 class="text-2xl font-bold text-indigo-600">{{ $totalCategories }}</h3>
+                <p class="text-sm text-gray-500">Total Patient</p>
+                <h3 class="text-2xl font-bold text-indigo-600">{{ $totalPatient }}</h3>
             </div>
             <div class="bg-white p-6 rounded-lg shadow text-center">
                 <p class="text-sm text-gray-500">Total Medicines</p>
                 <h3 class="text-2xl font-bold text-green-600">{{ $totalMedicines }}</h3>
             </div>
             <div class="bg-white p-6 rounded-lg shadow text-center">
-                <p class="text-sm text-gray-500">Total Customers</p>
-                <h3 class="text-2xl font-bold text-blue-600">{{ $totalCustomers }}</h3>
+                <p class="text-sm text-gray-500">Total Prescription</p>
+                <h3 class="text-2xl font-bold text-blue-600">{{ $totalPrescription }}</h3>
             </div>
             <div class="bg-white p-6 rounded-lg shadow text-center">
                 <p class="text-sm text-gray-500">Total Invoices</p>
