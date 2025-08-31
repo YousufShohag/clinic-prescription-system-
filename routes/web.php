@@ -13,7 +13,10 @@ use App\Http\Controllers\{
     PrescriptionController,
     TestCategoryController,
     InvoiceController,
-    CustomerController
+    CustomerController,
+    AppointmentController,
+    CalenderController,
+
 };
 
 Route::get('/', function () {
@@ -48,10 +51,35 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/medicines/import', [MedicineController::class, 'importCsv'])->name('medicines.import');
     Route::resource('medicines', MedicineController::class)->except('show'); // no show page
 
+
+
+
     /* ---- Core Resources ---- */
     Route::resource('tests', TestController::class);
     Route::resource('doctors', DoctorController::class);
     Route::resource('patients', PatientController::class);
+
+// ---------------------------------------
+    // Calendar data: counts per day in a range
+    Route::get('/calendars/calendar-data1', [CalenderController::class, 'calendarData'])
+    ->name('appointments.calendar');
+
+// Day detail list (history for a date)
+    Route::get('/calendars/day1', [CalenderController::class, 'dayList'])
+    ->name('appointments.day1');
+// ------------------------------------------
+    // Calendar data: counts per day in a range
+    Route::get('/appointments/calendar-data', [AppointmentController::class, 'calendarData'])
+    ->name('appointments.calendarData');
+
+// Day detail list (history for a date)
+    Route::get('/appointments/day', [AppointmentController::class, 'dayList'])
+    ->name('appointments.day');
+
+    Route::resource('appointments', AppointmentController::class);
+
+    Route::resource('calendars', CalenderController::class);
+
     Route::resource('test-categories', TestCategoryController::class);
     Route::resource('customers', CustomerController::class);
     Route::resource('categories', CategoryController::class);
@@ -76,12 +104,14 @@ Route::middleware(['auth'])->group(function () {
         ->name('reports.doctorPatients.export');
 
         // Detailed prescriptions “story” page
-Route::get('/reports/prescriptions', [ReportController::class, 'prescriptions'])
+    Route::get('/reports/prescriptions', [ReportController::class, 'prescriptions'])
     ->name('reports.prescriptions');
 
 // CSV export for the same view
-Route::get('/reports/prescriptions/export', [ReportController::class, 'prescriptionsExport'])
+    Route::get('/reports/prescriptions/export', [ReportController::class, 'prescriptionsExport'])
     ->name('reports.prescriptions.export');
+
+
 
 
 });
