@@ -32,7 +32,7 @@
       <a href="{{ route('appointments.index') }}" class="px-3 py-2 border rounded">Reset</a>
     </form>
 
-    {{-- Two-column layout: LEFT table, RIGHT calendar --}}
+    {{-- Two-column layout: LEFT day list, RIGHT calendar --}}
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
       {{-- LEFT: Day table --}}
       <div class="md:col-span-7">
@@ -42,7 +42,6 @@
               <div class="text-lg font-semibold">
                 Appointments on <span id="rightDate">{{ now()->toDateString() }}</span>
               </div>
-              {{-- shows filtered / total when searching, else just total --}}
               <div class="text-sm text-gray-600"><span id="rightCount">0</span> item(s)</div>
             </div>
 
@@ -102,7 +101,6 @@
         <button type="button" class="px-2 py-1 border rounded" onclick="closeCreateModal()">Close</button>
       </div>
       <form id="createForm" class="p-4 space-y-4">
-        {{-- errors --}}
         <div id="createErrors" class="hidden border border-red-300 bg-red-50 text-red-700 rounded p-3 text-sm"></div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -136,16 +134,6 @@
             <input type="number" name="duration_min" id="form_duration" min="0" step="5" class="w-full border rounded px-3 py-2" placeholder="e.g., 30">
           </div>
 
-          <div>
-            <label class="block text-sm text-gray-700 mb-1">Status</label>
-            <select name="status" id="form_status" class="w-full border rounded px-3 py-2">
-              <option value="scheduled">Scheduled</option>
-              <option value="checked_in">Checked in</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-
           <div class="md:col-span-2">
             <label class="block text-sm text-gray-700 mb-1">Notes</label>
             <textarea name="notes" id="form_notes" rows="3" class="w-full border rounded px-3 py-2"></textarea>
@@ -176,8 +164,8 @@
     const printBtn    = document.getElementById('printBtn');
 
     let _calendar;
-    let _dayItems = [];     // full items loaded from server for the selected day
-    let _dayFiltered = [];  // items after search filter
+    let _dayItems = [];
+    let _dayFiltered = [];
 
     // ---------- helpers ----------
     function csrf() { return document.querySelector('meta[name="csrf-token"]').getAttribute('content'); }
@@ -216,7 +204,6 @@
         });
       }
       renderDayRows(_dayFiltered);
-      // show "X / Y" when filtered
       const total = _dayItems.length;
       const shown = _dayFiltered.length;
       rightCount.textContent = (q && total !== shown) ? `${shown} / ${total}` : `${total}`;
@@ -230,6 +217,26 @@
       }
       dayTbody.innerHTML = items.map((it, idx) => {
         const no = (it.number != null && it.number !== '') ? it.number : (idx + 1);
+
+        const editLink = it.edit_url ? `
+          <a href="${it.edit_url}" class="inline-flex items-center gap-1.5 rounded px-2 py-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 013.182 3.182L7.5 19.313 3 21l1.687-4.5L16.862 3.487z"/>
+            </svg>
+            
+          </a>` : '';
+
+        const deleteBtn = it.delete_url ? `
+          <button type="button" class="delete-btn inline-flex items-center gap-1.5 rounded px-2 py-1 text-red-600 hover:text-red-700 hover:bg-red-50 text-sm"
+                  data-url="${it.delete_url}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M6 7h12M10 11v6m4-6v6M9 7l1-2h4l1 2M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12"/>
+            </svg>
+            
+          </button>` : '';
+
         return `
           <tr class="hover:bg-gray-50">
             <td class="px-3 py-2 whitespace-nowrap">${no}</td>
@@ -239,10 +246,7 @@
             <td class="px-3 py-2">${it.status || '—'}</td>
             <td class="px-3 py-2 max-w-[260px] truncate" title="${escapeHTML(it.notes) || ''}">${escapeHTML(it.notes) || '—'}</td>
             <td class="px-3 py-2">
-              <div class="flex gap-2">
-                ${it.show_url ? `<a href="${it.show_url}" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener">Open</a>` : ''}
-                ${it.edit_url ? `<a href="${it.edit_url}" class="text-blue-600 text-sm hover:underline">Edit</a>` : ''}
-              </div>
+              <div class="flex gap-2 items-center">${editLink}${deleteBtn}</div>
             </td>
           </tr>
         `;
@@ -377,8 +381,62 @@
       w.document.open();
       w.document.write(html);
       w.document.close();
-      // try auto print once the new document is ready
       w.onload = () => w.print();
+    });
+
+    // ---------- delegated delete handler (attach ONCE) ----------
+    dayTbody.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.delete-btn');
+      if (!btn) return;
+
+      const url = btn.dataset.url;
+      if (!url) { alert('Delete URL missing.'); return; }
+
+      const row = btn.closest('tr');
+      const who = row?.querySelector('td:nth-child(3)')?.innerText?.trim() || 'this appointment';
+      if (!confirm(`Delete ${who}? This cannot be undone.`)) return;
+
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.textContent = 'Deleting…';
+
+      try {
+        const res = await fetch(url, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': csrf(),
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'same-origin'
+        });
+
+        if (res.status === 204 || res.ok) {
+          // refresh calendar events in current range
+          const v = _calendar.view;
+          const params = {
+            start: v.currentStart.toISOString().slice(0,10),
+            end:   v.currentEnd.toISOString().slice(0,10)
+          };
+          const doctorId = doctorFilterSelect?.value || '';
+          if (doctorId) params.doctor_id = doctorId;
+
+          fetch(`{{ route('appointments.calendarData') }}?` + new URLSearchParams(params).toString())
+            .then(r=>r.json()).then(events => { _calendar.removeAllEvents(); _calendar.addEventSource(events); });
+
+          // reload currently shown day table
+          loadDay(rightDate.textContent || todayStr());
+          return;
+        }
+
+        if (res.status === 419) throw new Error('Session expired (419). Refresh the page and try again.');
+        if (res.status === 401) throw new Error('Unauthorized (401).');
+        throw new Error(`HTTP ${res.status}`);
+      } catch (err) {
+        alert('Delete failed: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+      }
     });
 
     // ---------- create modal ----------
@@ -399,7 +457,6 @@
       document.getElementById('form_time').value = now.toTimeString().slice(0,5);
 
       document.getElementById('form_duration').value = '';
-      document.getElementById('form_status').value   = 'scheduled';
       document.getElementById('form_notes').value    = '';
 
       errBox.classList.add('hidden'); errBox.innerHTML = '';
@@ -453,7 +510,6 @@
         date:        d,
         start_time:  t,
         duration_min:document.getElementById('form_duration').value || null,
-        status:      document.getElementById('form_status').value || null,
         notes:       document.getElementById('form_notes').value || null,
         scheduled_at: d && t ? (d + ' ' + t + ':00') : null
       };
@@ -515,7 +571,7 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      background: #f3f4f6; /* matches bg-gray-100 */
+      background: #f3f4f6;
     }
 
     /* Optional: nicer scroll on webkit */

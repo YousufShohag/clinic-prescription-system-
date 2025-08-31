@@ -137,11 +137,60 @@ class AppointmentController extends Controller
 }
 
 
-    public function destroy(Appointment $appointment)
-    {
-        $appointment->delete();
-        return redirect()->route('appointments.index')->with('success', 'Appointment deleted successfully.');
+// App\Http\Controllers\AppointmentController.php
+public function destroy(Request $request, Appointment $appointment)
+{
+    // capture day + doctor BEFORE delete (for optional resequencing)
+    $date     = optional($appointment->scheduled_at)->toDateString();
+    $doctorId = (int) $appointment->doctor_id;
+
+    $appointment->delete();
+
+    // OPTIONAL: keep numbers contiguous for that doctor+day
+    $this->resequenceNumbers($date, $doctorId);
+
+    if ($request->wantsJson()) {
+        return response()->json(['ok' => true]);
     }
+
+    return redirect()
+        ->route('appointments.index')
+        ->with('success', 'Appointment deleted successfully.');
+}
+
+/**
+ * Re-number appointment_number for a given date+doctor to 1..N
+ * Safe to call even if the column doesn't exist.
+ */
+private function resequenceNumbers(?string $date, ?int $doctorId): void
+{
+    if (!$date || !$doctorId) return;
+    if (!Schema::hasColumn('appointments', 'appointment_number')) return;
+
+    DB::transaction(function () use ($date, $doctorId) {
+        $list = Appointment::whereDate('scheduled_at', $date)
+            ->where('doctor_id', $doctorId)
+            ->orderBy('appointment_number')   // existing numbering first
+            ->orderBy('scheduled_at')         // stable fallback
+            ->lockForUpdate()
+            ->get();
+
+        $i = 1;
+        foreach ($list as $a) {
+            if ((int) $a->appointment_number !== $i) {
+                // update quietly to avoid events/observers, if available in your Laravel
+                if (method_exists($a, 'updateQuietly')) {
+                    $a->updateQuietly(['appointment_number' => $i]);
+                } else {
+                    $a->appointment_number = $i;
+                    $a->save();
+                }
+            }
+            $i++;
+        }
+    });
+}
+
 
 
 public function calendarData(Request $req)
@@ -302,6 +351,7 @@ public function dayList(Request $req)
 
         $showUrl = Route::has('appointments.show') ? route('appointments.show', $a->id) : null;
         $editUrl = Route::has('appointments.edit') ? route('appointments.edit', $a->id) : null;
+        $deleteUrl = Route::has('appointments.destroy') ? route('appointments.destroy', $a->id) : null;
 
         return [
             'id'       => $a->id,
@@ -314,6 +364,7 @@ public function dayList(Request $req)
             'notes'    => (string) \Illuminate\Support\Str::limit($a->notes ?? '', 120),
             'show_url' => $showUrl,
             'edit_url' => $editUrl,
+            'delete_url' => $deleteUrl,
         ];
     });
 
