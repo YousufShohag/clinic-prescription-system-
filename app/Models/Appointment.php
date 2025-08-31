@@ -14,6 +14,7 @@ class Appointment extends Model
         'doctor_id',
         'scheduled_at',
         'notes',
+        'appointment_number',
     ];
 
     protected $casts = [

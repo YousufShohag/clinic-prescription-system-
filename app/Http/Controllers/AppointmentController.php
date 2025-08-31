@@ -17,7 +17,7 @@ class AppointmentController extends Controller
 {
     public function index()
     {
-        $appointments = Appointment::with(['patient','doctor'])->latest()->paginate(15);
+        $appointments = Appointment::with(['patient','doctor'])->latest()->paginate(30);
         return view('admin.appointments.index', compact('appointments'));
     }
 
@@ -28,19 +28,74 @@ class AppointmentController extends Controller
         return view('admin.appointments.create', compact('patients','doctors'));
     }
 
+    // public function store(Request $request)
+    // {
+    //     $data = $request->validate([
+    //         'patient_id' => 'required|exists:patients,id',
+    //         'doctor_id' => 'required|exists:doctors,id',
+    //         'scheduled_at' => 'required|date',
+    //         'notes' => 'nullable|string',
+    //     ]);
+
+    //     $date = Carbon::parse($data['scheduled_at'])->toDateString();
+
+    //     Appointment::create($data);
+    //     if (Schema::hasColumn('appointments', 'scheduled_at')) {
+    //         $count = Appointment::whereDate('scheduled_at', $date)->count();
+    //     } elseif (Schema::hasColumn('appointments', 'date')) {
+    //         $count = Appointment::whereDate('date', $date)->count();
+    //     } elseif (Schema::hasColumn('appointments', 'appointment_date')) {
+    //         $count = Appointment::whereDate('appointment_date', $date)->count();
+    //     } else {
+    //         $count = 0;
+    //     }
+
+    //     $data['appointment_number'] = $count + 1;
+
+    //     $appointment = Appointment::create($data);
+
+    //     if ($request->wantsJson()) {
+    //         return response()->json($appointment, 201);
+    //     }
+
+    //     return redirect()->route('appointments.index')->with('success', 'Appointment created successfully.');
+    // }
+
     public function store(Request $request)
-    {
-        $data = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'doctor_id' => 'required|exists:doctors,id',
-            'scheduled_at' => 'required|date',
-            'notes' => 'nullable|string',
-        ]);
+{
+    $data = $request->validate([
+        'patient_id'   => 'required|exists:patients,id',
+        'doctor_id'    => 'required|exists:doctors,id',
+        'scheduled_at' => 'required|date',
+        'notes'        => 'nullable|string',
+    ]);
 
-        Appointment::create($data);
+    $date = Carbon::parse($data['scheduled_at'])->toDateString();
 
-        return redirect()->route('appointments.index')->with('success', 'Appointment created successfully.');
+    // Create exactly ONE row, and compute the next number inside a transaction.
+    $appointment = DB::transaction(function () use ($data, $date) {
+        // If you want numbering per-doctor-per-day, keep the doctor filter.
+        // If you want numbering per-day (all doctors combined), remove the where('doctor_id', ...) line.
+        $q = Appointment::whereDate('scheduled_at', $date)
+                        ->where('doctor_id', $data['doctor_id']);
+
+        // Lock rows so two users can't grab the same number at the same time
+        $max = $q->lockForUpdate()->max('appointment_number');
+        $next = ($max ?? 0) + 1;
+
+        return Appointment::create(array_merge($data, [
+            'appointment_number' => $next,
+        ]));
+    });
+
+    if ($request->wantsJson()) {
+        return response()->json($appointment, 201);
     }
+
+    return redirect()->route('appointments.index')
+        ->with('success', 'Appointment created successfully.');
+}
+
 
     public function edit(Appointment $appointment)
     {
@@ -50,18 +105,37 @@ class AppointmentController extends Controller
     }
 
     public function update(Request $request, Appointment $appointment)
-    {
-        $data = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'doctor_id' => 'required|exists:doctors,id',
-            'scheduled_at' => 'required|date',
-            'notes' => 'nullable|string',
-        ]);
+{
+    $data = $request->validate([
+        'patient_id'   => 'required|exists:patients,id',
+        'doctor_id'    => 'required|exists:doctors,id',
+        'scheduled_at' => 'required|date',
+        'notes'        => 'nullable|string',
+    ]);
 
+    $newDate = Carbon::parse($data['scheduled_at'])->toDateString();
+    $oldDate = optional($appointment->scheduled_at)->toDateString();
+    $doctorChanged = (int)$appointment->doctor_id !== (int)$data['doctor_id'];
+    $dateChanged   = $oldDate !== $newDate;
+
+    DB::transaction(function () use ($appointment, &$data, $newDate, $dateChanged, $doctorChanged) {
+        if ($dateChanged || $doctorChanged) {
+            $q = Appointment::whereDate('scheduled_at', $newDate)
+                            ->where('doctor_id', $data['doctor_id']);
+            $max  = $q->lockForUpdate()->max('appointment_number');
+            $data['appointment_number'] = ($max ?? 0) + 1;
+        }
         $appointment->update($data);
+    });
 
-        return redirect()->route('appointments.index')->with('success', 'Appointment updated successfully.');
+    if ($request->wantsJson()) {
+        return response()->json(['ok' => true]);
     }
+
+    return redirect()->route('appointments.index')
+        ->with('success', 'Appointment updated successfully.');
+}
+
 
     public function destroy(Appointment $appointment)
     {
@@ -111,6 +185,75 @@ public function calendarData(Request $req)
     ]));
 }
 
+// public function dayList(Request $req)
+// {
+//     $req->validate([
+//         'date'      => ['required','date'],
+//         'doctor_id' => ['nullable','exists:doctors,id'],
+//     ]);
+
+//     $date = Carbon::parse($req->query('date'))->toDateString();
+//     $doctorId = $req->query('doctor_id');
+
+//     $hasDateCol = Schema::hasColumn('appointments', 'date');
+//     $hasSchedAt = Schema::hasColumn('appointments', 'scheduled_at');
+//     $hasNumber  = Schema::hasColumn('appointments', 'appointment_number');
+
+//     $base = \App\Models\Appointment::with(['patient:id,name,phone','doctor:id,name']);
+
+//     if ($hasDateCol) {
+//         $base->whereDate('date', $date);
+//     } elseif ($hasSchedAt) {
+//         $base->whereBetween('scheduled_at', [
+//             Carbon::parse($date.' 00:00:00'),
+//             Carbon::parse($date.' 23:59:59'),
+//         ]);
+//     } else {
+//         return response()->json(['date'=>$date,'count'=>0,'items'=>[]]);
+//     }
+
+//     if ($doctorId) $base->where('doctor_id', $doctorId);
+
+//     $items = $base
+//         ->orderBy($hasNumber ? 'appointment_number' : ($hasDateCol ? 'start_time' : 'scheduled_at'))
+//         ->get()
+//        ->map(function ($a) use ($hasDateCol, $hasSchedAt, $hasNumber) {
+//             // Build time label safely
+//             $timeLabel = '—';
+//             try {
+//                 if ($hasDateCol && !empty($a->start_time)) {
+//                     $timeLabel = Carbon::parse($a->start_time)->format('h:i A');
+//                 } elseif ($hasSchedAt && !empty($a->scheduled_at)) {
+//                     $timeLabel = Carbon::parse($a->scheduled_at)->format('h:i A');
+//                 }
+//                 if (!empty($a->duration_min)) $timeLabel .= ' ('.$a->duration_min.'m)';
+//             } catch (\Throwable $e) { /* ignore */ }
+
+//             // Only include URLs if those routes exist
+//             $showUrl = Route::has('appointments.show') ? route('appointments.show', $a->id) : null;
+//             $editUrl = Route::has('appointments.edit') ? route('appointments.edit', $a->id) : null;
+
+//             return [
+//                 'id'       => $a->id,
+//                 'number'   => $hasNumber ? (int) $a->appointment_number : null,
+//                 'time'     => $timeLabel,
+//                 'patient'  => $a->patient->name ?? '—',
+//                 'phone'    => $a->patient->phone ?? '',
+//                 'doctor'   => $a->doctor->name ?? '—',
+//                 'status'   => ucfirst(str_replace('_',' ', $a->status ?? 'scheduled')),
+//                 'notes'    => (string) \Illuminate\Support\Str::limit($a->notes ?? '', 120),
+//                 'show_url' => $showUrl,
+//                 'edit_url' => $editUrl,
+//             ];
+//         });
+
+//     return response()->json([
+//         'date'  => $date,
+//         'count' => $items->count(),
+//         'items' => $items,
+//     ]);
+// }
+
 public function dayList(Request $req)
 {
     $req->validate([
@@ -123,53 +266,56 @@ public function dayList(Request $req)
 
     $hasDateCol = Schema::hasColumn('appointments', 'date');
     $hasSchedAt = Schema::hasColumn('appointments', 'scheduled_at');
+    $hasNumber  = Schema::hasColumn('appointments', 'appointment_number');
 
-    $base = \App\Models\Appointment::with(['patient:id,name,phone','doctor:id,name']);
+    $base = Appointment::with(['patient:id,name,phone','doctor:id,name']);
 
     if ($hasDateCol) {
         $base->whereDate('date', $date);
     } elseif ($hasSchedAt) {
-        $base->whereBetween('scheduled_at', [
-            Carbon::parse($date.' 00:00:00'),
-            Carbon::parse($date.' 23:59:59'),
-        ]);
+        $base->whereDate('scheduled_at', $date);
     } else {
         return response()->json(['date'=>$date,'count'=>0,'items'=>[]]);
     }
 
     if ($doctorId) $base->where('doctor_id', $doctorId);
 
-    $items = $base
-        ->orderBy($hasDateCol ? 'start_time' : 'scheduled_at')
-        ->get()
-        ->map(function ($a) use ($hasDateCol, $hasSchedAt) {
-            // Build time label safely
-            $timeLabel = '—';
-            try {
-                if ($hasDateCol && !empty($a->start_time)) {
-                    $timeLabel = Carbon::parse($a->start_time)->format('h:i A');
-                } elseif ($hasSchedAt && !empty($a->scheduled_at)) {
-                    $timeLabel = Carbon::parse($a->scheduled_at)->format('h:i A');
-                }
-                if (!empty($a->duration_min)) $timeLabel .= ' ('.$a->duration_min.'m)';
-            } catch (\Throwable $e) { /* ignore */ }
+    // Order by ticket if present (nulls last), then by time
+    if ($hasNumber) {
+        $base->orderByRaw('CASE WHEN appointment_number IS NULL THEN 1 ELSE 0 END, appointment_number ASC');
+    }
+    $base->when($hasDateCol, fn($q)=>$q->orderBy('start_time'))
+         ->when($hasSchedAt, fn($q)=>$q->orderBy('scheduled_at'));
 
-            // Only include URLs if those routes exist
-            $showUrl = Route::has('appointments.show') ? route('appointments.show', $a->id) : null;
-            $editUrl = Route::has('appointments.edit') ? route('appointments.edit', $a->id) : null;
+    $rows = $base->get()->values();
 
-            return [
-                'id'       => $a->id,
-                'time'     => $timeLabel,
-                'patient'  => $a->patient->name ?? '—',
-                'phone'    => $a->patient->phone ?? '',
-                'doctor'   => $a->doctor->name ?? '—',
-                'status'   => ucfirst(str_replace('_',' ', $a->status ?? 'scheduled')),
-                'notes'    => (string) \Illuminate\Support\Str::limit($a->notes ?? '', 120),
-                'show_url' => $showUrl,
-                'edit_url' => $editUrl,
-            ];
-        });
+    $items = $rows->map(function ($a, $i) use ($hasDateCol, $hasSchedAt, $hasNumber) {
+        $timeLabel = '—';
+        try {
+            if ($hasDateCol && !empty($a->start_time)) {
+                $timeLabel = Carbon::parse($a->start_time)->format('h:i A');
+            } elseif ($hasSchedAt && !empty($a->scheduled_at)) {
+                $timeLabel = Carbon::parse($a->scheduled_at)->format('h:i A');
+            }
+            if (!empty($a->duration_min)) $timeLabel .= ' ('.$a->duration_min.'m)';
+        } catch (\Throwable $e) {}
+
+        $showUrl = Route::has('appointments.show') ? route('appointments.show', $a->id) : null;
+        $editUrl = Route::has('appointments.edit') ? route('appointments.edit', $a->id) : null;
+
+        return [
+            'id'       => $a->id,
+            'number'   => $hasNumber ? ($a->appointment_number ?? ($i+1)) : ($i+1), // fallback
+            'time'     => $timeLabel,
+            'patient'  => $a->patient->name ?? '—',
+            'phone'    => $a->patient->phone ?? '',
+            'doctor'   => $a->doctor->name ?? '—',
+            'status'   => ucfirst(str_replace('_',' ', $a->status ?? 'scheduled')),
+            'notes'    => (string) \Illuminate\Support\Str::limit($a->notes ?? '', 120),
+            'show_url' => $showUrl,
+            'edit_url' => $editUrl,
+        ];
+    });
 
     return response()->json([
         'date'  => $date,
@@ -177,6 +323,7 @@ public function dayList(Request $req)
         'items' => $items,
     ]);
 }
+
 
 
     
