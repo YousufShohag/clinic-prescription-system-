@@ -53,7 +53,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-
+Route::get('/patients/{patient}/documents', [PatientController::class, 'documents'])
+     ->name('patients.documents');
     /* ---- Core Resources ---- */
     Route::resource('tests', TestController::class);
     Route::resource('doctors', DoctorController::class);

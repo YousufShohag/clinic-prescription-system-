@@ -8,7 +8,27 @@ class Patient extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['doctor_id', 'name', 'phone', 'email','next_return_date', 'notes'];
+      protected $fillable = [
+        'doctor_id',
+        'name',
+        'age',
+        'sex',
+        'dob',
+        'address',
+        'images',
+        'documents',
+        'status',
+        'phone',
+        'email',
+        'next_return_date',
+        'notes'
+    ];
+
+protected $casts = [
+    'images' => 'array',
+    'documents' => 'array',  // <= IMPORTANT
+];
+     
 
 
  public function prescriptions()
