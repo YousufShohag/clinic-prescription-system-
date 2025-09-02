@@ -14,6 +14,7 @@ class Prescription extends Model
         'problem_description','doctor_advice','return_date',
         'oe','bp','pulse','temperature_c','spo2','respiratory_rate',
         'weight_kg','height_cm','bmi',
+        'ph','dh','mh','oh','pae','dx','previous_investigation','ah','special_note','referred_to',
     ];
 
     protected $casts = [

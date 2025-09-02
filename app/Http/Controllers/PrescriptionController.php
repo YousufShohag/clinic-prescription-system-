@@ -58,6 +58,17 @@ class PrescriptionController extends Controller
             'height_cm'        => ['nullable', 'numeric', 'min:0', 'max:300'],
             'bmi'              => ['nullable', 'numeric', 'min:0', 'max:200'],
 
+            'ph'               => ['nullable', 'string'],
+            'dh'               => ['nullable', 'string'],
+            'mh'               => ['nullable', 'string'],
+            'oh'               => ['nullable', 'string'],
+            'pae'              => ['nullable', 'string'],
+            'dx'               => ['nullable', 'string'],
+            'previous_investigation' => ['nullable', 'string'],
+            'ah'               => ['nullable', 'string'],
+            'special_note'     => ['nullable', 'string'],
+            'referred_to'      => ['nullable', 'string'],
+
             // New patient (if used)
             'new_patient.name'      => ['nullable', 'string', 'max:255'],
             'new_patient.phone'     => ['nullable', 'string', 'max:50'],
@@ -123,6 +134,16 @@ class PrescriptionController extends Controller
                 'weight_kg',
                 'height_cm',
                 'bmi',
+                'ph',
+                'dh',
+                'mh',
+                'oh',
+                'pae',
+                'dx',
+                'previous_investigation',
+                'ah',
+                'special_note',
+                'referred_to',
             ]);
             $data['patient_id']  = $patientId ?: null;
             $data['return_date'] = $normalizedReturn;
@@ -201,6 +222,17 @@ class PrescriptionController extends Controller
             'height_cm'        => ['nullable','numeric','min:0','max:300'],
             'bmi'              => ['nullable','numeric','min:0','max:200'],
 
+            'ph'               => ['nullable','string'],
+            'dh'               => ['nullable','string'],
+            'mh'               => ['nullable','string'],
+            'oh'               => ['nullable','string'],
+            'pae'              => ['nullable','string'],
+            'dx'               => ['nullable','string'],
+            'previous_investigation' => ['nullable','string'],
+            'ah'               => ['nullable','string'],
+            'special_note'     => ['nullable','string'],
+            'referred_to'      => ['nullable','string'],
+
             // Optional new patient on edit
            'new_patient.name'      => ['nullable','string','max:255'],
             'new_patient.phone'     => ['nullable','string','max:50'],
@@ -248,6 +280,7 @@ class PrescriptionController extends Controller
             $data = $request->only([
                 'doctor_id','problem_description','doctor_advice',
                 'oe','bp','pulse','temperature_c','spo2','respiratory_rate','weight_kg','height_cm','bmi',
+                'ph','dh','mh','oh','pae','dx','previous_investigation','ah','special_note','referred_to',
             ]);
             $data['patient_id']  = $patientId ?: $prescription->patient_id;
             $data['return_date'] = $normalizedReturn;
