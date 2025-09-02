@@ -1,5 +1,10 @@
 {{-- resources/views/prescriptions/create.blade.php --}}
 <x-app-layout>
+  {{-- Select2 assets (load once) --}}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"/>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.full.min.js"></script>
+
   <div class="w-full min-h-screen bg-white p-6 md:p-8">
     <h2 class="text-3xl font-semibold mb-6">New Prescription</h2>
 
@@ -11,17 +16,16 @@
       </div>
     @endif
 
-    <form action="{{ route('prescriptions.store') }}" method="POST" class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+    <form action="{{ route('prescriptions.store') }}" method="POST" class="grid grid-cols-1 xl:grid-cols-12 gap-6"enctype="multipart/form-data">
       @csrf
 
-      {{-- LEFT: Clinical Findings (col-span-3) --}}
+      {{-- LEFT --}}
       <aside class="xl:col-span-3 space-y-6">
         <section class="border rounded-lg p-5 bg-gray-50">
           <h3 class="text-xl font-semibold mb-4">Clinical Findings</h3>
 
           <label class="block text-sm font-medium text-gray-700 mb-2">O/E (On Examination)</label>
-          <textarea name="oe" rows="4" class="w-full border rounded px-3 py-2 mb-5"
-                    placeholder="General appearance, system findings, etc.">{{ old('oe') }}</textarea>
+          <textarea name="oe" rows="4" class="w-full border rounded px-3 py-2 mb-5" placeholder="General appearance, system findings, etc.">{{ old('oe') }}</textarea>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -58,124 +62,115 @@
             </div>
           </div>
         </section>
+
+        
       </aside>
 
-      {{-- MIDDLE: Everything else (col-span-6) --}}
+      {{-- MIDDLE --}}
       <section class="xl:col-span-6 space-y-6">
         {{-- Doctor & Patient --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium text-gray-700">Doctor <span class="text-red-500">*</span></label>
-            <select name="doctor_id" id="doctor_id" required class="w-full border rounded px-3 py-2">
-              <option value="">-- Select Doctor --</option>
-              @foreach($doctors as $doc)
-                <option value="{{ $doc->id }}">{{ $doc->name }} {{ $doc->specialization ? "({$doc->specialization})" : '' }}</option>
-              @endforeach
-            </select>
+            @php
+  $preselectDoctorId = (string) old(
+    'doctor_id',
+    $prescription->doctor_id ?? ($defaultDoctorId ?? (auth()->user()->doctor_id ?? optional($doctors->first())->id))
+  );
+@endphp
+
+<select name="doctor_id" id="doctor_id" required class="w-full border rounded px-3 py-2">
+  <option value="" {{ $preselectDoctorId ? '' : 'selected' }} disabled>-- Select Doctor --</option>
+  @foreach($doctors as $doc)
+    <option value="{{ $doc->id }}"
+      @selected((string)$doc->id === $preselectDoctorId)>
+      {{ $doc->name }} {{ $doc->specialization ? "({$doc->specialization})" : '' }}
+    </option>
+  @endforeach
+</select>
           </div>
+
           <div>
             <label class="block text-sm font-medium text-gray-700">Patient</label>
-            <select name="patient_id" id="patient_select" class="w-full border rounded px-3 py-2" data-url-base="{{ url('/patients') }}">
+            {{-- AJAX Select2 for patient search (with +New) --}}
+            <select
+              name="patient_id"
+              id="patient_select"
+              class="w-full border rounded px-3 py-2"
+              data-search-url="{{ route('patients.search') }}"
+              data-history-url-template="{{ route('patients.history', ['patient' => '__ID__']) }}"
+            >
               <option value="">-- Select existing patient --</option>
               <option value="__new">+ Add new patient</option>
-              @foreach($patients as $pat)
-                <option value="{{ $pat->id }}">{{ $pat->name }} {{ $pat->phone ? "({$pat->phone})" : '' }}</option>
-              @endforeach
             </select>
+             <div id="patient_age_display" class="mt-2 text-sm text-gray-600"></div>
+
           </div>
         </div>
 
-        {{-- New patient (reveals when "__new") --}}
+        {{-- New patient --}}
         <div id="new_patient_block" class="hidden bg-gray-50 border rounded p-5">
           <h3 class="text-md font-semibold mb-4">New Patient Details</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input type="text" name="new_patient[name]" value="{{ old('new_patient.name') }}" placeholder="Patient name" class="border rounded px-3 py-2">
+            <input type="number" name="new_patient[age]" value="{{ old('new_patient.age') }}" placeholder="Age" class="border rounded px-3 py-2">
+            <select name="new_patient[sex]" class="border rounded px-3 py-2">
+              <option value="">Sex</option>
+              <option value="male" @selected(old('new_patient.sex')==='male')>Male</option>
+              <option value="female" @selected(old('new_patient.sex')==='female')>Female</option>
+              <option value="others" @selected(old('new_patient.sex')==='others')>Others</option>
+            </select>
             <input type="text" name="new_patient[phone]" value="{{ old('new_patient.phone') }}" placeholder="Phone" class="border rounded px-3 py-2">
             <input type="email" name="new_patient[email]" value="{{ old('new_patient.email') }}" placeholder="Email" class="border rounded px-3 py-2">
+            <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-gray-700">Images</label>
+                <input type="file" name="new_patient[images][]" multiple accept="image/*" class="w-full border rounded px-3 py-2">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-700">Documents</label>
+                <input type="file" name="new_patient[documents][]" multiple class="w-full border rounded px-3 py-2">
+              </div>
+            </div>
             <textarea name="new_patient[notes]" placeholder="Notes (optional)" class="md:col-span-3 border rounded px-3 py-2">{{ old('new_patient.notes') }}</textarea>
           </div>
         </div>
 
-        {{-- Problem description --}}
+        {{-- Problem --}}
         <div>
           <label class="block text-sm font-medium text-gray-700">Problem Description (brief)</label>
           <textarea name="problem_description" rows="3" class="w-full border rounded px-3 py-2">{{ old('problem_description') }}</textarea>
         </div>
 
-        {{-- Medicines --}}
+        {{-- Medicines (Select2 AJAX) --}}
         <div class="space-y-3">
           <div class="flex flex-col md:flex-row md:items-center gap-2">
             <h3 class="text-xl font-semibold">Medicines</h3>
             <div class="flex-1"></div>
-            <input type="text" id="medicine_search" placeholder="Search medicines…" class="border rounded px-3 py-2 w-full md:w-80" autocomplete="off">
+            <select id="medicine_picker" multiple class="w-full md:w-96"></select>
             <button type="button" id="medicine_clear" class="px-3 py-2 border rounded">Clear</button>
           </div>
+
+          <pre id="med_debug" class="text-xs text-gray-500 bg-gray-50 p-2 rounded border"></pre>
 
           <div id="medicine_selected_wrap" class="hidden">
             <div class="text-sm text-gray-600 mb-1">Selected medicines</div>
             <div id="medicine_selected" class="space-y-2"></div>
           </div>
-
-          <div>
-            <div class="text-sm text-gray-600 mb-1">Search results</div>
-            <div id="medicine_pool" class="space-y-2">
-              @foreach($medicines as $medicine)
-                <div id="medrow_{{ $medicine->id }}" class="hidden flex flex-col md:flex-row md:items-center gap-3 p-2 border rounded medicine-row"
-                     data-name="{{ strtolower($medicine->name) }}"
-                     data-price="{{ $medicine->price }}"
-                     data-id="{{ $medicine->id }}"
-                     data-type="medicine">
-                  <div class="flex items-center gap-2 md:w-2/5">
-                    <input type="checkbox" id="med_{{ $medicine->id }}" name="medicines[{{ $medicine->id }}][selected]" value="1"
-                           class="medicine-checkbox item-checkbox" data-id="{{ $medicine->id }}" data-kind="medicine">
-                    <label for="med_{{ $medicine->id }}" class="font-medium">{{ $medicine->name }}</label>
-                    <span class="text-sm text-gray-500">৳{{ $medicine->price }}</span>
-                  </div>
-                  <div class="flex gap-2 items-center md:w-3/5">
-                    <input type="text" name="medicines[{{ $medicine->id }}][duration]" placeholder="Duration (e.g., 5 days)"
-                           class="hidden med-input med-duration-{{ $medicine->id }} w-full md:w-1/2 border rounded px-2 py-1">
-                    <input type="text" name="medicines[{{ $medicine->id }}][times_per_day]" placeholder="Times/day (e.g., 3x)"
-                           class="hidden med-input med-times-{{ $medicine->id }} w-full md:w-1/2 border rounded px-2 py-1">
-                  </div>
-                </div>
-              @endforeach
-            </div>
-            <p class="text-xs text-gray-500 mt-1">Start typing to see medicine results. Checked items move up.</p>
-          </div>
         </div>
 
-        {{-- Tests --}}
+        {{-- Tests (Select2 AJAX multi) --}}
         <div class="space-y-3">
           <div class="flex flex-col md:flex-row md:items-center gap-2">
             <h3 class="text-xl font-semibold">Tests</h3>
             <div class="flex-1"></div>
-            <input type="text" id="test_search" placeholder="Search tests…" class="border rounded px-3 py-2 w-full md:w-80" autocomplete="off">
+            <select id="test_picker" multiple class="w-full md:w-96"></select>
             <button type="button" id="test_clear" class="px-3 py-2 border rounded">Clear</button>
           </div>
 
           <div id="test_selected_wrap" class="hidden">
             <div class="text-sm text-gray-600 mb-1">Selected tests</div>
             <div id="test_selected" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
-          </div>
-
-          <div>
-            <div class="text-sm text-gray-600 mb-1">Search results</div>
-            <div id="test_pool" class="grid grid-cols-1 md:grid-cols-2 gap-2">
-              @foreach($tests as $test)
-                <label id="testrow_{{ $test->id }}" class="hidden flex items-center gap-2 p-2 border rounded test-row"
-                       data-name="{{ strtolower($test->name) }}"
-                       data-price="{{ $test->price ?? '' }}"
-                       data-id="{{ $test->id }}"
-                       data-type="test">
-                  <input type="checkbox" class="item-checkbox" name="tests[]" value="{{ $test->id }}" data-id="{{ $test->id }}" data-kind="test">
-                  <div class="flex-1">
-                    <div class="font-medium">{{ $test->name }}</div>
-                    <div class="text-sm text-gray-500">৳{{ $test->price ?? '-' }} @if($test->note) — {{ $test->note }} @endif</div>
-                  </div>
-                </label>
-              @endforeach
-            </div>
-            <p class="text-xs text-gray-500 mt-1">Start typing to see test results. Checked items move up.</p>
           </div>
         </div>
 
@@ -188,8 +183,7 @@
         {{-- Return Date --}}
         <div>
           <label class="block text-sm font-medium text-gray-700">Return Date</label>
-          <input type="date" name="return_date" value="{{ old('return_date', isset($prescription)? optional($prescription->return_date)->format('Y-m-d') : '') }}"
-                class="w-full border rounded px-3 py-2">
+          <input type="date" name="return_date" value="{{ old('return_date', isset($prescription)? optional($prescription->return_date)->format('Y-m-d') : '') }}" class="w-full border rounded px-3 py-2">
           <p class="text-xs text-gray-500">The patient should revisit on this date.</p>
         </div>
 
@@ -200,12 +194,14 @@
         </div>
       </section>
 
-      {{-- RIGHT: Previous Prescriptions (col-span-3) --}}
+      {{-- RIGHT (optional area) --}}
       <aside class="xl:col-span-3 space-y-6">
+        {{-- Patient history panel (loads after a patient is selected) --}}
         <section id="prev_rx_panel" class="hidden border rounded-lg p-5">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-lg font-semibold">
-              Previous Prescriptions<br><span id="prev_rx_patient_name" class="text-sm font-normal text-gray-600"></span>
+              Previous Prescriptions<br>
+              <span id="prev_rx_patient_name" class="text-sm font-normal text-gray-600"></span>
             </h3>
             <span id="prev_rx_count" class="text-sm text-gray-500"></span>
           </div>
@@ -215,163 +211,501 @@
           <div id="prev_rx_error" class="hidden text-sm text-red-600">Could not load prescriptions.</div>
 
           <div id="prev_rx_list" class="hidden">
-            <ul id="prev_rx_ul" class="space-y-2">
-              {{-- populated via JS --}}
-            </ul>
+            <ul id="prev_rx_ul" class="space-y-2"></ul>
           </div>
         </section>
       </aside>
     </form>
   </div>
 
+  {{-- ===== Small helpers (BMI + New Patient toggle initial) ===== --}}
   <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Toggle new patient
-    const patientSelect   = document.getElementById('patient_select');
-    const newPatientBlock = document.getElementById('new_patient_block');
-    function toggleNewPatient(){
-      if (!patientSelect) return;
-      if (patientSelect.value === '__new') newPatientBlock.classList.remove('hidden');
-      else newPatientBlock.classList.add('hidden');
+    document.addEventListener('DOMContentLoaded', () => {
+      const patientSelect   = document.getElementById('patient_select');
+      const newPatientBlock = document.getElementById('new_patient_block');
+
+      function toggleNewPatient(){
+        if (!patientSelect) return;
+        if (patientSelect.value === '__new') newPatientBlock.classList.remove('hidden');
+        else newPatientBlock.classList.add('hidden');
+      }
+      patientSelect?.addEventListener('change', toggleNewPatient);
+
+      const weightEl = document.getElementById('weight_kg');
+      const heightEl = document.getElementById('height_cm');
+      const bmiEl    = document.getElementById('bmi');
+      function calcBMI(){
+        const w = parseFloat(weightEl?.value || '');
+        const h = parseFloat(heightEl?.value || '');
+        if (!isFinite(w) || !isFinite(h) || h <= 0) { if (bmiEl) bmiEl.value=''; return; }
+        const hm = h/100; const bmi = w/(hm*hm); bmiEl.value = bmi.toFixed(1);
+      }
+      weightEl?.addEventListener('input', calcBMI);
+      heightEl?.addEventListener('input', calcBMI);
+      calcBMI();
+    });
+  </script>
+
+  {{-- ===== Select2: Patient picker (AJAX) ===== --}}
+  {{-- <script>
+  $(function () {
+   const $patient   = $('#patient_select');
+    const newBlock   = document.getElementById('new_patient_block');
+    const $ageInfo   = $('#patient_age_display');
+
+    $patient.select2({
+      placeholder: 'Search patients…',
+      width: 'resolve',
+      allowClear: true,
+      minimumInputLength: 1,
+      dropdownParent: $patient.parent(),
+      ajax: {
+        url: $patient.data('search-url') || "{{ route('patients.search') }}",
+        dataType: 'json',
+        delay: 200,
+        data: params => ({ term: params.term, page: params.page || 1 }),
+        processResults: (data, params) => {
+          params.page = params.page || 1;
+          const base = [
+            { id: '', text: '-- Select existing patient --' },
+            { id: '__new', text: '+ Add new patient' }
+          ];
+          return {
+            results: base.concat((data?.results || [])),
+            pagination: { more: !!data?.pagination?.more }
+          };
+        }
+      },
+      templateResult: item => {
+        if (!item.id || item.id === '__new') return item.text;
+        const extra = [item.phone, item.email].filter(Boolean).join(' • ');
+        return $(`
+          <div class="flex flex-col">
+            <div class="font-medium">${item.name || item.text}</div>
+            ${extra ? `<div class="text-xs text-gray-600">${extra}</div>` : ''}
+          </div>
+        `);
+      },
+      templateSelection: item => item.text || item.name || ''
+    });
+
+    $patient.on('change', function () {
+      if (this.value === '__new') {
+        newBlock.classList.remove('hidden');
+        $ageInfo.text('');
+      } else if (!this.value) {
+        newBlock.classList.add('hidden');
+        $ageInfo.text('');
+      } else {
+        newBlock.classList.add('hidden');
+      }
+    });
+
+    $patient.on('select2:select', function(e){
+      const data = e.params.data || {};
+      if (data.id && data.id !== '__new') {
+        let info = '';
+        if (data.age) info += 'Age: ' + data.age;
+        if (data.sex) info += (info ? ', ' : '') + 'Gender: ' + data.sex.charAt(0).toUpperCase() + data.sex.slice(1);
+        $ageInfo.text(info);
+      } else {
+        $ageInfo.text('');
+      }
+    });
+
+    $patient.on('select2:clear', function(){
+      $ageInfo.text('');
+    });
+  });
+  </script> --}}
+  {{-- ===== Select2: Patient picker (AJAX) ===== --}}
+<script>
+$(function () {
+  const $patient  = $('#patient_select');
+  const newBlock  = document.getElementById('new_patient_block');
+  const $ageInfo  = $('#patient_age_display');
+
+  function computeAgeFromDob(dobStr) {
+    if (!dobStr) return null;
+    const d = new Date(dobStr);
+    if (isNaN(d)) return null;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const m = today.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+    return age >= 0 ? age : null;
+  }
+
+  $patient.select2({
+    placeholder: 'Search patients…',
+    width: 'resolve',
+    allowClear: true,
+    minimumInputLength: 1,
+    dropdownParent: $patient.parent(),
+    ajax: {
+      url: $patient.data('search-url') || "{{ route('patients.search') }}",
+      dataType: 'json',
+      delay: 200,
+      data: params => ({ term: params.term, page: params.page || 1 }),
+      processResults: (data, params) => {
+        params.page = params.page || 1;
+        const base = [
+          { id: '', text: '-- Select existing patient --' },
+          { id: '__new', text: '+ Add new patient' }
+        ];
+        return {
+          results: base.concat((data?.results || [])),
+          pagination: { more: !!data?.pagination?.more }
+        };
+      }
+    },
+
+    // Row in dropdown
+    templateResult: item => {
+      if (!item.id || item.id === '__new') return item.text;
+      const age = item.age ?? computeAgeFromDob(item.dob);
+      const idBadge = item.id ? `#${item.id}` : '';
+      const meta = [
+        idBadge,
+        (age != null ? `${age}y` : ''),
+        (item.sex ? (item.sex[0].toUpperCase() + item.sex.slice(1)) : ''),
+        (item.phone || '')
+      ].filter(Boolean).join(' • ');
+      return $(`
+        <div class="flex flex-col">
+          <div class="font-medium">${item.name || item.text}</div>
+          ${meta ? `<div class="text-xs text-gray-600">${meta}</div>` : ''}
+        </div>
+      `);
+    },
+
+    // What shows in the selected chip (input)
+    // templateSelection: item => {
+    //   if (!item.id || item.id === '__new') return item.text || '+ Add new patient';
+    //   const age = item.age ?? computeAgeFromDob(item.dob);
+    //   const parts = [];
+    //   if (item.id) parts.push(`#${item.id}`);
+    //   if (age != null) parts.push(`${age}y`);
+    //   const suffix = parts.length ? ` (${parts.join(', ')})` : '';
+    //   const label  = (item.name || item.text || '') + suffix;
+
+    //   const el = document.createElement('span');
+    //   el.textContent = label;
+    //   const tip = [item.phone, item.email].filter(Boolean).join(' • ');
+    //   if (tip) el.title = tip; // tooltip on hover
+    //   return $(el);
+    // }
+
+      templateSelection: function (item) {
+        if (!item.id || item.id === '__new') return item.text || '+ Add new patient';
+        const name = item.name || item.text || '';
+        const el = document.createElement('span');
+        el.textContent = `#${item.id} - ${name}`;
+        return $(el);
+      }
+  });
+
+  // Toggle new-patient block
+  $patient.on('change', function () {
+    if (this.value === '__new') {
+      newBlock.classList.remove('hidden');
+      $ageInfo.text('');
+    } else if (!this.value) {
+      newBlock.classList.add('hidden');
+      $ageInfo.text('');
+    } else {
+      newBlock.classList.add('hidden');
     }
-    patientSelect?.addEventListener('change', toggleNewPatient);
-    toggleNewPatient();
+  });
 
-    // BMI calc
-    const weightEl = document.getElementById('weight_kg');
-    const heightEl = document.getElementById('height_cm');
-    const bmiEl    = document.getElementById('bmi');
-    function calcBMI(){
-      const w = parseFloat(weightEl?.value || '');
-      const h = parseFloat(heightEl?.value || '');
-      if (!isFinite(w) || !isFinite(h) || h <= 0) { if (bmiEl) bmiEl.value=''; return; }
-      const hm = h/100; const bmi = w/(hm*hm); bmiEl.value = bmi.toFixed(1);
+  // Show age (and gender) just below the field too
+  $patient.on('select2:select', function(e){
+    const data = e.params.data || {};
+    if (data.id && data.id !== '__new') {
+      const age = (data.age ?? computeAgeFromDob(data.dob));
+      const sex = data.sex ? data.sex.charAt(0).toUpperCase() + data.sex.slice(1) : '';
+      const bits = [];
+      if (age != null) bits.push('Age: ' + age);
+      if (sex) bits.push('Gender: ' + sex);
+      $ageInfo.text(bits.join(' • '));
+    } else {
+      $ageInfo.text('');
     }
-    weightEl?.addEventListener('input', calcBMI);
-    heightEl?.addEventListener('input', calcBMI);
-    calcBMI();
+  });
 
-    // ===== Previous Prescriptions (RIGHT panel) =====
-    const prevPanel   = document.getElementById('prev_rx_panel');
-    const prevName    = document.getElementById('prev_rx_patient_name');
-    const prevCount   = document.getElementById('prev_rx_count');
-    const prevLoading = document.getElementById('prev_rx_loading');
-    const prevEmpty   = document.getElementById('prev_rx_empty');
-    const prevError   = document.getElementById('prev_rx_error');
-    const prevList    = document.getElementById('prev_rx_list');
-    const prevUL      = document.getElementById('prev_rx_ul');
+  $patient.on('select2:clear', function(){
+    $ageInfo.text('');
+  });
+});
+</script>
 
-    async function loadPrevRx(patientId, label) {
-      if (!patientId || patientId === '__new') { prevPanel.classList.add('hidden'); return; }
 
-      const base = patientSelect.dataset.urlBase; // e.g., /patients
-      const url  = `${base}/${patientId}/prescriptions`;
+  {{-- ===== Patient History: load into left panel on selection ===== --}}
+  <script>
+  $(function () {
+    const $patient  = $('#patient_select');
+    const tpl       = $patient.data('history-url-template') || "{{ route('patients.history', ['patient' => '__ID__']) }}";
 
-      // reset UI
-      prevPanel.classList.remove('hidden');
-      prevName.textContent = label || '';
-      prevCount.textContent = '';
-      prevLoading.classList.remove('hidden');
-      prevEmpty.classList.add('hidden');
-      prevError.classList.add('hidden');
-      prevList.classList.add('hidden');
-      prevUL.innerHTML = '';
+    const $panel    = $('#prev_rx_panel');
+    const $name     = $('#prev_rx_patient_name');
+    const $count    = $('#prev_rx_count');
+    const $loading  = $('#prev_rx_loading');
+    const $empty    = $('#prev_rx_empty');
+    const $error    = $('#prev_rx_error');
+    const $listWrap = $('#prev_rx_list');
+    const $ul       = $('#prev_rx_ul');
 
-      try {
-        const res = await fetch(url, {
-          headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
-          credentials: 'same-origin'
-        });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const payload = await res.json();
-        const items = payload.data || [];
+    function showPanel(){ $panel.removeClass('hidden'); }
+    function hidePanel(){ $panel.addClass('hidden'); }
+    function stateLoading(){ $loading.removeClass('hidden'); $empty.addClass('hidden'); $error.addClass('hidden'); $listWrap.addClass('hidden'); }
+    function stateEmpty(){ $loading.addClass('hidden'); $empty.removeClass('hidden'); $error.addClass('hidden'); $listWrap.addClass('hidden'); }
+    function stateError(msg){ $loading.addClass('hidden'); $empty.addClass('hidden'); $error.removeClass('hidden').text(msg || 'Could not load prescriptions.'); $listWrap.addClass('hidden'); }
+    function stateList(){ $loading.addClass('hidden'); $empty.addClass('hidden'); $error.addClass('hidden'); $listWrap.removeClass('hidden'); }
 
-        prevLoading.classList.add('hidden');
-        prevCount.textContent = `${items.length} item${items.length===1?'':'s'}`;
-
-        if (!items.length) { prevEmpty.classList.remove('hidden'); return; }
-
-        // Compact list: #ID • Date • Doctor • View
-        prevUL.innerHTML = items.map(p => `
+    function renderItems(items) {
+      $ul.empty();
+      items.forEach(it => {
+        const title = [it.date, it.doctor_name].filter(Boolean).join(' • ') || 'Prescription';
+        const line2 = it.problem ? it.problem : '';
+        const href  = it.url || '#';
+        $ul.append(`
           <li class="border rounded p-2">
             <div class="flex items-center justify-between gap-2">
               <div class="text-sm">
-                <span class="font-semibold">#${p.id}</span>
-                <span class="text-gray-500">• ${p.date ?? '-'}</span><br>
-                <span class="text-gray-700">${p.doctor ?? '—'}</span>
+                <div class="font-medium">${title}</div>
+                ${line2 ? `<div class="text-xs text-gray-600">${line2}</div>` : ''}
               </div>
-              <a href="${p.show_url}" class="text-blue-600 hover:underline text-sm" target="_blank" rel="noopener">View</a>
+              ${href !== '#' ? `<a href="${href}" target="_blank" class="text-blue-600 text-sm">Open</a>` : ''}
             </div>
           </li>
-        `).join('');
-        prevList.classList.remove('hidden');
-
-      } catch (e) {
-        prevLoading.classList.add('hidden');
-        prevError.classList.remove('hidden');
-        console.error(e);
-      }
-    }
-
-    // Hook select change
-    patientSelect?.addEventListener('change', function(){
-      const id = this.value;
-      const label = this.options[this.selectedIndex]?.text || '';
-      loadPrevRx(id, label);
-    });
-
-    // Preload if old value exists
-    @if(old('patient_id'))
-      loadPrevRx(@json(old('patient_id')), '');
-    @endif
-
-    // ===== Pickers (same logic, no inner scroll) =====
-    function stopEnterSubmit(el){ el?.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); }); }
-    function toggleMedInputs(id, on){
-      document.querySelectorAll('.med-duration-'+id+', .med-times-'+id).forEach(i => {
-        if(on){ i.classList.remove('hidden'); } else { i.classList.add('hidden'); i.value=''; }
+        `);
       });
     }
-    function setupPicker({ searchInputId, clearBtnId, poolId, selectedWrapId, selectedId, rowClass, kind }) {
-      const searchEl = document.getElementById(searchInputId);
-      const clearBtn = document.getElementById(clearBtnId);
-      const pool     = document.getElementById(poolId);
-      const selectedW= document.getElementById(selectedWrapId);
-      const selected = document.getElementById(selectedId);
 
-      stopEnterSubmit(searchEl);
-      const norm = s => (s||'').toString().trim().toLowerCase();
-      const match= (row,q)=> q && ((row.dataset.name||'').includes(q) || (row.dataset.price||'').toString().includes(q));
-      const ensureSel = ()=> selectedW.classList.toggle('hidden', selected.children.length===0);
-      const refresh = ()=>{
-        const q = norm(searchEl.value);
-        pool.querySelectorAll('.'+rowClass).forEach(row=>{
-          const cb = row.querySelector('.item-checkbox');
-          const on = cb && cb.checked;
-          if (on) row.classList.add('hidden'); else row.classList.toggle('hidden', !match(row,q));
+    function loadHistory(id, label){
+      if (!id) return hidePanel();
+      const url = (tpl || '').replace('__ID__', encodeURIComponent(id));
+      showPanel(); stateLoading(); $name.text(label || '');
+
+      $.ajax({ url, method: 'GET', dataType: 'json', data: { limit: 10 } })
+        .done(res => {
+          $count.text(res.count + ' total');
+          if (!res.items || res.items.length === 0) return stateEmpty();
+          renderItems(res.items); stateList();
+        })
+        .fail(xhr => {
+          const msg = `Could not load prescriptions (${xhr.status}). ${
+            (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message :
+            (xhr.responseText || '').slice(0, 180)
+          }`;
+          stateError(msg);
+          console.error('History load failed:', xhr);
         });
-      };
-      const moveSel = row => { row.classList.remove('hidden'); selected.appendChild(row); ensureSel(); };
-      const movePool= row => { pool.appendChild(row); refresh(); ensureSel(); };
-      const refocus = ()=> setTimeout(()=>{ if(!searchEl) return; const v=searchEl.value; searchEl.focus(); try{searchEl.setSelectionRange(v.length,v.length);}catch(e){} },0);
-
-      function onChange(e){
-        const cb = e.target.closest('.item-checkbox'); if(!cb) return; if (cb.dataset.kind!==kind) return;
-        const id = cb.dataset.id; const rowId=(kind==='medicine'?'medrow_':'testrow_')+id; const row=document.getElementById(rowId); if(!row) return;
-        if (cb.checked){ if(kind==='medicine') toggleMedInputs(id,true); moveSel(row); }
-        else { if(kind==='medicine') toggleMedInputs(id,false); movePool(row); }
-        refocus();
-      }
-      pool.addEventListener('change', onChange);
-      selected.addEventListener('change', onChange);
-      searchEl.addEventListener('input', refresh);
-      clearBtn.addEventListener('click', ()=>{ searchEl.value=''; refresh(); refocus(); });
-
-      refresh(); ensureSel();
     }
 
-    setupPicker({ searchInputId:'medicine_search', clearBtnId:'medicine_clear', poolId:'medicine_pool', selectedWrapId:'medicine_selected_wrap', selectedId:'medicine_selected', rowClass:'medicine-row', kind:'medicine' });
-    setupPicker({ searchInputId:'test_search',      clearBtnId:'test_clear',      poolId:'test_pool',      selectedWrapId:'test_selected_wrap',      selectedId:'test_selected',      rowClass:'test-row',      kind:'test' });
+    $patient.on('select2:select', (e) => {
+      const it = e.params.data;
+      if (!it || !it.id || it.id === '__new') return hidePanel();
+      loadHistory(it.id, it.text || it.name);
+    });
+
+    $patient.on('change', function(){
+      const val = $(this).val();
+      if (!val || val === '__new') hidePanel();
+    });
   });
   </script>
+
+  {{-- ===== Select2: Medicine picker (AJAX) ===== --}}
+  <script>
+  $(function () {
+    const $picker   = $('#medicine_picker');
+    const $selWrap  = $('#medicine_selected_wrap');
+    const $selList  = $('#medicine_selected');
+    const $clearBtn = $('#medicine_clear');
+
+    const AJAX_URL = "{{ route('medicines.search') }}";
+    function ensureWrap(){ $selWrap.toggleClass('hidden', $selList.children().length === 0); }
+
+    function selectedRow(item) {
+      const id = item.id;
+      const $row = $(`
+        <div class="border rounded p-2" data-id="${id}">
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-sm">
+              <div class="font-medium">
+                ${item.name ?? item.text ?? ''}
+                ${item.generic ? ' — ' + item.generic : ''}
+                ${item.strength ? ' (' + item.strength + ')' : ''}
+              </div>
+              
+            </div>
+            <button type="button" class="text-red-600 text-sm remove-btn">Remove</button>
+          </div>
+          <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+            <input type="hidden" name="medicines[${id}][selected]" value="1">
+            <input type="text" class="border rounded px-2 py-1" name="medicines[${id}][duration]" placeholder="Duration (e.g., 5 days)">
+            <input type="text" class="border rounded px-2 py-1" name="medicines[${id}][times_per_day]" placeholder="Times/day (e.g., 3x)">
+          </div>
+        </div>
+      `);
+      $row.find('.remove-btn').on('click', function () {
+        const remaining = $picker.select2('data').filter(d => d.id !== id).map(d => d.id);
+        $picker.val(remaining).trigger('change');
+        $row.remove(); ensureWrap();
+      });
+      return $row;
+    }
+
+    const dropdownParent = $('#medicine_picker').parent();
+
+    $picker.select2({
+      placeholder: 'Search medicines…',
+      width: 'resolve',
+      minimumInputLength: 2,
+      dropdownParent: dropdownParent,
+      ajax: {
+        url: AJAX_URL,
+        type: 'GET',
+        dataType: 'json',
+        delay: 200,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        data: params => ({ term: params.term, page: params.page || 1 }),
+        processResults: (data, params) => {
+          params.page = params.page || 1;
+          const results = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
+          const more    = Array.isArray(data) ? false : !!(data?.pagination && data.pagination.more);
+          return { results, pagination: { more } };
+        },
+        cache: true,
+        transport: function (params, success, failure) {
+          const req = $.ajax(params);
+          req.then(success);
+          req.fail(function (xhr) {
+            $('#med_debug').text('ERROR ' + xhr.status + ':\n' + (xhr.responseText || '').slice(0,1000));
+            console.error('Select2 AJAX error:', xhr.status, xhr.responseText);
+            failure(xhr);
+          });
+          return req;
+        }
+      },
+      templateResult: (item) => {
+        if (!item.id) return item.text;
+        const price = (item.price ?? '') !== '' ? `৳${item.price}` : '';
+        const extra = [item.generic, item.strength, item.manufacturer].filter(Boolean).join(' • ');
+        return $(`
+          <div class="flex flex-col">
+            <div class="font-medium">${item.name || item.text}</div>
+            <div class="text-xs text-gray-600">${extra}}</div>
+          </div>
+        `);
+      },
+      templateSelection: (item) => item.text || item.name || ''
+    });
+
+    $picker.on('select2:select', function (e) {
+      const item = e.params.data;
+      if ($selList.find(`[data-id="${item.id}"]`).length) return;
+      $selList.append(selectedRow(item)); ensureWrap();
+    });
+
+    $picker.on('select2:unselect', function (e) {
+      const id = e.params.data.id;
+      $selList.find(`[data-id="${id}"]`).remove(); ensureWrap();
+    });
+
+    $clearBtn.on('click', function () {
+      $picker.val(null).trigger('change');
+      $selList.empty(); ensureWrap();
+    });
+
+    ensureWrap();
+  });
+  </script>
+
+  {{-- ===== Select2: Test picker (AJAX) ===== --}}
+  <script>
+  $(function () {
+    const $picker   = $('#test_picker');
+    const $wrap     = $('#test_selected_wrap');
+    const $list     = $('#test_selected');
+    const $clearBtn = $('#test_clear');
+
+    const AJAX_URL = "{{ route('tests.search') }}";
+    function ensureWrap(){ $wrap.toggleClass('hidden', $list.children().length === 0); }
+
+    function selectedRow(item) {
+      const id = item.id;
+      const $row = $(`
+        <div class="border rounded p-2" data-id="${id}">
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-sm">
+              <div class="font-medium">${item.name ?? item.text ?? ''}</div>
+              
+            </div>
+            <button type="button" class="text-red-600 text-sm remove-btn">Remove</button>
+          </div>
+          <input type="hidden" name="tests[]" value="${id}">
+        </div>
+      `);
+      $row.find('.remove-btn').on('click', function(){
+        const remaining = $picker.select2('data').filter(d => d.id !== id).map(d => d.id);
+        $picker.val(remaining).trigger('change');
+        $row.remove(); ensureWrap();
+      });
+      return $row;
+    }
+
+    const dropdownParent = $picker.parent();
+
+    $picker.select2({
+      placeholder: 'Search tests…',
+      width: 'resolve',
+      minimumInputLength: 1,
+      dropdownParent,
+      ajax: {
+        url: AJAX_URL,
+        dataType: 'json',
+        delay: 200,
+        data: params => ({ term: params.term, page: params.page || 1 }),
+        processResults: (data, params) => {
+          params.page = params.page || 1;
+          const results = Array.isArray(data) ? data : (data.results || []);
+          const more    = Array.isArray(data) ? false : !!(data.pagination && data.pagination.more);
+          return { results, pagination: { more } };
+        }
+      },
+      templateResult: (item) => {
+        if (!item.id) return item.text;
+        const priced = (item.price ?? '') !== '' ? `৳${item.price}` : '';
+        return $(`
+          <div class="flex flex-col">
+            <div class="font-medium">${item.name || item.text}</div>
+            <div class="text-xs text-gray-600">${[priced, item.note].filter(Boolean).join(' • ')}</div>
+          </div>
+        `);
+      },
+      templateSelection: (item) => item.text || item.name || ''
+    });
+
+    $picker.on('select2:select', function (e) {
+      const item = e.params.data;
+      if ($list.find(`[data-id="${item.id}"]`).length) return;
+      $list.append(selectedRow(item)); ensureWrap();
+    });
+
+    $picker.on('select2:unselect', function (e) {
+      const id = e.params.data.id;
+      $list.find(`[data-id="${id}"]`).remove(); ensureWrap();
+    });
+
+    $clearBtn.on('click', function () {
+      $picker.val(null).trigger('change');
+      $list.empty(); ensureWrap();
+    });
+
+    ensureWrap();
+  });
+  </script>
+  
 </x-app-layout>

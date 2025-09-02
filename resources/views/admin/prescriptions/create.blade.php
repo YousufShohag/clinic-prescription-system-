@@ -16,54 +16,81 @@
       </div>
     @endif
 
-    <form action="{{ route('prescriptions.store') }}" method="POST" class="grid grid-cols-1 xl:grid-cols-12 gap-6"enctype="multipart/form-data">
+    <form action="{{ route('prescriptions.store') }}" method="POST" class="grid grid-cols-1 xl:grid-cols-12 gap-6" enctype="multipart/form-data">
       @csrf
 
       {{-- LEFT --}}
       <aside class="xl:col-span-3 space-y-6">
-        <section class="border rounded-lg p-5 bg-gray-50">
-          <h3 class="text-xl font-semibold mb-4">Clinical Findings</h3>
+        
+        {{-- ================= Clinical Findings (collapsible) ================= --}}
+        <section id="cf-card" class="border rounded-lg">
+          {{-- clickable header --}}
+          <button type="button"
+                  id="cf-toggle"
+                  class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
+                  aria-controls="cf-body"
+                  aria-expanded="false">
+            <span class="text-lg font-semibold">Clinical Findings</span>
+            <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </button>
 
-          <label class="block text-sm font-medium text-gray-700 mb-2">O/E (On Examination)</label>
-          <textarea name="oe" rows="4" class="w-full border rounded px-3 py-2 mb-5" placeholder="General appearance, system findings, etc.">{{ old('oe') }}</textarea>
+          {{-- contents (start hidden) --}}
+          <div id="cf-body" class="p-5 border-t hidden">
+            {{-- O/E with bullet helpers --}}
+            
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm text-gray-700">BP</label>
-              <input type="text" name="bp" value="{{ old('bp') }}" placeholder="120/80" class="w-full border rounded px-3 py-2">
-            </div>
-            <div>
-              <label class="block text-sm text-gray-700">Pulse (bpm)</label>
-              <input type="number" step="1" min="0" name="pulse" value="{{ old('pulse') }}" placeholder="78" class="w-full border rounded px-3 py-2">
-            </div>
-            <div>
-              <label class="block text-sm text-gray-700">Temperature (°C)</label>
-              <input type="number" step="0.1" name="temperature_c" value="{{ old('temperature_c') }}" placeholder="37.0" class="w-full border rounded px-3 py-2">
-            </div>
-            <div>
-              <label class="block text-sm text-gray-700">SpO₂ (%)</label>
-              <input type="number" step="1" min="0" max="100" name="spo2" value="{{ old('spo2') }}" placeholder="98" class="w-full border rounded px-3 py-2">
-            </div>
-            <div>
-              <label class="block text-sm text-gray-700">Respiratory Rate (/min)</label>
-              <input type="number" step="1" min="0" name="respiratory_rate" value="{{ old('respiratory_rate') }}" placeholder="16" class="w-full border rounded px-3 py-2">
-            </div>
-            <div>
-              <label class="block text-sm text-gray-700">Weight (kg)</label>
-              <input type="number" step="0.1" min="0" id="weight_kg" name="weight_kg" value="{{ old('weight_kg') }}" placeholder="70.5" class="w-full border rounded px-3 py-2">
-            </div>
-            <div>
-              <label class="block text-sm text-gray-700">Height (cm)</label>
-              <input type="number" step="0.1" min="0" id="height_cm" name="height_cm" value="{{ old('height_cm') }}" placeholder="170" class="w-full border rounded px-3 py-2">
-            </div>
-            <div>
-              <label class="block text-sm text-gray-700">BMI (kg/m²)</label>
-              <input type="text" id="bmi" name="bmi" value="{{ old('bmi') }}" readonly class="w-full border rounded px-3 py-2 bg-gray-100">
+            {{-- Vitals --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                <label class="block text-sm text-gray-700">BP</label>
+                <input type="text" name="bp" value="{{ old('bp') }}" placeholder="120/80" class="w-full border rounded px-3 py-2">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-700">Pulse (bpm)</label>
+                <input type="number" step="1" min="0" name="pulse" value="{{ old('pulse') }}" placeholder="78" class="w-full border rounded px-3 py-2">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-700">Temperature (°C)</label>
+                <input type="number" step="0.1" name="temperature_c" value="{{ old('temperature_c') }}" placeholder="37.0" class="w-full border rounded px-3 py-2">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-700">SpO₂ (%)</label>
+                <input type="number" step="1" min="0" max="100" name="spo2" value="{{ old('spo2') }}" placeholder="98" class="w-full border rounded px-3 py-2">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-700">Respiratory Rate (/min)</label>
+                <input type="number" step="1" min="0" name="respiratory_rate" value="{{ old('respiratory_rate') }}" placeholder="16" class="w-full border rounded px-3 py-2">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-700">Weight (kg)</label>
+                <input type="number" step="0.1" min="0" id="weight_kg" name="weight_kg" value="{{ old('weight_kg') }}" placeholder="70.5" class="w-full border rounded px-3 py-2">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-700">Height (cm)</label>
+                <input type="number" step="0.1" min="0" id="height_cm" name="height_cm" value="{{ old('height_cm') }}" placeholder="170" class="w-full border rounded px-3 py-2">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-700">BMI (kg/m²)</label>
+                <input type="text" id="bmi" name="bmi" value="{{ old('bmi') }}" readonly class="w-full border rounded px-3 py-2 bg-gray-100">
+              </div>
             </div>
           </div>
+          
         </section>
-
-        
+        <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm font-medium text-gray-700">O/E (On Examination)</label>
+              <div class="flex items-center gap-2">
+                <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                        data-bullets-toggle="#oe">• Bullets: OFF</button>
+                <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                        data-bullets-clear="#oe" title="Remove leading • from each line">Clear bullets</button>
+              </div>
+            </div>
+            <textarea id="oe" name="oe" rows="4" class="w-full border rounded px-3 py-2 mb-1" data-bullets
+                      placeholder="General appearance, system findings, etc.">{{ old('oe') }}</textarea>
+            <p class="text-xs text-gray-500">Tip: with bullets ON, press Enter for a new “•” item.</p>
       </aside>
 
       {{-- MIDDLE --}}
@@ -73,21 +100,19 @@
           <div>
             <label class="block text-sm font-medium text-gray-700">Doctor <span class="text-red-500">*</span></label>
             @php
-  $preselectDoctorId = (string) old(
-    'doctor_id',
-    $prescription->doctor_id ?? ($defaultDoctorId ?? (auth()->user()->doctor_id ?? optional($doctors->first())->id))
-  );
-@endphp
-
-<select name="doctor_id" id="doctor_id" required class="w-full border rounded px-3 py-2">
-  <option value="" {{ $preselectDoctorId ? '' : 'selected' }} disabled>-- Select Doctor --</option>
-  @foreach($doctors as $doc)
-    <option value="{{ $doc->id }}"
-      @selected((string)$doc->id === $preselectDoctorId)>
-      {{ $doc->name }} {{ $doc->specialization ? "({$doc->specialization})" : '' }}
-    </option>
-  @endforeach
-</select>
+              $preselectDoctorId = (string) old(
+                'doctor_id',
+                $prescription->doctor_id ?? ($defaultDoctorId ?? (auth()->user()->doctor_id ?? optional($doctors->first())->id))
+              );
+            @endphp
+            <select name="doctor_id" id="doctor_id" required class="w-full border rounded px-3 py-2">
+              <option value="" {{ $preselectDoctorId ? '' : 'selected' }} disabled>-- Select Doctor --</option>
+              @foreach($doctors as $doc)
+                <option value="{{ $doc->id }}" @selected((string)$doc->id === $preselectDoctorId)>
+                  {{ $doc->name }} {{ $doc->specialization ? "({$doc->specialization})" : '' }}
+                </option>
+              @endforeach
+            </select>
           </div>
 
           <div>
@@ -103,8 +128,7 @@
               <option value="">-- Select existing patient --</option>
               <option value="__new">+ Add new patient</option>
             </select>
-             <div id="patient_age_display" class="mt-2 text-sm text-gray-600"></div>
-
+            <div id="patient_age_display" class="mt-2 text-sm text-gray-600"></div>
           </div>
         </div>
 
@@ -136,11 +160,18 @@
           </div>
         </div>
 
-        {{-- Problem --}}
-        <div>
+        {{-- Problem (with bullets) --}}
+        <div class="flex items-center justify-between mt-6 mb-2">
           <label class="block text-sm font-medium text-gray-700">Problem Description (brief)</label>
-          <textarea name="problem_description" rows="3" class="w-full border rounded px-3 py-2">{{ old('problem_description') }}</textarea>
+          <div class="flex items-center gap-2">
+            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                    data-bullets-toggle="#problem_description">• Bullets: OFF</button>
+            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                    data-bullets-clear="#problem_description">Clear bullets</button>
+          </div>
         </div>
+        <textarea id="problem_description" name="problem_description" rows="3"
+                  class="w-full border rounded px-3 py-2" data-bullets>{{ old('problem_description') }}</textarea>
 
         {{-- Medicines (Select2 AJAX) --}}
         <div class="space-y-3">
@@ -175,10 +206,17 @@
         </div>
 
         {{-- Advice + Submit --}}
-        <div>
+        <div class="flex items-center justify-between mt-6 mb-2">
           <label class="block text-sm font-medium text-gray-700">Doctor Advice</label>
-          <textarea name="doctor_advice" rows="3" class="w-full border rounded px-3 py-2">{{ old('doctor_advice') }}</textarea>
+          <div class="flex items-center gap-2">
+            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                    data-bullets-toggle="#doctor_advice">• Bullets: OFF</button>
+            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                    data-bullets-clear="#doctor_advice">Clear bullets</button>
+          </div>
         </div>
+        <textarea id="doctor_advice" name="doctor_advice" rows="3"
+                  class="w-full border rounded px-3 py-2" data-bullets>{{ old('doctor_advice') }}</textarea>
 
         {{-- Return Date --}}
         <div>
@@ -247,11 +285,22 @@
   </script>
 
   {{-- ===== Select2: Patient picker (AJAX) ===== --}}
-  {{-- <script>
+  <script>
   $(function () {
-   const $patient   = $('#patient_select');
-    const newBlock   = document.getElementById('new_patient_block');
-    const $ageInfo   = $('#patient_age_display');
+    const $patient  = $('#patient_select');
+    const newBlock  = document.getElementById('new_patient_block');
+    const $ageInfo  = $('#patient_age_display');
+
+    function computeAgeFromDob(dobStr) {
+      if (!dobStr) return null;
+      const d = new Date(dobStr);
+      if (isNaN(d)) return null;
+      const today = new Date();
+      let age = today.getFullYear() - d.getFullYear();
+      const m = today.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+      return age >= 0 ? age : null;
+    }
 
     $patient.select2({
       placeholder: 'Search patients…',
@@ -276,19 +325,37 @@
           };
         }
       },
+
+      // Row in dropdown
       templateResult: item => {
         if (!item.id || item.id === '__new') return item.text;
-        const extra = [item.phone, item.email].filter(Boolean).join(' • ');
+        const age = item.age ?? computeAgeFromDob(item.dob);
+        const idBadge = item.id ? `#${item.id}` : '';
+        const meta = [
+          idBadge,
+          (age != null ? `${age}y` : ''),
+          (item.sex ? (item.sex[0].toUpperCase() + item.sex.slice(1)) : ''),
+          (item.phone || '')
+        ].filter(Boolean).join(' • ');
         return $(`
           <div class="flex flex-col">
             <div class="font-medium">${item.name || item.text}</div>
-            ${extra ? `<div class="text-xs text-gray-600">${extra}</div>` : ''}
+            ${meta ? `<div class="text-xs text-gray-600">${meta}</div>` : ''}
           </div>
         `);
       },
-      templateSelection: item => item.text || item.name || ''
+
+      // What shows in the selected chip (input)
+      templateSelection: function (item) {
+        if (!item.id || item.id === '__new') return item.text || '+ Add new patient';
+        const name = item.name || item.text || '';
+        const el = document.createElement('span');
+        el.textContent = `#${item.id} - ${name}`;
+        return $(el);
+      }
     });
 
+    // Toggle new-patient block
     $patient.on('change', function () {
       if (this.value === '__new') {
         newBlock.classList.remove('hidden');
@@ -301,13 +368,16 @@
       }
     });
 
+    // Show age (and gender) below the field
     $patient.on('select2:select', function(e){
       const data = e.params.data || {};
       if (data.id && data.id !== '__new') {
-        let info = '';
-        if (data.age) info += 'Age: ' + data.age;
-        if (data.sex) info += (info ? ', ' : '') + 'Gender: ' + data.sex.charAt(0).toUpperCase() + data.sex.slice(1);
-        $ageInfo.text(info);
+        const age = (data.age ?? computeAgeFromDob(data.dob));
+        const sex = data.sex ? data.sex.charAt(0).toUpperCase() + data.sex.slice(1) : '';
+        const bits = [];
+        if (age != null) bits.push('Age: ' + age);
+        if (sex) bits.push('Gender: ' + sex);
+        $ageInfo.text(bits.join(' • '));
       } else {
         $ageInfo.text('');
       }
@@ -317,130 +387,9 @@
       $ageInfo.text('');
     });
   });
-  </script> --}}
-  {{-- ===== Select2: Patient picker (AJAX) ===== --}}
-<script>
-$(function () {
-  const $patient  = $('#patient_select');
-  const newBlock  = document.getElementById('new_patient_block');
-  const $ageInfo  = $('#patient_age_display');
+  </script>
 
-  function computeAgeFromDob(dobStr) {
-    if (!dobStr) return null;
-    const d = new Date(dobStr);
-    if (isNaN(d)) return null;
-    const today = new Date();
-    let age = today.getFullYear() - d.getFullYear();
-    const m = today.getMonth() - d.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
-    return age >= 0 ? age : null;
-  }
-
-  $patient.select2({
-    placeholder: 'Search patients…',
-    width: 'resolve',
-    allowClear: true,
-    minimumInputLength: 1,
-    dropdownParent: $patient.parent(),
-    ajax: {
-      url: $patient.data('search-url') || "{{ route('patients.search') }}",
-      dataType: 'json',
-      delay: 200,
-      data: params => ({ term: params.term, page: params.page || 1 }),
-      processResults: (data, params) => {
-        params.page = params.page || 1;
-        const base = [
-          { id: '', text: '-- Select existing patient --' },
-          { id: '__new', text: '+ Add new patient' }
-        ];
-        return {
-          results: base.concat((data?.results || [])),
-          pagination: { more: !!data?.pagination?.more }
-        };
-      }
-    },
-
-    // Row in dropdown
-    templateResult: item => {
-      if (!item.id || item.id === '__new') return item.text;
-      const age = item.age ?? computeAgeFromDob(item.dob);
-      const idBadge = item.id ? `#${item.id}` : '';
-      const meta = [
-        idBadge,
-        (age != null ? `${age}y` : ''),
-        (item.sex ? (item.sex[0].toUpperCase() + item.sex.slice(1)) : ''),
-        (item.phone || '')
-      ].filter(Boolean).join(' • ');
-      return $(`
-        <div class="flex flex-col">
-          <div class="font-medium">${item.name || item.text}</div>
-          ${meta ? `<div class="text-xs text-gray-600">${meta}</div>` : ''}
-        </div>
-      `);
-    },
-
-    // What shows in the selected chip (input)
-    // templateSelection: item => {
-    //   if (!item.id || item.id === '__new') return item.text || '+ Add new patient';
-    //   const age = item.age ?? computeAgeFromDob(item.dob);
-    //   const parts = [];
-    //   if (item.id) parts.push(`#${item.id}`);
-    //   if (age != null) parts.push(`${age}y`);
-    //   const suffix = parts.length ? ` (${parts.join(', ')})` : '';
-    //   const label  = (item.name || item.text || '') + suffix;
-
-    //   const el = document.createElement('span');
-    //   el.textContent = label;
-    //   const tip = [item.phone, item.email].filter(Boolean).join(' • ');
-    //   if (tip) el.title = tip; // tooltip on hover
-    //   return $(el);
-    // }
-
-      templateSelection: function (item) {
-        if (!item.id || item.id === '__new') return item.text || '+ Add new patient';
-        const name = item.name || item.text || '';
-        const el = document.createElement('span');
-        el.textContent = `#${item.id} - ${name}`;
-        return $(el);
-      }
-  });
-
-  // Toggle new-patient block
-  $patient.on('change', function () {
-    if (this.value === '__new') {
-      newBlock.classList.remove('hidden');
-      $ageInfo.text('');
-    } else if (!this.value) {
-      newBlock.classList.add('hidden');
-      $ageInfo.text('');
-    } else {
-      newBlock.classList.add('hidden');
-    }
-  });
-
-  // Show age (and gender) just below the field too
-  $patient.on('select2:select', function(e){
-    const data = e.params.data || {};
-    if (data.id && data.id !== '__new') {
-      const age = (data.age ?? computeAgeFromDob(data.dob));
-      const sex = data.sex ? data.sex.charAt(0).toUpperCase() + data.sex.slice(1) : '';
-      const bits = [];
-      if (age != null) bits.push('Age: ' + age);
-      if (sex) bits.push('Gender: ' + sex);
-      $ageInfo.text(bits.join(' • '));
-    } else {
-      $ageInfo.text('');
-    }
-  });
-
-  $patient.on('select2:clear', function(){
-    $ageInfo.text('');
-  });
-});
-</script>
-
-
-  {{-- ===== Patient History: load into left panel on selection ===== --}}
+  {{-- ===== Patient History: load into right panel on selection ===== --}}
   <script>
   $(function () {
     const $patient  = $('#patient_select');
@@ -538,7 +487,6 @@ $(function () {
                 ${item.generic ? ' — ' + item.generic : ''}
                 ${item.strength ? ' (' + item.strength + ')' : ''}
               </div>
-              
             </div>
             <button type="button" class="text-red-600 text-sm remove-btn">Remove</button>
           </div>
@@ -591,7 +539,6 @@ $(function () {
       },
       templateResult: (item) => {
         if (!item.id) return item.text;
-        const price = (item.price ?? '') !== '' ? `৳${item.price}` : '';
         const extra = [item.generic, item.strength, item.manufacturer].filter(Boolean).join(' • ');
         return $(`
           <div class="flex flex-col">
@@ -641,7 +588,6 @@ $(function () {
           <div class="flex items-center justify-between gap-2">
             <div class="text-sm">
               <div class="font-medium">${item.name ?? item.text ?? ''}</div>
-              
             </div>
             <button type="button" class="text-red-600 text-sm remove-btn">Remove</button>
           </div>
@@ -707,5 +653,140 @@ $(function () {
     ensureWrap();
   });
   </script>
-  
+
+  {{-- ===== Bulleted textareas (default ON for OE/Problem/Advice) ===== --}}
+  <script>
+  (function () {
+    const BULLET = '• ';
+
+    function setCaretToEnd(el){ try{ const L=el.value.length; el.setSelectionRange(L,L); el.focus(); }catch{} }
+    function isOn(el){ return el.dataset.bulletsOn === '1'; }
+    function toggle(el,on){ el.dataset.bulletsOn = on ? '1' : '0'; }
+    function ensureBullets(text){
+      return String(text||'')
+        .split(/\r?\n/)
+        .map(l => l.trim()==='' ? '' : (l.startsWith(BULLET)? l : BULLET+l))
+        .join('\n');
+    }
+    function stripBullets(el){ el.value = el.value.replace(new RegExp('^'+BULLET,'gm'), ''); }
+
+    function onKeydown(e){
+      if (!isOn(e.target)) return;
+      const el = e.target;
+      if (e.key === 'Enter'){
+        e.preventDefault();
+        const s=el.selectionStart, epos=el.selectionEnd;
+        const before=el.value.slice(0,s), after=el.value.slice(epos);
+        const insert = '\n' + BULLET;
+        el.value = before + insert + after;
+        const pos = before.length + insert.length;
+        el.setSelectionRange(pos,pos);
+      } else if (e.key === 'Backspace'){
+        const s=el.selectionStart, epos=el.selectionEnd;
+        if (s===epos){
+          const lineStart = el.value.lastIndexOf('\n', s-1)+1;
+          if (s - lineStart <= BULLET.length &&
+              el.value.slice(lineStart, lineStart+BULLET.length) === BULLET){
+            e.preventDefault();
+            const before = el.value.slice(0,lineStart), after = el.value.slice(s);
+            el.value = before + after;
+            el.setSelectionRange(lineStart, lineStart);
+          }
+        }
+      }
+    }
+
+    function onPaste(e){
+      if (!isOn(e.target)) return;
+      e.preventDefault();
+      const paste = (e.clipboardData || window.clipboardData).getData('text') || '';
+      const el=e.target, s=el.selectionStart, epos=el.selectionEnd;
+      const before=el.value.slice(0,s), after=el.value.slice(epos);
+      const bulletized = ensureBullets(paste);
+      el.value = before + bulletized + after;
+      const pos = before.length + bulletized.length;
+      el.setSelectionRange(pos,pos);
+    }
+
+    function enable(el){ toggle(el,true); if (el.value.trim()!=='') el.value = ensureBullets(el.value); }
+    function disable(el){ toggle(el,false); }
+
+    function wireTextareas(){
+      document.querySelectorAll('textarea[data-bullets]').forEach(el=>{
+        el.addEventListener('keydown', onKeydown);
+        el.addEventListener('paste', onPaste);
+      });
+    }
+
+    function wireButtons(){
+      document.querySelectorAll('[data-bullets-toggle]').forEach(btn=>{
+        const sel = btn.getAttribute('data-bullets-toggle');
+        const target = document.querySelector(sel);
+        if (!target) return;
+
+        // read initial state from target
+        let on = target.dataset.bulletsOn === '1';
+        const paint = ()=>{
+          btn.textContent = on ? '• Bullets: ON' : '• Bullets: OFF';
+          btn.classList.toggle('bg-blue-600', on);
+          btn.classList.toggle('text-white', on);
+          btn.classList.toggle('bg-gray-100', !on);
+          btn.classList.toggle('text-gray-700', !on);
+        };
+        paint();
+
+        btn.addEventListener('click', ()=>{
+          on = !on;
+          if (on) enable(target); else disable(target);
+          paint(); setCaretToEnd(target);
+        });
+      });
+
+      document.querySelectorAll('[data-bullets-clear]').forEach(btn=>{
+        const sel = btn.getAttribute('data-bullets-clear');
+        const target = document.querySelector(sel);
+        if (!target) return;
+        btn.addEventListener('click', ()=> stripBullets(target));
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      wireTextareas();
+      wireButtons();
+
+      // Default ON for these fields
+      ['#oe', '#problem_description', '#doctor_advice'].forEach(sel=>{
+        const el = document.querySelector(sel);
+        if (!el) return;
+        el.dataset.bulletsOn = '1';
+        if (el.value.trim()!=='') el.value = ensureBullets(el.value);
+      });
+    });
+  })();
+  </script>
+
+  {{-- ===== Clinical Findings collapse toggle (with remember state) ===== --}}
+  <script>
+  (function(){
+    const key = 'cf-open';
+    function setOpen(open){
+      const body = document.getElementById('cf-body');
+      const btn  = document.getElementById('cf-toggle');
+      const icon = btn?.querySelector('svg');
+      if (!body || !btn) return;
+      body.classList.toggle('hidden', !open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (icon) icon.classList.toggle('rotate-180', open);
+      try { localStorage.setItem(key, open ? '1' : '0'); } catch {}
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const remembered = (localStorage.getItem(key) ?? '0') === '1';
+      setOpen(remembered); // default collapsed
+      document.getElementById('cf-toggle')?.addEventListener('click', () => {
+        const body = document.getElementById('cf-body');
+        setOpen(body?.classList.contains('hidden'));
+      });
+    });
+  })();
+  </script>
 </x-app-layout>
