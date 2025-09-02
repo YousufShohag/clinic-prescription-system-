@@ -13,6 +13,7 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-100">
                     <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#ID</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
@@ -47,6 +48,7 @@
                         @endphp
 
                         <tr class="hover:bg-gray-50 transition">
+                          <td class="px-4 py-2">{{''. $patient->id }}</td>
                             <td class="px-4 py-2">
                                 @if($imgUrl)
                                     <img src="{{ $imgUrl }}" alt="{{ $patient->name }}"

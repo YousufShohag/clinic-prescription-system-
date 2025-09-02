@@ -18,7 +18,8 @@ class PatientController extends Controller
     {
         $patients = Patient::with('doctor')
             ->withCount('prescriptions')
-            ->orderBy('name')
+            ->latest()
+            // ->orderBy('name')
             ->paginate(10);
 
         return view('admin.patients.index', compact('patients'));
@@ -187,7 +188,7 @@ class PatientController extends Controller
         $results = $builder->orderBy('name')
             ->skip(($page - 1) * $per)
             ->take($per)
-            ->get(['id', 'name', 'phone', 'email', 'notes']);
+            ->get(['id', 'name', 'phone', 'email', 'notes', 'age', 'sex']);
 
         return response()->json([
             'results' => $results->map(fn ($p) => [
@@ -197,6 +198,8 @@ class PatientController extends Controller
                 'phone' => $p->phone,
                 'email' => $p->email,
                 'notes' => $p->notes,
+                'age'   => $p->age,
+                'sex'   => $p->sex,
             ]),
             'pagination' => [ 'more' => ($page * $per) < $total ],
         ]);

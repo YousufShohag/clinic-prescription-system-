@@ -17,7 +17,8 @@ class PrescriptionController extends Controller
     {
         $patients = Patient::with(['doctor'])
             ->withCount('prescriptions')
-            ->orderBy('name')
+            ->latest()
+            // ->orderBy('name')
             ->paginate(10);
 
         $prescriptions = Prescription::with(['doctor','patient'])
@@ -58,10 +59,14 @@ class PrescriptionController extends Controller
             'bmi'              => ['nullable', 'numeric', 'min:0', 'max:200'],
 
             // New patient (if used)
-            'new_patient.name'  => ['nullable', 'string', 'max:255'],
-            'new_patient.phone' => ['nullable', 'string', 'max:50'],
-            'new_patient.email' => ['nullable', 'email', 'max:255'],
-            'new_patient.notes' => ['nullable', 'string'],
+            'new_patient.name'      => ['nullable', 'string', 'max:255'],
+            'new_patient.phone'     => ['nullable', 'string', 'max:50'],
+            'new_patient.email'     => ['nullable', 'email', 'max:255'],
+            'new_patient.notes'     => ['nullable', 'string'],
+            'new_patient.age'       => ['nullable', 'integer', 'min:0'],
+            'new_patient.sex'       => ['nullable', 'in:male,female,others'],
+            'new_patient.images.*'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp'],
+            'new_patient.documents.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,gif,doc,docx,webp'],
         ]);
 
         return DB::transaction(function () use ($request) {
@@ -73,11 +78,30 @@ class PrescriptionController extends Controller
                     return back()->withInput()
                         ->withErrors(['patient_id' => 'Please provide a name for the new patient.']);
                 }
+                $images = [];
+                if ($request->hasFile('new_patient.images')) {
+                    foreach ($request->file('new_patient.images') as $img) {
+                        $images[] = $img->store('patients/images', 'public');
+                    }
+                }
+
+                $documents = [];
+                if ($request->hasFile('new_patient.documents')) {
+                    foreach ($request->file('new_patient.documents') as $doc) {
+                        $documents[] = $doc->store('patients/documents', 'public');
+                    }
+                }
+
                 $patient = Patient::create([
-                    'name'  => $new['name'],
-                    'phone' => $new['phone'] ?? null,
-                    'email' => $new['email'] ?? null,
-                    'notes' => $new['notes'] ?? null,
+                    'name'      => $new['name'],
+                    'phone'     => $new['phone'] ?? null,
+                    'email'     => $new['email'] ?? null,
+                    'notes'     => $new['notes'] ?? null,
+                    'age'       => $new['age'] ?? null,
+                    'sex'       => $new['sex'] ?? null,
+                    'images'    => $images,
+                    'documents' => $documents,
+                    'doctor_id' => $request->input('doctor_id'),
                 ]);
                 $patientId = $patient->id;
             }
@@ -178,10 +202,14 @@ class PrescriptionController extends Controller
             'bmi'              => ['nullable','numeric','min:0','max:200'],
 
             // Optional new patient on edit
-            'new_patient.name'  => ['nullable','string','max:255'],
-            'new_patient.phone' => ['nullable','string','max:50'],
-            'new_patient.email' => ['nullable','email','max:255'],
-            'new_patient.notes' => ['nullable','string'],
+           'new_patient.name'      => ['nullable','string','max:255'],
+            'new_patient.phone'     => ['nullable','string','max:50'],
+            'new_patient.email'     => ['nullable','email','max:255'],
+            'new_patient.notes'     => ['nullable','string'],
+            'new_patient.age'       => ['nullable','integer','min:0'],
+            'new_patient.sex'       => ['nullable','in:male,female,others'],
+            'new_patient.images.*'  => ['nullable','image','mimes:jpg,jpeg,png,gif,webp'],
+            'new_patient.documents.*' => ['nullable','file','mimes:pdf,jpg,jpeg,png,gif,doc,docx,webp'],
         ]);
 
         return DB::transaction(function () use ($request, $prescription) {
@@ -191,6 +219,19 @@ class PrescriptionController extends Controller
                 $new = $request->input('new_patient', []);
                 if (empty($new['name'])) {
                     return back()->withInput()->withErrors(['patient_id' => 'Please provide a name for the new patient.']);
+                }
+                 $images = [];
+                if ($request->hasFile('new_patient.images')) {
+                    foreach ($request->file('new_patient.images') as $img) {
+                        $images[] = $img->store('patients/images', 'public');
+                    }
+                }
+
+                $documents = [];
+                if ($request->hasFile('new_patient.documents')) {
+                    foreach ($request->file('new_patient.documents') as $doc) {
+                        $documents[] = $doc->store('patients/documents', 'public');
+                    }
                 }
                 $patient = Patient::create([
                     'name'  => $new['name'],

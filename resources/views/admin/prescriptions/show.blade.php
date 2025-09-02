@@ -48,10 +48,18 @@
         <hr class="my-4 border-gray-300 rx-keep">
 
         {{-- Patient bar --}}
-        <div class="rx-keep grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+        <div class="rx-keep grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
             <div>
                 <div class="text-gray-500">Patient</div>
                 <div class="font-medium">{{ $prescription->patient->name }}</div>
+            </div>
+            <div>
+                <div class="text-gray-500">Age / Gender</div>
+                <div>
+                    @php $p = $prescription->patient; @endphp
+                    @if($p?->age){{ $p->age }} yrs @else — @endif
+                    @if($p?->sex) ({{ ucfirst($p->sex) }}) @endif
+                </div>
             </div>
             <div>
                 <div class="text-gray-500">Contact</div>

@@ -16,7 +16,7 @@
       </div>
     @endif
 
-    <form action="{{ route('prescriptions.store') }}" method="POST" class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+    <form action="{{ route('prescriptions.store') }}" method="POST" class="grid grid-cols-1 xl:grid-cols-12 gap-6"enctype="multipart/form-data">
       @csrf
 
       {{-- LEFT --}}
@@ -103,6 +103,8 @@
               <option value="">-- Select existing patient --</option>
               <option value="__new">+ Add new patient</option>
             </select>
+             <div id="patient_age_display" class="mt-2 text-sm text-gray-600"></div>
+
           </div>
         </div>
 
@@ -111,8 +113,25 @@
           <h3 class="text-md font-semibold mb-4">New Patient Details</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input type="text" name="new_patient[name]" value="{{ old('new_patient.name') }}" placeholder="Patient name" class="border rounded px-3 py-2">
+            <input type="number" name="new_patient[age]" value="{{ old('new_patient.age') }}" placeholder="Age" class="border rounded px-3 py-2">
+            <select name="new_patient[sex]" class="border rounded px-3 py-2">
+              <option value="">Sex</option>
+              <option value="male" @selected(old('new_patient.sex')==='male')>Male</option>
+              <option value="female" @selected(old('new_patient.sex')==='female')>Female</option>
+              <option value="others" @selected(old('new_patient.sex')==='others')>Others</option>
+            </select>
             <input type="text" name="new_patient[phone]" value="{{ old('new_patient.phone') }}" placeholder="Phone" class="border rounded px-3 py-2">
             <input type="email" name="new_patient[email]" value="{{ old('new_patient.email') }}" placeholder="Email" class="border rounded px-3 py-2">
+            <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-gray-700">Images</label>
+                <input type="file" name="new_patient[images][]" multiple accept="image/*" class="w-full border rounded px-3 py-2">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-700">Documents</label>
+                <input type="file" name="new_patient[documents][]" multiple class="w-full border rounded px-3 py-2">
+              </div>
+            </div>
             <textarea name="new_patient[notes]" placeholder="Notes (optional)" class="md:col-span-3 border rounded px-3 py-2">{{ old('new_patient.notes') }}</textarea>
           </div>
         </div>
@@ -228,10 +247,11 @@
   </script>
 
   {{-- ===== Select2: Patient picker (AJAX) ===== --}}
-  <script>
+  {{-- <script>
   $(function () {
-    const $patient = $('#patient_select');
-    const newBlock = document.getElementById('new_patient_block');
+   const $patient   = $('#patient_select');
+    const newBlock   = document.getElementById('new_patient_block');
+    const $ageInfo   = $('#patient_age_display');
 
     $patient.select2({
       placeholder: 'Search patients…',
@@ -270,11 +290,155 @@
     });
 
     $patient.on('change', function () {
-      if (this.value === '__new') newBlock.classList.remove('hidden');
-      else newBlock.classList.add('hidden');
+      if (this.value === '__new') {
+        newBlock.classList.remove('hidden');
+        $ageInfo.text('');
+      } else if (!this.value) {
+        newBlock.classList.add('hidden');
+        $ageInfo.text('');
+      } else {
+        newBlock.classList.add('hidden');
+      }
+    });
+
+    $patient.on('select2:select', function(e){
+      const data = e.params.data || {};
+      if (data.id && data.id !== '__new') {
+        let info = '';
+        if (data.age) info += 'Age: ' + data.age;
+        if (data.sex) info += (info ? ', ' : '') + 'Gender: ' + data.sex.charAt(0).toUpperCase() + data.sex.slice(1);
+        $ageInfo.text(info);
+      } else {
+        $ageInfo.text('');
+      }
+    });
+
+    $patient.on('select2:clear', function(){
+      $ageInfo.text('');
     });
   });
-  </script>
+  </script> --}}
+  {{-- ===== Select2: Patient picker (AJAX) ===== --}}
+<script>
+$(function () {
+  const $patient  = $('#patient_select');
+  const newBlock  = document.getElementById('new_patient_block');
+  const $ageInfo  = $('#patient_age_display');
+
+  function computeAgeFromDob(dobStr) {
+    if (!dobStr) return null;
+    const d = new Date(dobStr);
+    if (isNaN(d)) return null;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const m = today.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+    return age >= 0 ? age : null;
+  }
+
+  $patient.select2({
+    placeholder: 'Search patients…',
+    width: 'resolve',
+    allowClear: true,
+    minimumInputLength: 1,
+    dropdownParent: $patient.parent(),
+    ajax: {
+      url: $patient.data('search-url') || "{{ route('patients.search') }}",
+      dataType: 'json',
+      delay: 200,
+      data: params => ({ term: params.term, page: params.page || 1 }),
+      processResults: (data, params) => {
+        params.page = params.page || 1;
+        const base = [
+          { id: '', text: '-- Select existing patient --' },
+          { id: '__new', text: '+ Add new patient' }
+        ];
+        return {
+          results: base.concat((data?.results || [])),
+          pagination: { more: !!data?.pagination?.more }
+        };
+      }
+    },
+
+    // Row in dropdown
+    templateResult: item => {
+      if (!item.id || item.id === '__new') return item.text;
+      const age = item.age ?? computeAgeFromDob(item.dob);
+      const idBadge = item.id ? `#${item.id}` : '';
+      const meta = [
+        idBadge,
+        (age != null ? `${age}y` : ''),
+        (item.sex ? (item.sex[0].toUpperCase() + item.sex.slice(1)) : ''),
+        (item.phone || '')
+      ].filter(Boolean).join(' • ');
+      return $(`
+        <div class="flex flex-col">
+          <div class="font-medium">${item.name || item.text}</div>
+          ${meta ? `<div class="text-xs text-gray-600">${meta}</div>` : ''}
+        </div>
+      `);
+    },
+
+    // What shows in the selected chip (input)
+    // templateSelection: item => {
+    //   if (!item.id || item.id === '__new') return item.text || '+ Add new patient';
+    //   const age = item.age ?? computeAgeFromDob(item.dob);
+    //   const parts = [];
+    //   if (item.id) parts.push(`#${item.id}`);
+    //   if (age != null) parts.push(`${age}y`);
+    //   const suffix = parts.length ? ` (${parts.join(', ')})` : '';
+    //   const label  = (item.name || item.text || '') + suffix;
+
+    //   const el = document.createElement('span');
+    //   el.textContent = label;
+    //   const tip = [item.phone, item.email].filter(Boolean).join(' • ');
+    //   if (tip) el.title = tip; // tooltip on hover
+    //   return $(el);
+    // }
+
+      templateSelection: function (item) {
+        if (!item.id || item.id === '__new') return item.text || '+ Add new patient';
+        const name = item.name || item.text || '';
+        const el = document.createElement('span');
+        el.textContent = `#${item.id} - ${name}`;
+        return $(el);
+      }
+  });
+
+  // Toggle new-patient block
+  $patient.on('change', function () {
+    if (this.value === '__new') {
+      newBlock.classList.remove('hidden');
+      $ageInfo.text('');
+    } else if (!this.value) {
+      newBlock.classList.add('hidden');
+      $ageInfo.text('');
+    } else {
+      newBlock.classList.add('hidden');
+    }
+  });
+
+  // Show age (and gender) just below the field too
+  $patient.on('select2:select', function(e){
+    const data = e.params.data || {};
+    if (data.id && data.id !== '__new') {
+      const age = (data.age ?? computeAgeFromDob(data.dob));
+      const sex = data.sex ? data.sex.charAt(0).toUpperCase() + data.sex.slice(1) : '';
+      const bits = [];
+      if (age != null) bits.push('Age: ' + age);
+      if (sex) bits.push('Gender: ' + sex);
+      $ageInfo.text(bits.join(' • '));
+    } else {
+      $ageInfo.text('');
+    }
+  });
+
+  $patient.on('select2:clear', function(){
+    $ageInfo.text('');
+  });
+});
+</script>
+
 
   {{-- ===== Patient History: load into left panel on selection ===== --}}
   <script>
@@ -543,4 +707,5 @@
     ensureWrap();
   });
   </script>
+  
 </x-app-layout>

@@ -17,7 +17,7 @@
             $selectedTestIds = $selectedTestIds ?? $prescription->tests->pluck('id')->toArray();
         @endphp
 
-        <form action="{{ route('prescriptions.update', $prescription) }}" method="POST" class="space-y-6">
+        <form action="{{ route('prescriptions.update', $prescription) }}" method="POST" class="space-y-6" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -54,8 +54,27 @@
                 <h3 class="text-sm font-medium mb-2">New Patient Details</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div><input type="text" name="new_patient[name]" placeholder="Patient name" class="w-full border rounded px-3 py-2"></div>
+                    <div><input type="number" name="new_patient[age]" placeholder="Age" class="w-full border rounded px-3 py-2"></div>
+                    <div>
+                        <select name="new_patient[sex]" class="w-full border rounded px-3 py-2">
+                            <option value="">Sex</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="others">Others</option>
+                        </select>
+                    </div>
                     <div><input type="text" name="new_patient[phone]" placeholder="Phone" class="w-full border rounded px-3 py-2"></div>
                     <div><input type="email" name="new_patient[email]" placeholder="Email" class="w-full border rounded px-3 py-2"></div>
+                    <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm text-gray-700">Images</label>
+                            <input type="file" name="new_patient[images][]" multiple accept="image/*" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-700">Documents</label>
+                            <input type="file" name="new_patient[documents][]" multiple class="w-full border rounded px-3 py-2">
+                        </div>
+                    </div>
                     <div class="md:col-span-3"><textarea name="new_patient[notes]" placeholder="Notes (optional)" class="w-full border rounded px-3 py-2"></textarea></div>
                 </div>
             </div>
