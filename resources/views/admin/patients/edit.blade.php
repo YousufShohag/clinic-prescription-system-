@@ -135,6 +135,20 @@
                 <input type="date" name="dob" value="{{ old('dob', $patient->dob) }}"
                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-400">
               </div>
+               <div>
+                <label class="block text-gray-700 font-medium mb-1">Blood Group</label>
+                <select name="blood_group" class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-400">
+                  <option value="">-- Select --</option>
+                  @foreach(['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $bg)
+                    <option value="{{ $bg }}" @selected(old('blood_group', $patient->blood_group) === $bg)>{{ $bg }}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div>
+                <label class="block text-gray-700 font-medium mb-1">Guardian Name</label>
+                <input type="text" name="guardian_name" value="{{ old('guardian_name', $patient->guardian_name) }}"
+                       class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-400">
+              </div>
               <div>
                 <label class="block text-gray-700 font-medium mb-1">Phone</label>
                 <input type="text" name="phone" value="{{ old('phone', $patient->phone) }}"
