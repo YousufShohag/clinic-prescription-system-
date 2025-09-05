@@ -1,37 +1,43 @@
-Features
+# 🏥 Smart Prescription Management System
 
-Patients
+![Banner](banner.png)  
+*A modern Laravel 12-based system for managing patients, doctors, and prescriptions with ease.*
 
-Profile with sex, age, date of birth, image & documents (uploads)
+---
 
-Auto-computed next_return_date from prescriptions
+## 🚀 Features
 
-Previous prescriptions panel when creating a new prescription
+### 👩‍⚕️ Patients
+- Profile with **sex, age, date of birth, image & documents (uploads)**
+- **Auto-computed** `next_return_date` from prescriptions
+- **Previous prescriptions panel** available when creating a new prescription
 
-Doctors
+### 🧑‍⚕️ Doctors
+- Name, specialization, degree, BMDC reg. no., contact
 
-Name, specialization, degree, BMDC reg. no., contact
+### 📋 Prescriptions
+- Clinical findings:
+  - **O/E, BP, SpO₂, RR, temp, weight, height, BMI**
+- Medicines with dose details:
+  - **times/day, duration**
+- Lab tests (with **categories & price**)
+- **Return Date** (updates patient’s `next_return_date`)
+- Printable **RX with QR code** (doctor, patient, RX id / link)
 
-Prescriptions
+### 🧪 Tests & Categories
+- CRUD for tests & categories
+- Includes **price & note fields**
 
-Clinical findings (O/E, BP, SpO₂, RR, temp, weight, height, BMI)
+### 💡 Smart UI
+- **No-scroll selectors** for medicines/tests
+- Patient’s **previous RX list on the fly**
+- **Tooltips** for long notes/names
 
-Medicines with dose details (times/day, duration)
+---
 
-Lab tests (with categories & price)
+## ⚙️ Tech Stack
+- **Framework**: Laravel 12
+- **Database**: MySQL / MariaDB
+- **Frontend**: Blade + Bootstrap / Tailwind (customizable)
+- **Other**: QR Code generation, file uploads
 
-Return Date (updates patient’s next_return_date)
-
-Printable RX with QR code (doctor, patient, RX id / link)
-
-Tests & Categories
-
-CRUD for tests & categories (with price, note)
-
-Smart UI
-
-No-scroll selectors for medicines/tests
-
-Patient previous RX list on the fly
-
-Tooltips for long notes/names
