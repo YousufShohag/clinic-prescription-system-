@@ -76,6 +76,8 @@ class PrescriptionController extends Controller
             'new_patient.notes'     => ['nullable', 'string'],
             'new_patient.age'       => ['nullable', 'integer', 'min:0'],
             'new_patient.sex'       => ['nullable', 'in:male,female,others'],
+            'new_patient.blood_group' => ['nullable','in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
+            'new_patient.guardian_name' => ['nullable','string','max:255'],
             'new_patient.images.*'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp'],
             'new_patient.documents.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,gif,doc,docx,webp'],
         ]);
@@ -110,6 +112,8 @@ class PrescriptionController extends Controller
                     'notes'     => $new['notes'] ?? null,
                     'age'       => $new['age'] ?? null,
                     'sex'       => $new['sex'] ?? null,
+                    'blood_group' => $new['blood_group'] ?? null,
+                    'guardian_name' => $new['guardian_name'] ?? null,
                     'images'    => $images,
                     'documents' => $documents,
                     'doctor_id' => $request->input('doctor_id'),
@@ -240,6 +244,8 @@ class PrescriptionController extends Controller
             'new_patient.notes'     => ['nullable','string'],
             'new_patient.age'       => ['nullable','integer','min:0'],
             'new_patient.sex'       => ['nullable','in:male,female,others'],
+            'new_patient.blood_group' => ['nullable','in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
+            'new_patient.guardian_name' => ['nullable','string','max:255'],
             'new_patient.images.*'  => ['nullable','image','mimes:jpg,jpeg,png,gif,webp'],
             'new_patient.documents.*' => ['nullable','file','mimes:pdf,jpg,jpeg,png,gif,doc,docx,webp'],
         ]);

@@ -18,6 +18,9 @@
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Group</th>
+                          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guardian</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Date</th>
@@ -64,6 +67,8 @@
                             <td class="px-4 py-2">{{ $patient->name }}</td>
                             <td class="px-4 py-2">{{ $patient->age ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $patient->sex ?? '-' }}</td>
+                            <td class="px-4 py-2">{{ $patient->blood_group ?? '-' }}</td>
+                              <td class="px-4 py-2">{{ $patient->guardian_name ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $patient->doctor->name ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $patient->phone ?? '-' }}</td>
                             <td class="px-4 py-2 max-w-[240px] truncate" title="{{ $returnDisplay !== '-' ? $returnDisplay : '' }}">
@@ -177,6 +182,8 @@
         address: btn.getAttribute('data-address') || '-',
         doctor: btn.getAttribute('data-doctor') || '-',
         phone: btn.getAttribute('data-phone') || '-',
+        blood_group: btn.getAttribute('data-blood-group') || '-',
+        guardian: btn.getAttribute('data-guardian') || '-',
         email: btn.getAttribute('data-email') || '-',
         status: btn.getAttribute('data-status') || '-',
         notes: btn.getAttribute('data-notes') || '-',
@@ -213,6 +220,8 @@
             <div><div class="text-gray-500 text-xs uppercase">Age</div><div class="font-medium">${esc(data.age)}</div></div>
             <div><div class="text-gray-500 text-xs uppercase">Sex</div><div class="font-medium">${esc(data.sex)}</div></div>
             <div><div class="text-gray-500 text-xs uppercase">Phone</div><div class="font-medium">${esc(data.phone)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Blood Group</div><div class="font-medium">${esc(data.blood_group)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Guardian</div><div class="font-medium">${esc(data.guardian)}</div></div>
             <div><div class="text-gray-500 text-xs uppercase">Email</div><div class="font-medium">${esc(data.email)}</div></div>
             <div class="md:col-span-2"><div class="text-gray-500 text-xs uppercase">Address</div><div class="font-medium">${esc(data.address)}</div></div>
             <div><div class="text-gray-500 text-xs uppercase">Return Date</div><div class="font-medium">${esc(data.return_date)}</div></div>

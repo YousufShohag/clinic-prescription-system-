@@ -40,6 +40,8 @@ class PatientController extends Controller
             'sex'          => 'nullable|in:male,female,others',
             'dob'          => 'nullable|date',
             'next_return_date' => 'nullable|date',
+            'blood_group'  => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
+            'guardian_name' => 'nullable|string|max:255',
             'address'      => 'nullable|string',
             'images.*'     => 'nullable|image|mimes:jpg,jpeg,png,gif,webp',
             'documents.*'  => 'nullable|file|mimes:pdf,jpg,jpeg,png,gif,doc,docx,webp',
@@ -87,6 +89,8 @@ class PatientController extends Controller
             'sex'          => 'nullable|in:male,female,others',
             'dob'          => 'nullable|date',
             'next_return_date' => 'nullable|date',
+            'blood_group'  => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
+            'guardian_name' => 'nullable|string|max:255',
             'address'      => 'nullable|string',
             'images.*'     => 'nullable|image|mimes:jpg,jpeg,png,gif,webp',
             'documents.*'  => 'nullable|file|mimes:pdf,jpg,jpeg,png,gif,doc,docx,webp',
@@ -188,7 +192,8 @@ class PatientController extends Controller
         $results = $builder->orderBy('name')
             ->skip(($page - 1) * $per)
             ->take($per)
-            ->get(['id', 'name', 'phone', 'email', 'notes', 'age', 'sex']);
+            // ->get(['id', 'name', 'phone', 'email', 'notes', 'age', 'sex']);
+            ->get(['id', 'name', 'phone', 'email', 'notes', 'age', 'sex', 'blood_group', 'guardian_name']);
 
         return response()->json([
             'results' => $results->map(fn ($p) => [
@@ -200,6 +205,8 @@ class PatientController extends Controller
                 'notes' => $p->notes,
                 'age'   => $p->age,
                 'sex'   => $p->sex,
+                'blood_group' => $p->blood_group,
+                'guardian_name' => $p->guardian_name,
             ]),
             'pagination' => [ 'more' => ($page * $per) < $total ],
         ]);

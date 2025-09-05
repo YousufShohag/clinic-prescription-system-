@@ -258,6 +258,13 @@
               <option value="female" @selected(old('new_patient.sex')==='female')>Female</option>
               <option value="others" @selected(old('new_patient.sex')==='others')>Others</option>
             </select>
+            <select name="new_patient[blood_group]" class="border rounded px-3 py-2">
+              <option value="">Blood Group</option>
+              @foreach(['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $bg)
+                <option value="{{ $bg }}" @selected(old('new_patient.blood_group')===$bg)>{{ $bg }}</option>
+              @endforeach
+            </select>
+            <input type="text" name="new_patient[guardian_name]" value="{{ old('new_patient.guardian_name') }}" placeholder="Guardian name" class="border rounded px-3 py-2">
             <input type="text" name="new_patient[phone]" value="{{ old('new_patient.phone') }}" placeholder="Phone" class="border rounded px-3 py-2">
             <input type="email" name="new_patient[email]" value="{{ old('new_patient.email') }}" placeholder="Email" class="border rounded px-3 py-2">
             <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">

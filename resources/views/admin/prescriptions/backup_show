@@ -85,73 +85,78 @@
                 </div>
                 <div class="text-xs text-gray-500 leading-4">
                     {{ config('clinic.address', '128, Jubilee Road, Tin pool, Chattagram') }}<br>
-                    {{ config('clinic.phone', 'Phone for Appointment: 01xxxxxxxxx') }}
+                    {{ config('clinic.phone', 'Phone for Appointment: 01xxxxxxxxx') }} <br>
+                    {{ config('clinic.available', 'Satuerday-Friday (07.00 PM - 10.00 PM) ') }}
                 </div>
-                @if($showRxId)
+                {{-- @if($showRxId)
                     <div class="text-xs text-gray-500 mt-1">Prescription #{{ $prescription->id }}</div>
-                @endif
-                <div class="text-xs text-gray-500">Date: {{ $prescription->created_at->format('d M Y, h:i A') }}</div>
+                @endif --}}
+                {{-- <div class="text-xs text-gray-500">Date: {{ $prescription->created_at->format('d M Y, h:i A') }}</div> --}}
             </div>
         </div>
 
-        <hr class="my-4 border-gray-300 rx-keep">
+        <hr class="my-2 border-gray-300 rx-keep">
 
         {{-- Patient bar --}}
         {{-- Patient header (patient-friendly, no image) --}}
-@php
-    $pat = $prescription->patient ?? null;
+        @php
+            $pat = $prescription->patient ?? null;
 
-    $showPatientName = filled($pat?->name);
-    $showRxId        = filled($prescription->id);
+            $showPatientName = filled($pat?->name);
+            $showRxId        = filled($prescription->id);
 
-    $ageText    = filled($pat?->age) ? ($pat->age . ' yrs') : null;
-    $genderText = filled($pat?->sex) ? ucfirst($pat->sex) : null;
-    $phoneText  = filled($pat?->phone) ? $pat->phone : null;
-    $emailText  = filled($pat?->email) ? $pat->email : null;
+            $ageText    = filled($pat?->age) ? ($pat->age . ' yrs') : null;
+            $genderText = filled($pat?->sex) ? ucfirst($pat->sex) : null;
+            $phoneText  = filled($pat?->phone) ? $pat->phone : null;
+            $emailText  = filled($pat?->email) ? $pat->email : null;
+            $bloodText  = filled($pat?->blood_group) ? $pat->blood_group : null;
+            $guardianText = filled($pat?->guardian_name) ? $pat->guardian_name : null;
 
-    $showContact = $phoneText || $emailText;
-@endphp
+            $showContact = $phoneText || $emailText;
+        @endphp
 
 <section class="rx-keep mt-2 rounded-lg border bg-white">
-  {{-- header bar --}}
- 
 
-  {{-- content --}}
   {{-- ================= Patient Header (no image) ================= --}}
-@php
-    $pat = $prescription->patient ?? null;
+        @php
+            $pat = $prescription->patient ?? null;
 
-    $showPatientName = filled($pat?->name);
-    $showRxId        = filled($prescription->id);
+            $showPatientName = filled($pat?->name);
+            $showRxId        = filled($prescription->id);
 
-    $ageText    = filled($pat?->age) ? ($pat->age . ' yrs') : null;
-    $genderText = filled($pat?->sex) ? ucfirst($pat->sex) : null;
-    $phoneText  = filled($pat?->phone) ? $pat->phone : null;
-    $emailText  = filled($pat?->email) ? $pat->email : null;
+            $ageText    = filled($pat?->age) ? ($pat->age . ' yrs') : null;
+            $genderText = filled($pat?->sex) ? ucfirst($pat->sex) : null;
+            $phoneText  = filled($pat?->phone) ? $pat->phone : null;
+            $emailText  = filled($pat?->email) ? $pat->email : null;
 
-    $showContact = $phoneText || $emailText;
-@endphp
-
-<div class="p-4 flex flex-col md:flex-row md:items-start md:justify-between gap-4 border rounded-lg bg-white rx-keep">
+            $showContact = $phoneText || $emailText;
+        @endphp
+     
+<div class="p-2 grid grid-cols-1 md:grid-cols-3 gap-4 border rounded-lg bg-white rx-keep">
   {{-- LEFT: Name + ID + Age/Gender + Contact --}}
   <div class="min-w-[220px] space-y-1 text-sm">
     @if($showPatientName)
       <div>Patient Name: <span class="font-medium">{{ $pat->name }}</span></div>
     @endif
 
-    @if(filled($pat?->id))
-      <div>Patient ID: <span class="font-medium">#{{ $pat->id }}</span></div>
-    @endif
 
     @if($ageText && $genderText)
-      <div>Age / Gender: <span class="font-medium">{{ $ageText }}</span> / <span class="font-medium">{{ $genderText }}</span></div>
+      <div>Age / Gender:
+        <span class="font-medium">{{ $ageText }}</span> /
+        <span class="font-medium">{{ $genderText }}</span>
+      </div>
     @elseif($ageText)
       <div>Age: <span class="font-medium">{{ $ageText }}</span></div>
     @elseif($genderText)
       <div>Gender: <span class="font-medium">{{ $genderText }}</span></div>
     @endif
+    @if($phoneText)
+      <div>Phone: <span class="font-medium">{{ $phoneText }}</span></div>
+    @endif
 
-    @if($showContact)
+    
+    
+    {{-- @if($showContact)
       <div class="flex flex-wrap gap-x-6 gap-y-1 text-gray-700">
         @if($phoneText)
           <span>Phone: <span class="font-medium">{{ $phoneText }}</span></span>
@@ -160,23 +165,73 @@
           <span>Email: <span class="font-medium">{{ $emailText }}</span></span>
         @endif
       </div>
-    @endif
+    @endif --}}
   </div>
 
-  {{-- RIGHT: Rx ID + Date (+ optional phone again if you want) --}}
+  {{-- MIDDLE: Doctor + Visit info (only if available) --}}
+  <div class="text-sm space-y-1">
+    @php
+      $doctorName  = optional($prescription->doctor)->name;
+      $doctorSpec  = optional($prescription->doctor)->specialization;
+      $retText     = $prescription->return_date
+                      ? \Illuminate\Support\Carbon::parse($prescription->return_date)->format('d-m-Y')
+                      : null;
+      $nextRetText = $pat?->next_return_date
+                      ? \Illuminate\Support\Carbon::parse($pat->next_return_date)->format('d-m-Y')
+                      : null;
+    @endphp
+
+    
+    @if(filled($pat?->id))
+      <div>Patient ID: <span class="font-medium">#{{ $pat->id }}</span></div>
+    @endif
+
+    @if($bloodText)
+      <div>Blood Group: <span class="font-medium">{{ $bloodText }}</span></div>
+    @endif
+    @if($guardianText)
+      <div>Guardian: <span class="font-medium">{{ $guardianText }}</span></div>
+    @endif
+
+    {{-- @if($retText)
+      <div>Return Date: <span class="font-medium">{{ $retText }}</span></div>
+    @endif --}}
+
+    @if($nextRetText && (!$retText || $nextRetText !== $retText))
+      <div class="text-gray-600">Next Visit (Patient): <span class="font-medium text-black">{{ $nextRetText }}</span></div>
+    @endif
+
+    {{-- You can add more identifiers here if you like --}}
+    {{-- @if($pat?->blood_group) <div>Blood Group: <span class="font-medium">{{ $pat->blood_group }}</span></div> @endif --}}
+  </div>
+
+  {{-- RIGHT: Rx ID + Date (+ optional phone again) --}}
   <div class="text-sm text-left md:min-w-[200px] space-y-1">
+    {{-- @if($showRxId)
+      <div class="text-gray-500">Prescription #
+        <span class="font-medium text-black">{{ $prescription->id }}</span>
+      </div>
+    @endif --}}
+
+    
+
+    <div class="text-gray-500">Date:
+      <span class="font-medium text-black">{{ $prescription->created_at->format('d-m-Y H:i') }}</span>
+    </div>
+
     @if($showRxId)
-      <div class="text-gray-500">Prescription # <span class="font-medium text-black">{{ $prescription->id }}</span></div>
-    @endif
+    @php
+    $barcodeValue = "RX-{$prescription->id}";
+    $dns = new Milon\Barcode\DNS1D();
+    // $dns->setStorPath(storage_path('framework/barcodes')); // optional
+    $barcodeSvg = $dns->getBarcodeSVG($barcodeValue, 'C128', 1.8, 40, 'black', true);
+@endphp
 
-    {{-- If you also want phone repeated on the right, keep this block; else remove it --}}
-    @if($phoneText)
-      <div>Phone: <span class="font-medium">{{ $phoneText }}</span></div>
-    @endif
+<div class="leading-none">{!! $barcodeSvg !!}</div>
 
-    <div class="text-gray-500">Date: <span class="font-medium text-black">{{ $prescription->created_at->format('d-m-Y H:i') }}</span></div>
   </div>
 </div>
+
 
 </section>
 
@@ -188,7 +243,7 @@
                 {{-- Problem --}}
                 @if($hasProblem)
                 <div class="mb-4">
-                    <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">Problem</div>
+                    <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">C/C</div>
                     <div class="text-sm leading-6 whitespace-pre-wrap">{{ $prescription->problem_description }}</div>
                 </div>
                 @endif
@@ -221,12 +276,19 @@
                 @endif
 
                 {{-- Other history (except Previous Investigation & Referred To) --}}
-                @foreach($nonEmptyHistoryOthers as $field => $label)
+                {{-- @foreach($nonEmptyHistoryOthers as $field => $label)
                     <div class="mb-4">
                         <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">{{ $label }}</div>
                         <div class="text-sm leading-6 whitespace-pre-wrap">{{ $prescription->$field }}</div>
                     </div>
-                @endforeach
+                @endforeach --}}
+                @foreach($nonEmptyHistoryOthers as $field => $label)
+                    <div class="mb-2">
+                        <div class="uppercase tracking-wide text-[11px] text-gray-500 mb-0.5">{{ $label }}</div>
+                        <div class="text-[13px] leading-5 whitespace-pre-wrap">{{ $prescription->$field }}</div>
+                    </div>
+                    @endforeach
+
 
                 {{-- Previous Investigation (LEFT) --}}
                 @if($hasPrevInv)
@@ -239,13 +301,13 @@
                 {{-- Tests (LEFT) --}}
                 @if($hasTests)
                 <div class="mb-4">
-                    <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">Tests</div>
+                    <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">Investigation</div>
                     <ul class="space-y-2">
                         @foreach($prescription->tests as $t)
                             <li class="flex items-start">
-                                <div class="mt-1 mr-2">•</div>
+                                <div class=" mr-1">•</div>
                                 <div class="flex-1">
-                                    <div class="font-medium">{{ $t->name }}</div>
+                                    <div class="text-sm leading-6 whitespace-pre-wrap">{{ $t->name }}</div>
                                 </div>
                             </li>
                         @endforeach
@@ -327,34 +389,27 @@
                 </div>
                 @endif
 
-                {{-- QR + Signature: show only if we have an ID --}}
-                @if($showRxId)
-                    @php
-                        $qrText = "RX#{$prescription->id}\nDoctor: " . ($doc->name ?? '-') .
-                                  "\nPatient: " . ($pat->name ?? '-');
-                        $qrLink = route('prescriptions.show', $prescription->id);
-                        $qrPayload = $qrText . "\n" . $qrLink;
-                    @endphp
-                    <div class="rx-keep mt-10 grid grid-cols-2 gap-8 items-end">
-                        <div class="text-left">
-                            <div class="flex items-end gap-4">
-                                <div class="leading-none">{!! QrCode::size(110)->margin(1)->generate($qrPayload) !!}</div>
-                                <div class="text-[11px] text-gray-500 leading-tight">
-                                    Scan to view/verify<br>RX #{{ $prescription->id }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="h-12"></div>
-                            <div class="border-t border-gray-400 pt-1 text-sm">
-                                {{ $doc->name ?? '' }}<br>
-                                @if(filled($doc?->specialization))
-                                    <span class="text-gray-500">{{ $doc->specialization }}</span><br>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
+                {{-- BARCODE + Signature: show only if we have an ID --}}
+
+
+    <div class="rx-keep mt-10 grid grid-cols-2 gap-8 items-end">
+        <div class="text-left">
+            
+        </div>
+
+        <div class="text-right">
+            <div class="h-12"></div>
+            <div class="border-t border-gray-400 pt-1 text-sm">
+                {{ $doc->name ?? '' }}<br>
+                @if(filled($doc?->specialization))
+                    <span class="text-gray-500">{{ $doc->specialization }}</span><br>
                 @endif
+            </div>
+        </div>
+    </div>
+@endif
+
+                
             </div>
             @endif
         </div>
@@ -385,7 +440,7 @@
   .gap-6{ gap:1.5rem!important; }
   .md\:col-span-4{ grid-column:span 4 / span 4!important; }
   .md\:col-span-8{ grid-column:span 8 / span 8!important; }
-  .rx-keep, .text-right, .border, .rounded-lg, .p-4, .p-6, .p-8 { page-break-inside:avoid; }
+  .rx-keep, .text-right, .border, .rounded-lg, .p-4, .p-4, .p- { page-break-inside:avoid; }
   ul, li, table, tr { page-break-inside:avoid; }
   thead { display:table-header-group; }
 
