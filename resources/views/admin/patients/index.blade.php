@@ -20,7 +20,6 @@
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
                           <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Group</th>
                           <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guardian</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Date</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prescriptions</th>
@@ -68,7 +67,6 @@
                             <td class="px-4 py-2">{{ $patient->sex ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $patient->blood_group ?? '-' }}</td>
                               <td class="px-4 py-2">{{ $patient->guardian_name ?? '-' }}</td>
-                            <td class="px-4 py-2">{{ $patient->doctor->name ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $patient->phone ?? '-' }}</td>
                             <td class="px-4 py-2 max-w-[240px] truncate" title="{{ $returnDisplay !== '-' ? $returnDisplay : '' }}">
                                 {{ $returnDisplay }}
@@ -103,6 +101,9 @@
                                     data-name="{{ $patient->name }}"
                                     data-age="{{ $patient->age ?? '-' }}"
                                     data-sex="{{ $patient->sex ?? '-' }}"
+                                    data-dob="{{ $patient->dob ?? '-' }}"
+                                    data-blood_group="{{ $patient->	blood_group ?? '-' }}"
+                                    data-guardian_name="{{ $patient->	guardian_name ?? '-' }}"
                                     data-address="{{ $patient->address ?? '-' }}"
                                     data-doctor="{{ $patient->doctor->name ?? '-' }}"
                                     data-phone="{{ $patient->phone ?? '-' }}"
@@ -116,18 +117,39 @@
                                     data-rx-url="{{ route('patients.prescriptions', $patient) }}"
                                     data-docs-url="{{ route('patients.documents', $patient) }}"
                                 >
-                                    View
+                                   {{-- Heroicon "eye" for "View" --}}
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                      stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                      <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 
+                                              4.5c4.638 0 8.574 3.01 9.963 7.183.07.207.07.431 
+                                              0 .639C20.577 16.49 16.64 19.5 12 
+                                              19.5c-4.638 0-8.574-3.01-9.963-7.183z" />
+                                      <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  </svg>
                                 </button>
 
-                                <a href="{{ route('patients.edit', $patient->id) }}"
-                                   class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 text-sm">Edit</a>
+                                <a href="{{ route('patients.edit', $patient->id) }}"class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 text-sm"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 
+                                            16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 
+                                            0 011.13-1.897l8.932-8.931z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M19.5 7.125L17.25 4.875" />
+                                </svg></a>
 
                                 <form action="{{ route('patients.destroy', $patient->id) }}" method="POST"
                                       onsubmit="return confirm('Are you sure?');">
                                     @csrf @method('DELETE')
                                     <button type="submit"
                                             class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-sm">
-                                        Delete
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M6 7h12M9 7v10m6-10v10M4 7h16l-1 12a2 2 0 01-2 2H7a2 2 0 01-2-2L4 7zM9 4h6v2H9V4z" />
+                                        </svg>
                                     </button>
                                 </form>
                             </td>
@@ -442,4 +464,159 @@
       }
     }
     </script>
+
+<script>
+  /* ---- tiny helpers (keep or merge with yours) ---- */
+  const svg = {
+    user:  '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.5 19.5a7.5 7.5 0 0115 0"/></svg>',
+    phone: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 4.5l4.5-2.25L9 6.75 6.75 9l7.5 7.5 2.25-2.25 4.5 2.25-2.25 4.5a3 3 0 01-3 1.5c-7.456 0-13.5-6.044-13.5-13.5a3 3 0 011.5-3z"/></svg>',
+    mail:  '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21.75 7.5v9a2.25 2.25 0 01-2.25 2.25H4.5A2.25 2.25 0 012.25 16.5v-9"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21.75 7.5L12 13.5 2.25 7.5"/></svg>',
+    home:  '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 12l9.75-7.5L21.75 12v7.5A1.5 1.5 0 0120.25 21H3.75A1.5 1.5 0 012.25 19.5V12z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 21V12h6v9"/></svg>',
+    id:    '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7.5A2.25 2.25 0 015.25 5.25h13.5A2.25 2.25 0 0121 7.5V16.5A2.25 2.25 0 0118.75 18.75H5.25A2.25 2.25 0 013 16.5V7.5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7.5 9h4.5M7.5 12h6.75M7.5 15h3"/></svg>',
+    doctor:'<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7a4 4 0 118 0v2a4 4 0 11-8 0V7z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 21v-3a4 4 0 014-4h4a4 4 0 014 4v3"/></svg>',
+    status:'<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+    calendar:'<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 3v3M16 3v3M3 8h18M4.5 21h15A1.5 1.5 0 0021 19.5V7.5A1.5 1.5 0 0019.5 6h-15A1.5 1.5 0 003 7.5v12A1.5 1.5 0 004.5 21z"/></svg>',
+    file:  '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 3H6a1.5 1.5 0 00-1.5 1.5v15A1.5 1.5 0 006 21h12a1.5 1.5 0 001.5-1.5V8.25L15.75 3z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 3V8.25H21"/></svg>',
+    pills: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3h6a3 3 0 013 3v12a3 3 0 01-3 3H9a3 3 0 01-3-3V6a3 3 0 013-3z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 9h6"/></svg>'
+  };
+
+  const badge = (text, tone='gray') => {
+    const tones = {
+      gray:  'bg-gray-100 text-gray-800',
+      green: 'bg-green-100 text-green-800',
+      red:   'bg-red-100 text-red-800',
+      amber: 'bg-amber-100 text-amber-800',
+      blue:  'bg-blue-100 text-blue-800',
+    };
+    return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${tones[tone]||tones.gray}">${text}</span>`;
+  };
+
+  function dueTone(dateStr){ // returns {text, tone}
+    if(!dateStr || dateStr==='-') return { text:'No Return', tone:'gray' };
+    // expect format d/m/Y; fallback safe parsing
+    const [d,m,y] = (dateStr||'').split(/[\/\-\.]/).map(Number);
+    const dt = (y && m && d) ? new Date(y, m-1, d) : new Date(dateStr);
+    if(isNaN(dt)) return { text: dateStr, tone:'gray' };
+    const today = new Date(); today.setHours(0,0,0,0);
+    const cmp = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+    if (cmp < today)  return { text:`Overdue ${dateStr}`, tone:'red' };
+    if (cmp.getTime() === today.getTime()) return { text:`Due Today ${dateStr}`, tone:'amber' };
+    return { text:`Due ${dateStr}`, tone:'green' };
+  }
+
+  /* ========= Friendlier profile popup ========= */
+  async function showPatientInfo(btn) {
+    // data pull
+    let imgsRaw = [];
+    try { imgsRaw = JSON.parse(btn.getAttribute('data-images') || '[]'); } catch(_){}
+    const data = {
+      id: btn.getAttribute('data-id'),
+      avatar: btn.getAttribute('data-avatar') || '',
+      images: Array.isArray(imgsRaw) ? imgsRaw : [],
+      name: btn.getAttribute('data-name') || '-',
+      age: btn.getAttribute('data-age') || '-',
+      sex: btn.getAttribute('data-sex') || '-',
+      dob: btn.getAttribute('data-dob') || '-',
+      blood_group: btn.getAttribute('data-blood_group') || '-',
+      guardian_name: btn.getAttribute('data-guardian_name') || '-',
+      address: btn.getAttribute('data-address') || '-',
+      doctor: btn.getAttribute('data-doctor') || '-',
+      phone: btn.getAttribute('data-phone') || '-',
+      email: btn.getAttribute('data-email') || '-',
+      status: btn.getAttribute('data-status') || '-',
+      notes: btn.getAttribute('data-notes') || '-',
+      return_date: btn.getAttribute('data-return-date') || '-',
+      created_at: btn.getAttribute('data-created') || '-',
+      updated_at: btn.getAttribute('data-updated') || '-',
+      rxCount: parseInt(btn.getAttribute('data-rx-count') || '0', 10),
+      rxUrl: btn.getAttribute('data-rx-url') || null,
+      docsUrl: btn.getAttribute('data-docs-url') || null,
+    };
+
+    const due = dueTone(data.return_date);
+    const hasRx = data.rxCount > 0;
+
+    // header card (avatar + core)
+    const header = `
+      <div class="flex items-center gap-4">
+        ${data.avatar
+          ? `<img src="${esc(data.avatar)}" class="w-16 h-16 rounded-full object-cover ring-1 ring-gray-200" alt="${esc(data.name)}">`
+          : `<div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center ring-1 ring-indigo-200">
+               <span class="text-lg font-bold">${esc((data.name||'P').charAt(0).toUpperCase())}</span>
+             </div>`}
+        <div class="flex-1 min-w-0">
+          <div class="text-lg font-semibold truncate">${esc(data.name)}</div>
+          <div class="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+            <span class="inline-flex items-center gap-1">${svg.id}<span>#${esc(data.id)}</span></span>
+            <span>•</span>
+            <span class="inline-flex items-center gap-1">${svg.doctor}<span>${esc(data.doctor)}</span></span>
+          </div>
+          <div class="mt-1 flex flex-wrap items-center gap-2">
+            ${badge(`${svg.user} ${esc(data.age)} / ${esc(data.sex)}`, 'blue')}
+            ${badge(`${svg.calendar} ${esc(due.text)}`, due.tone)}
+            ${badge(`${svg.status} ${esc(data.status)}`, 'gray')}
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          ${hasRx ? `<button class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+                     onclick="(function(){ const fake={getAttribute:(k)=>k==='data-url'?'${esc(data.rxUrl)}':(k==='data-patient-name'?'${esc(data.name)}':null)}; showPatientPrescriptions(fake); })()">
+                     ${svg.pills} <span class="ml-1">Prescriptions (${data.rxCount})</span></button>` : ''}
+          <a href="/patients/${encodeURIComponent(data.id)}/edit"
+             class="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-sm text-center">
+             Edit</a>
+        </div>
+      </div>
+    `;
+
+    // info cards
+    const info = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="border rounded-lg p-3">
+          <div class="text-[11px] uppercase text-gray-500 mb-1">Contact</div>
+          <div class="text-sm flex flex-col gap-1">
+            <div><span class="text-gray-500">Gurdian Name:</span> <span class="font-medium">${esc(data.guardian_name)}</span></div>
+            <div><span class="text-gray-500">Address:</span> <span class="font-medium">${esc(data.address)}</span></div>
+            <div class="inline-flex items-center gap-2">Phone: 
+              ${data.phone && data.phone !== '-' ? `<a href="tel:${esc(data.phone)}" class="text-blue-600 hover:underline">${esc(data.phone)}</a>` : '<span>-</span>'}
+            </div>
+          
+          </div>
+        </div>
+        <div class="border rounded-lg p-3">
+          <div class="text-[11px] uppercase text-gray-500 mb-1">Meta</div>
+          <div class="text-sm grid grid-cols-2 gap-x-3 gap-y-1">
+            <div><span class="text-gray-500">Created:</span> <span class="font-medium">${esc(data.created_at)}</span></div>
+            <div><span class="text-gray-500">Updated:</span> <span class="font-medium">${esc(data.updated_at)}</span></div>
+            <div><span class="text-gray-500">Return:</span> <span class="font-medium">${esc(data.return_date)}</span></div>
+            <div><span class="text-gray-500">Status:</span> <span class="font-medium">${esc(data.status)}</span></div>
+          </div>
+        </div>
+        <div class="md:col-span-2 border rounded-lg p-3">
+          <div class="text-[11px] uppercase text-gray-500 mb-1">Notes</div>
+          <div class="text-sm leading-relaxed">${nl2br(data.notes)}</div>
+        </div>
+      </div>
+    `;
+
+    // images (your existing renderer works — keeping style consistent)
+    const imgsHtml = renderPatientImages(data.images);
+
+    // documents holder (loaded async)
+    const docsHolder = `<div id="docsSection" class="mt-6 text-sm text-gray-600">Loading documents…</div>`;
+
+    Swal.fire({
+      title: `Patient`,
+      html: `<div class="text-left space-y-4">${header}${info}${imgsHtml}${docsHolder}</div>`,
+      width: '64rem',
+      showCloseButton: true,
+      showCancelButton: true,
+      cancelButtonText: 'Close',
+      showConfirmButton: false,
+      didOpen: () => fetchAndRenderDocuments(data.docsUrl)
+    });
+  }
+</script>
+
+
+
 </x-app-layout>

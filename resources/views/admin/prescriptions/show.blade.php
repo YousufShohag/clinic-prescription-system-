@@ -5,10 +5,6 @@
     <div class="no-print flex items-center justify-between mb-4">
       <a href="{{ route('prescriptions.index') }}" class="text-blue-600 hover:underline">← Back to prescriptions</a>
       <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
-      <a href="{{ route('prescriptions.pdf.tcpdf', $prescription->id) }}" target="_blank"
-   class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-  Print as PDF (TCPDF)
-</a>
     </div>
 
     @php
@@ -173,9 +169,9 @@
               <div>Guardian: <span class="font-medium">{{ $guardianText }}</span></div>
             @endif
 
-            @if($nextRetText && (!$retText || $nextRetText !== $retText))
+            {{-- @if($nextRetText && (!$retText || $nextRetText !== $retText))
               <div class="text-gray-600">Next Visit (Patient): <span class="font-medium text-black">{{ $nextRetText }}</span></div>
-            @endif
+            @endif --}}
           </div>
 
           {{-- RIGHT: Date + Barcode --}}
@@ -216,7 +212,7 @@
 
               @if($hasOE)
                 <div class="text-sm leading-6 mb-2">
-                  <span class="font-medium">O/E:</span>
+                  <span class="font-medium">O/E:</span><br>
                   <span class="text-gray-700 whitespace-pre-wrap">{{ $prescription->oe }}</span>
                 </div>
               @endif
@@ -304,8 +300,8 @@
                         </div>
                         @php
                           $parts = [];
-                          if(filled($m->pivot->times_per_day ?? null)) $parts[] = ' '.$m->pivot->times_per_day;
-                          if(filled($m->pivot->duration ?? null))     $parts[] = ' '.$m->pivot->duration;
+                          if(filled($m->pivot->times_per_day ?? null)) $parts[] = 'Times/day: '.$m->pivot->times_per_day;
+                          if(filled($m->pivot->duration ?? null))     $parts[] = 'Duration: '.$m->pivot->duration;
                         @endphp
                         @if(!empty($parts))
                           <div class="text-sm text-gray-600">{{ implode(' — ', $parts) }}</div>
@@ -320,7 +316,7 @@
             {{-- Doctor Advice --}}
             @if($hasAdvice)
               <div class="border rounded-lg p-4 mb-4">
-                <u><div class="font-semibold mb-2">উপদেশ </div></u>
+                <div class="font-semibold mb-2">Doctor Advice</div>
                 <div class="text-sm leading-6 whitespace-pre-wrap">{{ $prescription->doctor_advice }}</div>
               </div>
             @endif
