@@ -252,7 +252,7 @@
 
         {{-- Problem (with bullets + chips) --}}
         <div class="flex items-center justify-between mt-6 mb-2">
-          <label class="block text-sm font-medium text-gray-700">Problem Description (brief)</label>
+          <label class="block text-sm font-medium text-gray-700">Chief Complain (C/C)</label>
           <div class="flex items-center gap-2">
             <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-toggle="#problem_description">• Bullets: OFF</button>
             <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-clear="#problem_description">Clear</button>
@@ -880,8 +880,8 @@
         'Follow-up for DM','Dyspepsia','Dizziness'
       ],
       '#doctor_advice': [
-        'Hydration + rest','Salt-water gargle','Paracetamol PRN','Avoid spicy/oily foods',
-        'Small frequent meals','Home glucose monitoring','BP log daily','ER if red flags'
+        'বেশি করে পানি খাবেন','ঝাল, তেল-চর্বিযুক্ত খাবার এড়িয়ে চলুন','ধূমপান ও মাদক সম্পূর্ণভাবে পরিহার করুন','প্রতিদিন পর্যাপ্ত ঘুমান (৬–৮ ঘণ্টা)',
+        'প্রেসক্রিপশনে দেওয়া ওষুধ নিয়মিত এবং সঠিক সময়ে গ্রহণ করুন'
       ],
       '#ph': ['HTN','DM','BA','CKD','IHD'],
       '#dh': ['NSAIDs use','PPIs use','Steroid use','Antibiotics recently'],
@@ -899,13 +899,13 @@
       urti: {
         problem_description: '• Fever with sore throat\n• Runny nose\n• Dry cough',
         oe: '• GA: NAD\n• ENT: Congested oropharynx, no exudate\n• RS: Clear, no added sound\n• CVS: S1 S2 normal',
-        doctor_advice: '• Hydration + rest\n• Salt-water gargle\n• Paracetamol PRN\n• ER if red flags',
+        doctor_advice: '• বেশি করে পানি খাবেন\n• ঝাল, তেল-চর্বিযুক্ত খাবার এড়িয়ে চলুন\n• ধূমপান ও মাদক সম্পূর্ণভাবে পরিহার করুন\n• ER if red flags',
         dx: '• URTI'
       },
       gerd: {
         problem_description: '• Epigastric burning\n• Post-meal fullness',
         oe: '• P/A: Soft, mild epigastric tenderness\n• CVS/RS: Normal',
-        doctor_advice: '• Avoid spicy/oily foods\n• Small frequent meals\n• Elevate head-end while sleeping',
+        doctor_advice: '• প্রতিদিন পর্যাপ্ত ঘুমান (৬–৮ ঘণ্টা)\n• প্রেসক্রিপশনে দেওয়া ওষুধ নিয়মিত এবং সঠিক সময়ে গ্রহণ করুন\n• Elevate head-end while sleeping',
         dx: '• Acute gastritis / GERD'
       },
       htn: {
@@ -917,7 +917,7 @@
       dm2: {
         problem_description: '• Follow-up for Type-2 DM',
         oe: '• GA: NAD\n• No neuropathic deficits',
-        doctor_advice: '• Home glucose monitoring\n• Diet counseling\n• Foot care advice',
+        // doctor_advice: '• gHome lucose monitoring\n• Diet counseling\n• Foot care advice',
         dx: '• Type-2 DM – controlled'
       }
     };

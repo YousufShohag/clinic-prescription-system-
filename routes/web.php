@@ -92,6 +92,11 @@ Route::get('/patients/{patient}/documents', [PatientController::class, 'document
     Route::resource('invoices', InvoiceController::class);
 
     /* ---- Prescriptions ---- */
+    //  Route::get('prescriptions/{prescription}/pdf', [PrescriptionController::class, 'pdf'])->name('prescriptions.pdf');
+Route::get('/prescriptions/{prescription}/pdf-tcpdf', [PrescriptionController::class, 'pdfTcpdf'])
+    ->name('prescriptions.pdf.tcpdf');
+
+    //  Route::get('prescriptions/{prescription}/pdf', [PrescriptionController::class, 'pdf'])->name('prescriptions.pdf');
     Route::resource('prescriptions', PrescriptionController::class);
     // If you truly need a custom show, do:
     // Route::resource('prescriptions', PrescriptionController::class)->except('show');

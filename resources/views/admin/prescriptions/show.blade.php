@@ -5,6 +5,10 @@
     <div class="no-print flex items-center justify-between mb-4">
       <a href="{{ route('prescriptions.index') }}" class="text-blue-600 hover:underline">← Back to prescriptions</a>
       <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
+      <a href="{{ route('prescriptions.pdf.tcpdf', $prescription->id) }}" target="_blank"
+   class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+  Print as PDF (TCPDF)
+</a>
     </div>
 
     @php
@@ -300,8 +304,8 @@
                         </div>
                         @php
                           $parts = [];
-                          if(filled($m->pivot->times_per_day ?? null)) $parts[] = 'Times/day: '.$m->pivot->times_per_day;
-                          if(filled($m->pivot->duration ?? null))     $parts[] = 'Duration: '.$m->pivot->duration;
+                          if(filled($m->pivot->times_per_day ?? null)) $parts[] = ' '.$m->pivot->times_per_day;
+                          if(filled($m->pivot->duration ?? null))     $parts[] = ' '.$m->pivot->duration;
                         @endphp
                         @if(!empty($parts))
                           <div class="text-sm text-gray-600">{{ implode(' — ', $parts) }}</div>
@@ -316,7 +320,7 @@
             {{-- Doctor Advice --}}
             @if($hasAdvice)
               <div class="border rounded-lg p-4 mb-4">
-                <div class="font-semibold mb-2">Doctor Advice</div>
+                <u><div class="font-semibold mb-2">উপদেশ </div></u>
                 <div class="text-sm leading-6 whitespace-pre-wrap">{{ $prescription->doctor_advice }}</div>
               </div>
             @endif

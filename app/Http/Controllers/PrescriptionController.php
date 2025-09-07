@@ -10,6 +10,11 @@ use App\Models\Test;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+// use Barryvdh\DomPDF\Facade\Pdf;
+// use Illuminate\Http\Request;
+// TCPDF ships as \TCPDF
+use TCPDF;
+
 
 class PrescriptionController extends Controller
 {
@@ -188,6 +193,73 @@ class PrescriptionController extends Controller
         $prescription->load(['doctor','patient','medicines','tests']);
         return view('admin.prescriptions.show', compact('prescription'));
     }
+    
+ /** TCPDF version of the PDF */
+    public function pdfTcpdf(Request $request, Prescription $prescription)
+    {
+        $prescription->load(['doctor', 'patient', 'medicines', 'tests']);
+
+        // --- init tcpdf ---
+        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+        $pdf->SetCreator(config('app.name', 'Laravel'));
+        $pdf->SetAuthor(optional($prescription->doctor)->name ?? 'Doctor');
+        $pdf->SetTitle('Prescription #'.$prescription->id);
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // margins (L, T, R)
+        $pdf->SetMargins(12, 14, 12);
+        $pdf->SetAutoPageBreak(true, 16);
+
+        // Use DejaVu Sans (bundled) for robust Unicode (e.g., Bangla)
+        $pdf->SetFont('dejavusans', '', 10);
+
+        $pdf->AddPage();
+
+        // Render a simple, TCPDF-safe HTML view (no Tailwind / grid / flex)
+        $html = view('admin.prescriptions.pdf_tcpdf', [
+            'prescription' => $prescription,
+        ])->render();
+
+        $pdf->writeHTML($html, true, false, true, false, '');
+
+        // --- draw barcode (right-aligned near top of patient band) ---
+        $barcodeValue = 'RX-' . $prescription->id;
+
+        // Decide a safe spot; tweak Y as you like
+        // You can also move this below patient block if your HTML grows taller.
+        $x = $pdf->GetPageWidth() - $pdf->getMargins()['right'] - 60; // 60mm width for barcode cell
+        $y = 40; // mm from top
+        $w = 60;
+        $h = 16; // barcode height
+
+        $style = [
+            'position'      => '',
+            'align'         => 'R',
+            'stretch'       => false,
+            'fitwidth'      => true,
+            'cellfitalign'  => '',
+            'border'        => false,
+            'hpadding'      => 'auto',
+            'vpadding'      => 'auto',
+            'fgcolor'       => [0, 0, 0],
+            'bgcolor'       => false,
+            'text'          => true,     // show human-readable text under barcode
+            'font'          => 'dejavusans',
+            'fontsize'      => 8,
+            'stretchtext'   => 4
+        ];
+
+        $pdf->write1DBarcode($barcodeValue, 'C128', $x, $y, $w, $h, 0.4, $style, 'N');
+
+        $filename = 'prescription_' . $prescription->id . '.pdf';
+
+        // /prescriptions/{id}/pdf-tcpdf?download=1 to download, else stream
+        if ($request->boolean('download')) {
+            return $pdf->Output($filename, 'D'); // Download
+        }
+        return $pdf->Output($filename, 'I');     // Inline stream
+    }
 
     public function edit(Prescription $prescription)
     {
@@ -276,6 +348,8 @@ class PrescriptionController extends Controller
                     'phone' => $new['phone'] ?? null,
                     'email' => $new['email'] ?? null,
                     'notes' => $new['notes'] ?? null,
+                    'blood_group' => $new['blood_group'] ?? null,
+                    'guardian_name' => $new['guardian_name'] ?? null,
                 ]);
                 $patientId = $patient->id;
             }
