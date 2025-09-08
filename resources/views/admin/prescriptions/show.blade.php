@@ -1,14 +1,13 @@
 {{-- resources/views/prescriptions/show.blade.php --}}
 <x-app-layout>
-  <div class="container mx-auto py-6">
     {{-- Print / Back controls (hidden on print) --}}
-    <div class="no-print flex items-center justify-between mb-4">
+    <div class="no-print flex items-center justify-between px-2 py-2">
       <a href="{{ route('prescriptions.index') }}" class="text-blue-600 hover:underline">← Back to prescriptions</a>
-      <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
+      <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-2">Print</button>
        <a href="{{ route('prescriptions.pdf.tcpdf', $prescription->id) }}" target="_blank"
-   class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-  Print as PDF (TCPDF)
-</a>
+        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Print as PDF (TCPDF)
+      </a>
     </div>
 
     @php
@@ -65,7 +64,7 @@
       $showRxId = filled($prescription->id);
     @endphp
 
-    <div id="rx-paper" class="mx-auto bg-white shadow md:rounded-lg p-6 md:p-8 max-w-4xl">
+    <div id="rx-paper" class="mx-auto bg-white md:rounded-lg p-6 md:p-8 max-w-4xl">
 
       {{-- Letterhead --}}
       <div class="rx-keep flex items-start justify-between">
@@ -122,10 +121,10 @@
         $showContact = $phoneText || $emailText;
       @endphp
 
-      <section class="rx-keep mt-2 rounded-lg border bg-white">
-        <div class="p-2 grid grid-cols-1 md:grid-cols-3 gap-4 border rounded-lg bg-white rx-keep">
+      
+      <div class="rx-keep mt-2 rounded-lg border bg-white grid grid-cols-12 gap-6">
           {{-- LEFT: Name + Age/Gender + Contact --}}
-          <div class="min-w-[220px] space-y-1 text-sm">
+          <div class="col-span-12 md:col-span-4 space-y-1 text-sm">
             @if($showPatientName)
               <div>Patient Name: <span class="font-medium">{{ $pat->name }}</span></div>
             @endif
@@ -152,7 +151,7 @@
           </div>
 
           {{-- MIDDLE: IDs + misc --}}
-          <div class="text-sm space-y-1">
+          <div class="col-span-12 md:col-span-4 space-y-1 text-sm">
             @php
               $retText     = $prescription->return_date
                               ? \Illuminate\Support\Carbon::parse($prescription->return_date)->format('d-m-Y')
@@ -179,7 +178,7 @@
           </div>
 
           {{-- RIGHT: Date + Barcode --}}
-          <div class="text-sm text-left md:min-w-[200px] space-y-1">
+          <div class="col-span-12 md:col-span-4 space-y-1 text-sm">
             <div class="text-gray-500">Date:
               <span class="font-medium text-black">{{ $prescription->created_at->format('d-m-Y H:i') }}</span>
             </div>
@@ -194,8 +193,7 @@
               <div class="leading-none">{!! $barcodeSvg !!}</div>
             @endif
           </div>
-        </div>
-      </section>
+      </div>
 
       {{-- Body: LEFT = Problem, Clinical Findings, Other History, Previous Investigation, Tests. RIGHT = Medicines, Advice, Next Meeting Date, Referred To --}}
       <div class="mt-6 grid grid-cols-12 gap-6">
@@ -361,11 +359,10 @@
       </div>
 
       {{-- Footer (fixed at bottom for print) --}}
-      <div id="rx-footer" class="mt-6 text-center text-[11px] text-gray-500">
+      <div id="rx-footer" class="text-center text-[11px] text-gray-500">
         {{ config('clinic.footer', 'Thank you for visiting. For emergencies, please contact the clinic immediately.') }}
       </div>
     </div>
-  </div>
 
   {{-- PRINT CSS --}}
   <style>
@@ -374,7 +371,7 @@
     /* Control page size + margins (browser headers/footers OFF) */
     @page {
       size: A4 portrait;
-      margin: 14mm 12mm 20mm 12mm; /* top right bottom left */
+      margin: 14mm 12mm 10mm 12mm; /* top right bottom left */
     }
 
     html, body {
