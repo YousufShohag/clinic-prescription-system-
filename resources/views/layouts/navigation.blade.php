@@ -9,9 +9,10 @@
       {{-- LEFT: Logo + primary --}}
       <div class="flex items-center gap-6">
         {{-- Logo --}}
-        <a href="{{ route('dashboard') }}" class="flex items-center shrink-0">
-          <img src="{{ asset('logo.png') }}" alt="Logo" class="h-10 w-auto">
-        </a>
+      <a href="{{ route('dashboard') }}" class="flex items-center shrink-0">
+        <img src="{{ asset('logo.png') }}" alt="{{ config('app.name', 'Logo') }}"
+            class="block h-12 sm:h-14 md:h-16 lg:h-20 w-auto">
+      </a>
 
         {{-- Desktop primaries --}}
         <div class="hidden md:flex items-center gap-2">

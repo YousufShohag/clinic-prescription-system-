@@ -228,10 +228,10 @@ class PrescriptionController extends Controller
 
         // Decide a safe spot; tweak Y as you like
         // You can also move this below patient block if your HTML grows taller.
-        $x = $pdf->GetPageWidth() - $pdf->getMargins()['right'] - 60; // 60mm width for barcode cell
-        $y = 40; // mm from top
-        $w = 60;
-        $h = 16; // barcode height
+        $x = $pdf->GetPageWidth() - $pdf->getMargins()['right'] - 37; // 60mm width for barcode cell
+        $y = 50; // mm from top
+        $w = 38;
+        $h = 10; // barcode height
 
         $style = [
             'position'      => '',
@@ -244,7 +244,7 @@ class PrescriptionController extends Controller
             'vpadding'      => 'auto',
             'fgcolor'       => [0, 0, 0],
             'bgcolor'       => false,
-            'text'          => true,     // show human-readable text under barcode
+            'text'          => false,     // show human-readable text under barcode
             'font'          => 'dejavusans',
             'fontsize'      => 8,
             'stretchtext'   => 4

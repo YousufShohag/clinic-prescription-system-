@@ -5,6 +5,10 @@
     <div class="no-print flex items-center justify-between mb-4">
       <a href="{{ route('prescriptions.index') }}" class="text-blue-600 hover:underline">← Back to prescriptions</a>
       <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
+       <a href="{{ route('prescriptions.pdf.tcpdf', $prescription->id) }}" target="_blank"
+   class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+  Print as PDF (TCPDF)
+</a>
     </div>
 
     @php
