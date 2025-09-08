@@ -61,7 +61,7 @@
     .mt8 { margin-top: 8px; }
     .mt16 { margin-top: 16px; }
     .bold { font-weight: 700; }
-    .b { border: 1px solid #ddd; }
+    /* .b { border: 1px solid #ddd; } */
     .p8 { padding: 8px; }
     .p10 { padding: 10px; }
     .p12 { padding: 12px; }
@@ -192,11 +192,19 @@
 </table>
 
 
+<div class="mt16 small" style="text-align:right;">
+  <span class="muted" style="margin:0; padding:0; font-size:7px;">
+    Software Developed By: YoDuPa Limited Chattagram. Email: yodupa@gmail.com
+  </span>
+</div>
 
 
   {{-- Body --}}
+
   <table class="w-100 mt16">
+    
     <tr>
+     
       {{-- LEFT column --}}
       <td style="width:40%; padding-right:10px;">
 
@@ -218,22 +226,26 @@
 
 {{-- C/C (extra tight) --}}
 @php $ccLines = $hasProblem ? $toLines($prescription->problem_description ?? '') : []; @endphp
-@if(!empty($ccLines))
-  {{-- Pull the list up by shrinking the title's bottom margin --}}
-  <b><u><div class="section-title" style="margin: 0; padding:0; line-height:1;">C/C:</div></u></b>
+  @if(!empty($ccLines))
+    {{-- Pull the list up by shrinking the title's bottom margin --}}
+    <b><u><div class="section-title" style="margin: 0; padding:0; line-height:1;">C/C:</div></u></b>
 
-  <table role="presentation" style="width:100%; border-collapse:collapse; margin:-6px 0 0 0; ">
-    <tr >
-      <td ><ul class="small list-dot" style="margin:0; line-height:1.8; font-size:9px;">
-    @foreach($ccLines as $ln)
-      <li style="margin:0; padding:0; line-height:1.4; {{ !$loop->first ? 'margin-top:-3px;' : '' }}">
-        {{ $ln }}
-      </li>
-    @endforeach
-  </ul></td>
-    </tr>
-  </table>
-@endif
+    <table role="presentation" style="width:100%; border-collapse:collapse; margin:-6px 0 0 0; ">
+      <tr >
+        <td ><ul class="small list-dot" style="margin:0; line-height:1.8; font-size:9px;">
+      @foreach($ccLines as $ln)
+        <li style="margin:0; padding:0; line-height:1.4; {{ !$loop->first ? 'margin-top:-3px;' : '' }}">
+          {{ $ln }}
+        </li>
+      @endforeach
+    </ul></td>
+      </tr>
+    </table>
+  @endif
+
+
+
+
 
 
 
@@ -280,7 +292,7 @@
 
   {{-- Other History (each field: bullets per line) --}}
   @foreach($nonEmptyHistoryOthers as $field => $label)
-   <b><u><div class="section-title" style="margin: 0; padding:0; line-height:1;">{{ $label }}</div></u></b>
+   <b><u><div class="section-title" style="margin: 0; padding:0; line-height:1;">{{ $label }}:</div></u></b>
     {{-- <div class="section-title">{{ $label }}</div> --}}
     @php $histLines = $toLines($prescription->$field ?? ''); @endphp
     <table role="presentation" style="width:100%; border-collapse:collapse; margin:-6px 0 0 0; ">
@@ -297,103 +309,32 @@
       </tr>
     </table>
   @endforeach
-
   {{-- Previous Investigation --}}
-  @if($hasPrevInv)
-    <div class="section-title">Previous Investigation</div>
-    @php $piLines = $toLines($prescription->previous_investigation ?? ''); @endphp
-    @if($piLines)
-      <ul class="small list-dot mb12" style="padding-left:14px; margin:0; line-height:1.25;">
-        @foreach($piLines as $ln)
-          <li>{{ $ln }}</li>
-        @endforeach
-      </ul>
-    @endif
-  @endif
-
-  {{-- Patient Notes --}}
-  @if(filled($pat?->notes))
-    <div class="section-title">Patient Notes</div>
-    @php $pnLines = $toLines($pat->notes ?? ''); @endphp
-    @if($pnLines)
-      <ul class="small list-dot" style="padding-left:14px; margin:0; line-height:1.25;">
-        @foreach($pnLines as $ln)
-          <li>{{ $ln }}</li>
-        @endforeach
-      </ul>
-    @endif
-  @endif
-
-
-
-
-</td>
-
-
-      {{-- RIGHT column --}}
-      <td style="width:60%; padding-left:10px;">
-        <table class="w-100">
-          <tr>
-            <td style="width:100%;">
-              <div class="bold" style="font-size:18px; display:inline;">℞</div>
-              <span class="muted small">Medicines & Advice</span>
-            </td>
-          </tr>
-        </table>
-
-        {{-- Medicines --}}
-        @if($hasMeds)
-          <table class="w-100 b  ">
-            <tr><td><div class="bold mb6">Medicines</div></td></tr>
-            <tr>
-              <td>
-                <ul class="small" style="margin:0; padding:0; list-style-position:inside; line-height:1;">
-                @foreach($prescription->medicines as $m)
-                  @php
-                    $metaParts = [];
-                    if (filled($m->pivot->times_per_day ?? null)) $metaParts[] = $m->pivot->times_per_day;
-                    if (filled($m->pivot->duration ?? null))     $metaParts[] = 'Duration: '.$m->pivot->duration;
-                    $meta = implode(' — ', $metaParts);
-                  @endphp
-
-                  <li style="margin:0; padding:0; line-height:1;">
-                   @if(filled($m->type))
-                    <span class="muted">{{ mb_substr($m->type, 0, 3, 'UTF-8') }}</span>.
-                  @endif
-                  <span class="bold">{{ $m->name }}</span>
-                    @if(filled($m->strength)) <span class="muted"> - {{ $m->strength }}</span>@endif
-                    
-                    @if($meta)
-                      <div class="muted" style="margin:-2px 0 0 0; padding:0; line-height:1.2;">
-                        {{ $meta }}
-                      </div>
-                    @endif
-                  </li>
+@if($hasPrevInv)
+     @php $piLines = $toLines($prescription->previous_investigation ?? ''); @endphp
+      <b><u><div class="section-title" style="margin: 0; padding:0; line-height:1;">Previous Investigation</div></u></b>
+      <table  role="presentation" style="width:100%; border-collapse:collapse; margin:-6px 0 0 0; ">
+        <tr>
+          <td>
+            @if($piLines)
+      {{-- <b><u><div class="section-title" style="margin: 0; padding:0; line-height:1;">O/E:</div></u></b> --}}
+              {{-- <div class="small" style="margin:0 0 2px 0;"><span class="bold">O/E:</span></div> --}}
+              <ul class="small  " style="padding-left:10px; margin:0; line-height:1.25;">
+                @foreach($piLines as $ln)
+                  <li>{{ $ln }}</li>
                 @endforeach
-              </ul> 
-
-              </td>
-            </tr>
-          </table>
-        @endif
-
-
-           {{-- Patient Notes --}}
-  {{-- @if(filled($pat?->tests))
-    <div class="section-title">Investigation</div>
-    @php $pnLines = $toLines($pat->tests ?? ''); @endphp
-    @if($pnLines)
-      <ul class="small list-dot" style="padding-left:14px; margin:0; line-height:1.25;">
-        @foreach($pnLines as $ln)
-          <li>{{ $ln }}</li>
-        @endforeach
-      </ul>
+              </ul>
+            @endif
+          </td>
+        </tr>
+      </table>
     @endif
-  @endif --}}
-    {{-- Tests / Investigation --}}
+
+
+    {{--  Investigation/Tests --}}
 @if($hasTests)
-  <table class="w-100 b">
-    <tr><td><div class="bold mb6">Tests</div></td></tr>
+  <b><u><div class="section-title" style="margin:0; padding:0; line-height:1;">Investigation</div></u></b>
+  <table role="presentation" style="width:100%; border-collapse:collapse; margin:-6px 0 0 0;">
     <tr>
       <td>
         <ul class="small" style="margin:0; padding:0; list-style-position:inside; line-height:1.2;">
@@ -410,49 +351,111 @@
 
 
 
+  {{-- Patient Notes --}}
+  @if(filled($pat?->notes))
+    <div class="section-title">Patient Notes</div>
+    @php $pnLines = $toLines($pat->notes ?? ''); @endphp
+    @if($pnLines)
+      <ul class="small list-dot" style="padding-left:14px; margin:0; line-height:1.25;">
+        @foreach($pnLines as $ln)
+          <li>{{ $ln }}</li>
+        @endforeach
+      </ul>
+    @endif
+  @endif
+
+</td>
+
+
+      {{-- RIGHT column --}}
+      <td style="width:60%; padding-left:10px;  border-left:1px solid #999;">
+        <table class="w-100">
+          <tr>
+            <td style="width:100%;">
+              <div class="bold" style="font-size:18px; display:inline;">℞</div>
+             
+            </td>
+          </tr>
+        </table>
+
+        {{-- Medicines --}}
+        @if($hasMeds)
+  <table class="w-100 b">
+    <tr><td><div class="bold mb6 ">Medicines:</div></td></tr>
+    <tr>
+      <td>
+        <ol class="small" style="margin:0; padding:0; list-style-type:decimal; list-style-position:inside; line-height:1;">
+          @foreach($prescription->medicines as $m)
+            @php
+              $metaParts = [];
+              if (filled($m->pivot->times_per_day ?? null)) $metaParts[] = $m->pivot->times_per_day;
+              if (filled($m->pivot->duration ?? null))     $metaParts[] = 'Duration: '.$m->pivot->duration;
+              $meta = implode(' — ', $metaParts);
+            @endphp
+
+            <li style="margin:0; padding:0; line-height:1;">
+              @if(filled($m->type))
+                <span class="muted">{{ mb_substr($m->type, 0, 3, 'UTF-8') }}</span>.
+              @endif
+              <span class="bold">{{ $m->name }}</span>
+              @if(filled($m->strength)) <span class="muted"> - {{ $m->strength }}</span>@endif
+
+              @if($meta)
+                <div class="muted" style="margin:-2px 0 0 0; padding:0; line-height:1.2;">
+                  {{ $meta }}
+                </div>
+              @endif
+            </li>
+          @endforeach
+        </ol>
+      </td>
+    </tr>
+  </table>
+@endif
         {{-- Doctor Advice --}}
        @if($hasAdvice)
-        @php $advLines = $toLines($prescription->doctor_advice ?? ''); @endphp
-        @if(!empty($advLines))
-          <table class="w-100 b ">
-            <tr><td><div class="bold mb6">Advice</div></td></tr>
-            
-            <tr>
-              <td>
-                <ul class="small" style="margin:0; padding:0; list-style-position:inside; line-height:1.4;">
-                  @foreach($advLines as $ln)
-                    <li style="margin:0; padding:0; line-height:1.3;">{{ $ln }}</li>
-                    
-                  @endforeach
-                </ul>
-              </td>
-            </tr>
-          </table>
-        @endif
-      @endif
+  @php $advLines = $toLines($prescription->doctor_advice ?? ''); @endphp
+  @if(!empty($advLines))
+    <table class="w-100 b">
+      <tr><td><div class="bold mb6">Advice:</div></td></tr>
+      <tr>
+        <td>
+          <ul class="small" style="margin:0; padding:0; list-style-type:none; list-style-position:inside; line-height:1.4;">
+            @foreach($advLines as $ln)
+              <li style="margin:0; padding:0; line-height:1.3;">
+                <span aria-hidden="true" style="margin-right:3px;">&#10148;</span> {{-- → --}}
+                {{ $ln }}
+              </li>
+            @endforeach
+          </ul>
+        </td>
+      </tr>
+    </table>
+  @endif
+@endif
+
 
 
         {{-- Next Meeting Date --}}
         @if($hasReturn)
-          <table class="w-100 b p10 mb12">
-            <tr><td><div class="bold mb6">Next Meeting Date</div></td></tr>
-            <tr><td class="small" style="line-height:1.5;">{{ Carbon::parse($prescription->return_date)->format('d/m/Y') }}</td></tr>
+          <table class="w-100 b " style="padding-top: 40px;">
+            <tr><td><div class="bold ">Next Meeting Date: <span class="small" style="line-height:1.5;"> {{ Carbon::parse($prescription->return_date)->format('d/m/Y') }}</span></div></td></tr>
           </table>
         @endif
 
         {{-- Referred To --}}
         @if($hasReferred)
-          <table class="w-100 b p10">
-            <tr><td><div class="bold mb6">Referred To</div></td></tr>
+          <table class="w-100 b ">
+            <tr><td><div class="bold ">Referred To:</div></td></tr>
             <tr><td class="small" style="line-height:1.5;">{{ $prescription->referred_to }}</td></tr>
           </table>
         @endif
 
         {{-- Signature --}}
-        <table class="w-100 mt16">
+        <table class="w-100 " style="padding-top: 40px;">
           <tr>
-            <td style="width:50%;">&nbsp;</td>
-            <td style="width:50%; text-align:right;">
+            <td style="width:20%;">&nbsp;</td>
+            <td style="width:70%; text-align:right;">
               <div style="border-top:1px solid #999; padding-top:4px;" class="small">
                 {{ $doc->name ?? '' }}<br>
                 @if(filled($doc?->specialization))
@@ -468,9 +471,9 @@
   </table>
 
   {{-- Footer --}}
-  <div class="text-center mt16 small muted">
+  {{-- <div class="text-center mt16 small muted">
     {{ config('clinic.footer', 'Thank you for visiting. For emergencies, please contact the clinic immediately.') }}
-  </div>
+  </div> --}}
 
 </body>
 </html>
