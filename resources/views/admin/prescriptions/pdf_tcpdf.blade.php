@@ -414,25 +414,25 @@
 @endif
         {{-- Doctor Advice --}}
        @if($hasAdvice)
-  @php $advLines = $toLines($prescription->doctor_advice ?? ''); @endphp
-  @if(!empty($advLines))
-    <table class="w-100 b">
-      <tr><td><div class="bold mb6">Advice:</div></td></tr>
-      <tr>
-        <td>
-          <ul class="small" style="margin:0; padding:0; list-style-type:none; list-style-position:inside; line-height:1.4;">
-            @foreach($advLines as $ln)
-              <li style="margin:0; padding:0; line-height:1.3;">
-                <span aria-hidden="true" style="margin-right:3px;">&#10148;</span> {{-- → --}}
-                {{ $ln }}
-              </li>
-            @endforeach
-          </ul>
-        </td>
-      </tr>
-    </table>
-  @endif
-@endif
+        @php $advLines = $toLines($prescription->doctor_advice ?? ''); @endphp
+        @if(!empty($advLines))
+          <table class="w-100 b"  >
+            <tr><td><div class="bold mb6">Advice:</div></td></tr>
+            <tr>
+              <td>
+                <ul class="small" style="margin:0; padding:0; list-style-type:none; list-style-position:inside; line-height:1.4;">
+                  @foreach($advLines as $ln)
+                    <li style="margin:0; padding:0; line-height:1.3;">
+                      <span aria-hidden="true" style="margin-right:3px;">&#10148;</span> {{-- → --}}
+                      {{ $ln }}
+                    </li>
+                  @endforeach
+                </ul>
+              </td>
+            </tr>
+          </table>
+        @endif
+      @endif
 
 
 
