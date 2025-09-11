@@ -41,4 +41,27 @@ class Medicine extends Model
     }
 
 
+    // optional: include it automatically in JSON
+    protected $appends = ['type_prefix'];
+
+    public function getTypePrefixAttribute(): string
+    {
+        $map = [
+            'tablet'     => 'Tab.',
+            'tab'        => 'Tab.',
+            'capsule'    => 'Cap.',
+            'cap'        => 'Cap.',
+            'syrup'      => 'Syr.',
+            'suspension' => 'Susp.',
+            'drop'       => 'Drop',
+            'injection'  => 'Inj.',
+            'inj'        => 'Inj.',
+            'cream'      => 'Cr.',
+            'ointment'   => 'Oint.',
+            'gel'        => 'Gel',
+        ];
+        return $map[strtolower($this->type ?? '')] ?? '';
+    }
+
+
 }

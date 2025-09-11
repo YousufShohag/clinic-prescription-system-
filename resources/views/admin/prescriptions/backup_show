@@ -1,28 +1,27 @@
 {{-- resources/views/prescriptions/show.blade.php --}}
-@if(empty($pdf))
 <x-app-layout>
-@endif
   <div class="container mx-auto py-6">
-     @if(empty($pdf)) 
     {{-- Print / Back controls (hidden on print) --}}
     <div class="no-print flex items-center justify-between mb-4">
       <a href="{{ route('prescriptions.index') }}" class="text-blue-600 hover:underline">← Back to prescriptions</a>
-       <div class="space-x-2">
-        <a href="{{ route('prescriptions.pdf', $prescription->id) }}" target="_blank" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Print as PDF</a>
-        <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
-      </div>
+      <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
+       <a href="{{ route('prescriptions.pdf.tcpdf', $prescription->id) }}" target="_blank"
+   class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+  Print as PDF (TCPDF)
+</a>
     </div>
-    @endif
 
     @php
       $doc = $prescription->doctor ?? null;
       $pat = $prescription->patient ?? null;
 
+      // O/E + vitals flags
       $hasOE = filled($prescription->oe);
       $hasVitals = filled($prescription->bp) || filled($prescription->pulse) || filled($prescription->temperature_c)
         || filled($prescription->spo2) || filled($prescription->respiratory_rate)
         || filled($prescription->weight_kg) || filled($prescription->height_cm) || filled($prescription->bmi);
 
+      // History fields
       $historyMap = [
         'ph' => 'P/H', 'dh' => 'D/H', 'mh' => 'M/H', 'oh' => 'OH',
         'pae' => 'P/A/E', 'dx' => 'DX',
@@ -32,25 +31,37 @@
       ];
       $nonEmptyHistory = collect($historyMap)->filter(fn($label, $field) => filled(trim((string)($prescription->$field ?? ''))));
 
+      // We will render these separately
       $hasPrevInv  = filled(trim((string)($prescription->previous_investigation ?? '')));
       $hasReferred = filled(trim((string)($prescription->referred_to ?? '')));
+
+      // Other history excludes prev_inv & referred_to
       $nonEmptyHistoryOthers = $nonEmptyHistory->except(['previous_investigation','referred_to']);
 
+      // Problem / Advice / Return
       $hasProblem = filled($prescription->problem_description);
       $hasAdvice  = filled($prescription->doctor_advice);
       $hasReturn  = filled($prescription->return_date);
 
+      // Medicines / Tests
       $hasMeds  = isset($prescription->medicines) && $prescription->medicines->isNotEmpty();
       $hasTests = isset($prescription->tests) && $prescription->tests->isNotEmpty();
 
+      // Right side shows if any of these exist (tests are on the left now)
       $showRightCol = $hasMeds || $hasAdvice || $hasReferred || $hasReturn;
 
+      // Doctor header bits
       $showDocName = filled($doc?->name);
       $showDegree  = filled($doc?->degree);
       $showSpec    = filled($doc?->specialization);
       $showBMDC    = filled($doc?->bma_registration_number);
 
+      // Patient bar bits
       $showPatientName = filled($pat?->name);
+      $showAgeGender   = filled($pat?->age) || filled($pat?->sex);
+      $showContact     = filled($pat?->phone) || filled($pat?->email);
+
+      // QR/signature and header ID only when there is an ID
       $showRxId = filled($prescription->id);
     @endphp
 
@@ -83,6 +94,12 @@
             {{ config('clinic.phone', 'Phone for Appointment: 01xxxxxxxxx') }} <br>
             {{ config('clinic.available', 'Satuerday-Friday (07.00 PM - 10.00 PM) ') }}
           </div>
+          {{-- Optional header meta
+          @if($showRxId)
+            <div class="text-xs text-gray-500 mt-1">Prescription #{{ $prescription->id }}</div>
+          @endif
+          <div class="text-xs text-gray-500">Date: {{ $prescription->created_at->format('d M Y, h:i A') }}</div>
+          --}}
         </div>
       </div>
 
@@ -106,7 +123,7 @@
       @endphp
 
       <section class="rx-keep mt-2 rounded-lg border bg-white">
-        <div class="patient-band p-2 grid grid-cols-1 md:grid-cols-3 gap-4 border rounded-lg bg-white rx-keep">
+        <div id="patient-bar" class="p-2 grid grid-cols-1 md:grid-cols-3 gap-4 border rounded-lg bg-white rx-keep">
           {{-- LEFT: Name + Age/Gender + Contact --}}
           <div class="min-w-[220px] space-y-1 text-sm">
             @if($showPatientName)
@@ -127,7 +144,11 @@
             @if($phoneText)
               <div>Phone: <span class="font-medium">{{ $phoneText }}</span></div>
             @endif
-            {{-- @if($emailText) <div>Email: <span class="font-medium">{{ $emailText }}</span></div> @endif --}}
+            {{-- If you want to show email too, uncomment:
+            @if($emailText)
+              <div>Email: <span class="font-medium">{{ $emailText }}</span></div>
+            @endif
+            --}}
           </div>
 
           {{-- MIDDLE: IDs + misc --}}
@@ -152,9 +173,9 @@
               <div>Guardian: <span class="font-medium">{{ $guardianText }}</span></div>
             @endif
 
-            @if($nextRetText && (!$retText || $nextRetText !== $retText))
+            {{-- @if($nextRetText && (!$retText || $nextRetText !== $retText))
               <div class="text-gray-600">Next Visit (Patient): <span class="font-medium text-black">{{ $nextRetText }}</span></div>
-            @endif
+            @endif --}}
           </div>
 
           {{-- RIGHT: Date + Barcode --}}
@@ -167,16 +188,17 @@
               @php
                 $barcodeValue = "RX-{$prescription->id}";
                 $dns = new Milon\Barcode\DNS1D();
+                // $dns->setStorPath(storage_path('framework/barcodes')); // optional
                 $barcodeSvg = $dns->getBarcodeSVG($barcodeValue, 'C128', 1.8, 40, 'black', true);
               @endphp
-              <div class="leading-none barcode-wrap">{!! $barcodeSvg !!}</div>
+              <div class="leading-none">{!! $barcodeSvg !!}</div>
             @endif
           </div>
         </div>
       </section>
 
       {{-- Body: LEFT = Problem, Clinical Findings, Other History, Previous Investigation, Tests. RIGHT = Medicines, Advice, Next Meeting Date, Referred To --}}
-      <div class="mt-6 grid grid-cols-12 gap-6">
+      <div id="rx-body" class="mt-6 grid grid-cols-12 gap-6">
         {{-- LEFT column --}}
         <div class="col-span-12 md:col-span-4">
           {{-- Problem --}}
@@ -194,7 +216,7 @@
 
               @if($hasOE)
                 <div class="text-sm leading-6 mb-2">
-                  <span class="font-medium">O/E:</span>
+                  <span class="font-medium">O/E:</span><br>
                   <span class="text-gray-700 whitespace-pre-wrap">{{ $prescription->oe }}</span>
                 </div>
               @endif
@@ -338,81 +360,138 @@
         @endif
       </div>
 
-      {{-- Footer --}}
+      {{-- Footer (fixed at bottom for print) --}}
       <div id="rx-footer" class="mt-6 text-center text-[11px] text-gray-500">
         {{ config('clinic.footer', 'Thank you for visiting. For emergencies, please contact the clinic immediately.') }}
       </div>
     </div>
   </div>
 
-  {{-- PRINT CSS: force patient band to look EXACTLY like screen (3 columns), and keep layout stable --}}
+  {{-- PRINT CSS --}}
   <style>
+  /* HARDENED A4 PRINT RULES */
   @media print {
-    @page { size: A4 portrait; margin: 14mm 12mm 20mm 12mm; }
+  @page { size: A4 portrait; margin: 1mm 1mm 1mm 1mm; }
 
-    html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-      background: #fff !important;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .no-print { display: none !important; }
-
-    /* Keep the same card look; you can remove shadow/radius if you prefer flatter print */
-    #rx-paper{
-      /* width: calc(210mm - 24mm) !important; */
-      max-width: none !important;
-      margin: 0 auto !important;
-      background: #fff !important;
-      padding: 20px 18px !important;
-      border: none !important;
-      border-radius: 8px !important;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05) !important;
-    }
-
-    /* >>> FORCE the same grid behavior as screen for patient band <<< */
-    .patient-band { display: grid !important; align-items: start !important; gap: 1rem !important; }
-    /* print should behave like >=md */
-    .patient-band.grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-
-    /* Ensure generic tailwind grid utilities still apply in print */
-    .grid{ display:grid !important; }
-    .grid-cols-12{ grid-template-columns:repeat(12,minmax(0,1fr)) !important; }
-    .gap-6{ gap:1.5rem !important; }
-    .md\:col-span-4{ grid-column:span 4 / span 4 !important; }
-    .md\:col-span-8{ grid-column:span 8 / span 8 !important; }
-
-    /* Keep important blocks intact across page breaks */
-    .rx-keep,
-    .border, .rounded-lg,
-    .p-2, .p-4, .p-6, .p-8,
-    ul, li, table, thead, tr, img, svg {
-      break-inside: avoid !important;
-      page-break-inside: avoid !important;
-    }
-    thead { display: table-header-group !important; }
-
-    /* Barcode sizing so it never pushes layout */
-    .barcode-wrap svg { max-width: 100% !important; height: 40px !important; }
-
-    /* Footer stays in normal flow (more robust if content grows) */
-    #rx-footer{
-      position: static !important;
-      margin-top: 12px !important;
-      text-align: center;
-      font-size: 11px;
-      color: #6b7280;
-    }
-
-    /* Paper-friendly typography */
-    body { font-size: 12pt !important; line-height: 1.35 !important; }
-    h1,h2,h3,.text-2xl,.text-xl { break-after: avoid !important; }
-  svg { width: auto; height: auto; }
+  html, body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
-  </style>
 
-@if(empty($pdf))
+  /* --- Patient bar: lock to one horizontal row with 3 columns on print --- */
+#patient-bar{
+  display: flex !important;
+  flex-wrap: nowrap !important;       /* keep all three blocks on the same row */
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 8mm !important;
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+  padding: 6px 8px !important;
+}
+
+/* Column widths: 40% | 30% | 30% (matches your screenshot) */
+#patient-bar > div:nth-child(1){ flex: 0 0 30% !important; min-width: 0 !important; }
+#patient-bar > div:nth-child(2){ flex: 0 0 30% !important; min-width: 0 !important; }
+#patient-bar > div:nth-child(3){ flex: 0 0 20% !important; min-width: 0 !important; }
+
+/* Keep field labels + values tidy */
+#patient-bar > div > div{
+  display: block !important;
+  white-space: nowrap !important;     /* avoid mid-line wraps like 'Age / Gender' */
+  line-height: 1.25 !important;
+  margin-bottom: 2px !important;
+}
+
+/* Date + barcode compact, aligned right like the image */
+#patient-bar > div:nth-child(3){
+  text-align: right !important;
+}
+#patient-bar svg{
+  height: 26px !important;            /* adjust if you want bigger/smaller */
+  width: auto !important;
+  display: inline-block !important;
+  margin-top: 2px !important;
+}
+
+/* Slightly smaller type so the whole row fits neatly */
+#patient-bar, #patient-bar *{
+  font-size: 9.5pt !important;
+}
+
+
+  .no-print { display: none !important; }
+
+  /* Paper container: no min-height, no positioning quirks */
+  #rx-paper{
+    max-width: calc(210mm - 20mm) !important; /* 10+10mm page side margins */
+    width: 100% !important;
+    margin: 0 auto !important;
+    background: #fff !important;
+    padding: 12mm 10mm !important; /* inner gutter so it breathes */
+
+    border-radius: 6px !important;          /* keeps your nice rounded look */
+    box-shadow: 0 0 0 rgba(0,0,0,0) !important;  /* drop shadow not needed on print */
+    border: 1px solid #e5e7eb !important;   /* subtle outline */
+
+    position: static !important;
+    overflow: visible !important;
+  }
+
+  /* Header & patient bar should not split */
+  .rx-keep, thead, img, svg {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* ===== Two-column PRINT layout (robust for pagination) ===== */
+  /* Use flex for print (Grid sometimes refuses to break rows) */
+  #rx-body{
+    display: flex !important;
+    gap: 10mm !important;
+  }
+  /* left = ~38%, right = ~62% like your screenshot */
+  #rx-body > .md\:col-span-4 { width: 38% !important; }
+  #rx-body > .md\:col-span-8 { width: 62% !important; }
+
+  /* If the right column is absent, left takes full width */
+  #rx-body > :only-child { width: 100% !important; }
+
+  /* Allow cards/lists to break normally (prevents big white gaps) */
+  /* (Do NOT blanket-avoid breaks on .border/.p- classes) */
+
+  /* Tighter cards for Medicines/Advice look */
+  .border { border-color: #e5e7eb !important; }
+  .rounded-lg { border-radius: 8px !important; }
+  .p-4 { padding: 10px !important; }
+  .mb-4 { margin-bottom: 8px !important; }
+
+  /* Typography sizing tuned to match your sample */
+  body { font-size: 11pt !important; line-height: 1.35 !important; }
+  .text-sm { font-size: 10pt !important; }
+  .text-xs { font-size: 9pt  !important; }
+  .text-2xl { font-size: 16pt !important; font-weight: 700 !important; }
+  .font-semibold, .font-medium { font-weight: 600 !important; }
+  .uppercase { letter-spacing: .06em !important; }
+
+  /* Barcode: keep compact */
+  svg { height: 28px !important; width: auto !important; }
+
+  /* Footer: flow after content (no fixed position) */
+  #rx-footer{
+    position: static !important;
+    margin-top: 6mm !important;
+    text-align: center !important;
+    font-size: 9pt !important;
+    color: #6b7280 !important;
+  }
+
+  /* Avoid widows/orphans on titles */
+  h1,h2,h3,.text-xl,.text-2xl { break-after: avoid !important; }
+}
+
+  </style>
 </x-app-layout>
-@endif

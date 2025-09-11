@@ -16,6 +16,7 @@ use App\Http\Controllers\{
     CustomerController,
     AppointmentController,
     CalenderController,
+    PrescriptionPdfController,
 
 };
 
@@ -92,6 +93,25 @@ Route::get('/patients/{patient}/documents', [PatientController::class, 'document
     Route::resource('invoices', InvoiceController::class);
 
     /* ---- Prescriptions ---- */
+
+
+
+    
+Route::get('/prescriptions/{prescription}/pdf-mpdf', [PrescriptionPdfController::class, 'mpdf'])
+    ->name('prescriptions.pdf.mpdf');
+
+    // Route::get('/prescriptions/{prescription}/pdf', [PrescriptionPdfController::class, 'mpdf'])
+    // ->name('prescriptions.pdf'); 
+
+Route::get('/prescriptions/{prescription}/pdf/download', [PrescriptionPdfController::class, 'download'])
+    ->name('prescriptions.pdf.download') // new: forces download
+    ->middleware('signed'); // important for tamper-proof links
+
+//     Route::get(
+//     '/prescriptions/{prescription}/pdf-mpdf',
+//     [PrescriptionPdfController::class, 'mpdf']
+// )->name('prescriptions.pdf.mpdf');
+
     //  Route::get('prescriptions/{prescription}/pdf', [PrescriptionController::class, 'pdf'])->name('prescriptions.pdf');
 Route::get('/prescriptions/{prescription}/pdf-tcpdf', [PrescriptionController::class, 'pdfTcpdf'])
     ->name('prescriptions.pdf.tcpdf');

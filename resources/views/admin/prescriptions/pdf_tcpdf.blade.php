@@ -78,6 +78,13 @@
    .ul-nopad { margin:0; padding:0; list-style-position:inside; }
   .ul-nopad li { margin:0; padding:0; line-height:1; }
  
+
+
+
+
+
+
+
   </style>
 </head>
 <body>
@@ -416,7 +423,7 @@
        @if($hasAdvice)
         @php $advLines = $toLines($prescription->doctor_advice ?? ''); @endphp
         @if(!empty($advLines))
-          <table class="w-100 b"  >
+          <table class="w-100 b">
             <tr><td><div class="bold mb6">Advice:</div></td></tr>
             <tr>
               <td>

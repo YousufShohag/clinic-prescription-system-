@@ -1,15 +1,24 @@
 {{-- resources/views/prescriptions/show.blade.php --}}
 <x-app-layout>
-  <div class="container mx-auto py-6">
+  <div class="container mx-auto  ">
     {{-- Print / Back controls (hidden on print) --}}
-    <div class="no-print flex items-center justify-between mb-4">
+    <div class="no-print flex items-center justify-between mb-4 py-4">
       <a href="{{ route('prescriptions.index') }}" class="text-blue-600 hover:underline">← Back to prescriptions</a>
       <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
        <a href="{{ route('prescriptions.pdf.tcpdf', $prescription->id) }}" target="_blank"
-   class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-  Print as PDF (TCPDF)
+      class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+      Print as PDF (TCPDF)
+    </a>
+    <a href="{{ route('prescriptions.pdf.mpdf', $prescription->id) }}" target="_blank"
+   class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+  Print as PDF (mPDF)
 </a>
+
+
+
     </div>
+
+    
 
     @php
       $doc = $prescription->doctor ?? null;
@@ -103,7 +112,7 @@
         </div>
       </div>
 
-      <hr class="my-2 border-gray-300 rx-keep">
+      {{-- <hr class="my-2 border-gray-300 rx-keep"> --}}
 
       {{-- ================= Patient Header (no image) ================= --}}
       @php
@@ -122,8 +131,8 @@
         $showContact = $phoneText || $emailText;
       @endphp
 
-      <section class="rx-keep mt-2 rounded-lg border bg-white">
-        <div class="p-2 grid grid-cols-1 md:grid-cols-3 gap-4 border rounded-lg bg-white rx-keep">
+      <section class="rx-keep bg-white" style="border:1.5px solid;">
+        <div id="patient-bar" class="p-2 grid grid-cols-1 md:grid-cols-3 gap-4   bg-white rx-keep">
           {{-- LEFT: Name + Age/Gender + Contact --}}
           <div class="min-w-[220px] space-y-1 text-sm">
             @if($showPatientName)
@@ -196,28 +205,28 @@
           </div>
         </div>
       </section>
-
+<div style=" font-size:10px;" class=" text-right">Software Developed By: YoDuPa Limited Chattagram. Email: yodupa@gmail.com</div>
       {{-- Body: LEFT = Problem, Clinical Findings, Other History, Previous Investigation, Tests. RIGHT = Medicines, Advice, Next Meeting Date, Referred To --}}
-      <div class="mt-6 grid grid-cols-12 gap-6">
+      <div id="rx-body" class="mt-4 grid grid-cols-12 gap-6">
         {{-- LEFT column --}}
         <div class="col-span-12 md:col-span-4">
           {{-- Problem --}}
           @if($hasProblem)
-            <div class="mb-4">
-              <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">C/C</div>
-              <div class="text-sm leading-6 whitespace-pre-wrap">{{ $prescription->problem_description }}</div>
+            <div class="text-sm">
+             <div class="font-medium "><b><u>C/C:</u></b></div>
+              <div class="text-sm  whitespace-pre-wrap">{{ $prescription->problem_description }}</div>
             </div>
           @endif
 
           {{-- Clinical Findings --}}
           @if($hasOE || $hasVitals)
-            <div class="mb-4">
-              <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">Clinical Findings</div>
+            <div class="mb-2">
+              {{-- <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">Clinical Findings</div> --}}
 
               @if($hasOE)
-                <div class="text-sm leading-6 mb-2">
-                  <span class="font-medium">O/E:</span><br>
-                  <span class="text-gray-700 whitespace-pre-wrap">{{ $prescription->oe }}</span>
+                <div class="text-sm ">
+                   <div class="font-medium "><b><u>O/E:</u></b></div>
+                  <span class="text-sm  whitespace-pre-wrap">{{ $prescription->oe }}</span>
                 </div>
               @endif
 
@@ -238,30 +247,32 @@
 
           {{-- Other history (except Previous Investigation & Referred To) --}}
           @foreach($nonEmptyHistoryOthers as $field => $label)
-            <div class="mb-2">
-              <div class="uppercase tracking-wide text-[11px] text-gray-500 mb-0.5">{{ $label }}</div>
-              <div class="text-[13px] leading-5 whitespace-pre-wrap">{{ $prescription->$field }}</div>
+            <div class="mb-1">
+              <div class="font-medium"><b><u>{{ $label .':' }}</u></b></div>
+              <div class="text-sm  whitespace-pre-wrap">{{ $prescription->$field }}</div>
             </div>
           @endforeach
 
           {{-- Previous Investigation (LEFT) --}}
           @if($hasPrevInv)
             <div class="mb-4">
-              <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">Previous Investigation</div>
-              <div class="text-sm leading-6 whitespace-pre-wrap">{{ $prescription->previous_investigation }}</div>
+              <div class="font-medium"><b><u>Previous Investigation</u></b></div>
+              {{-- <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">Previous Investigation</div> --}}
+              <div class="text-sm  whitespace-pre-wrap">{{ $prescription->previous_investigation }}</div>
             </div>
           @endif
 
           {{-- Tests (LEFT) --}}
           @if($hasTests)
             <div class="mb-4">
-              <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">Investigation</div>
-              <ul class="space-y-2">
+              <div class="font-medium"><b><u>Investigation</u></b></div>
+              {{-- <div class="uppercase tracking-wider text-xs text-gray-500 mb-1">Investigation</div> --}}
+              <ul class="">
                 @foreach($prescription->tests as $t)
                   <li class="flex items-start">
                     <div class="mr-1">•</div>
                     <div class="flex-1">
-                      <div class="text-sm leading-6 whitespace-pre-wrap">{{ $t->name }}</div>
+                      <div class="text-sm  whitespace-pre-wrap">{{ $t->name }}</div>
                     </div>
                   </li>
                 @endforeach
@@ -280,23 +291,22 @@
 
         {{-- RIGHT column: Medicines, Advice, Next Meeting Date, Referred To --}}
         @if($showRightCol)
-          <div class="col-span-12 md:col-span-8">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="text-2xl font-extrabold">℞</div>
-              <div class="text-sm text-gray-500">Medicines & Advice</div>
+          <div class="col-span-12 md:col-span-8" style="border-left:1px solid;">
+            <div class="flex items-center gap-2 ">
+              <div class="text-2xl font-extrabold" style="padding-left: 10px;">℞</div>
+              {{-- <div class="text-sm text-gray-500">Medicines & Advice</div> --}}
             </div>
 
             {{-- Medicines --}}
             @if($hasMeds)
-              <div class="border rounded-lg p-4 mb-4">
+              <div class="rounded-lg mb-4" style="padding-left: 25px;">
                 <div class="font-semibold mb-2">Medicines</div>
-                <ul class="space-y-2">
+                <ol class="list-decimal space-y-2 pl-5">
                   @foreach($prescription->medicines as $m)
-                    <li class="flex items-start">
-                      <div class="mt-1 mr-2">•</div>
+                    <li>
                       <div class="flex-1">
                         <div class="font-medium">
-                          <span class="text-sm text-gray-600">{{ $m->type }}</span>.
+                          <span class="text-sm">{{ Str::substr($m->type, 0, 3) }}</span>.
                           {{ $m->name }}
                           @if(filled($m->strength))
                             - <span class="text-sm text-gray-600">{{ $m->strength }}</span>
@@ -304,8 +314,8 @@
                         </div>
                         @php
                           $parts = [];
-                          if(filled($m->pivot->times_per_day ?? null)) $parts[] = 'Times/day: '.$m->pivot->times_per_day;
-                          if(filled($m->pivot->duration ?? null))     $parts[] = 'Duration: '.$m->pivot->duration;
+                          if(filled($m->pivot->times_per_day ?? null)) $parts[] = ''.$m->pivot->times_per_day;
+                          if(filled($m->pivot->duration ?? null))     $parts[] = ' '.$m->pivot->duration;
                         @endphp
                         @if(!empty($parts))
                           <div class="text-sm text-gray-600">{{ implode(' — ', $parts) }}</div>
@@ -313,38 +323,39 @@
                       </div>
                     </li>
                   @endforeach
-                </ul>
+                </ol>
               </div>
+
             @endif
 
             {{-- Doctor Advice --}}
             @if($hasAdvice)
-              <div class="border rounded-lg p-4 mb-4">
-                <div class="font-semibold mb-2">Doctor Advice</div>
-                <div class="text-sm leading-6 whitespace-pre-wrap">{{ $prescription->doctor_advice }}</div>
+              <div class=" rounded-lg pl-6 mb-2">
+                <div class="font-semibold ">Doctor Advice</div>
+                <div class="text-sm whitespace-pre-wrap">{{ $prescription->doctor_advice }}</div>
               </div>
             @endif
 
             {{-- Next Meeting Date --}}
             @if($hasReturn)
-              <div class="border rounded-lg p-4 mb-4">
-                <div class="font-semibold mb-2">Next Meeting Date</div>
-                <div class="text-sm leading-6">
+              <div class=" rounded-lg pl-4 mb-1">
+                <div class="font-semibold ">Next Meeting Date: {{ \Carbon\Carbon::parse($prescription->return_date)->format('d/m/Y') }}</div>
+                {{-- <div class="text-sm leading-6">
                   {{ \Carbon\Carbon::parse($prescription->return_date)->format('d/m/Y') }}
-                </div>
+                </div> --}}
               </div>
             @endif
 
             {{-- Referred To --}}
             @if($hasReferred)
-              <div class="border rounded-lg p-4">
-                <div class="font-semibold mb-2">Referred To</div>
+              <div class=" rounded-lg pl-4">
+                <div class="font-semibold ">Referred To</div>
                 <div class="text-sm leading-6 whitespace-pre-wrap">{{ $prescription->referred_to }}</div>
               </div>
             @endif
 
             {{-- Signature --}}
-            <div class="rx-keep mt-10 grid grid-cols-2 gap-8 items-end">
+            <div class="rx-keep mt-9 grid grid-cols-2 gap-8 items-end">
               <div class="text-left"></div>
               <div class="text-right">
                 <div class="h-12"></div>
@@ -362,7 +373,7 @@
 
       {{-- Footer (fixed at bottom for print) --}}
       <div id="rx-footer" class="mt-6 text-center text-[11px] text-gray-500">
-        {{ config('clinic.footer', 'Thank you for visiting. For emergencies, please contact the clinic immediately.') }}
+        <span>Thank you for visiting. For emergencies, please contact the clinic immediately</span>     
       </div>
     </div>
   </div>
@@ -371,77 +382,144 @@
   <style>
   /* HARDENED A4 PRINT RULES */
   @media print {
-    /* Control page size + margins (browser headers/footers OFF) */
-    @page {
-      size: A4 portrait;
-      margin: 14mm 12mm 20mm 12mm; /* top right bottom left */
-    }
+  @page { size: A4 portrait; margin: 0mm 0mm 0mm 0mm; }
 
-    html, body {
-      background: #fff !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .no-print { display: none !important; }
-
-    /* Lock the sheet to the remaining area inside @page margins */
-    #rx-paper{
-      /* Total A4: 210 × 297mm. Subtract our @page margins */
-      max-width: calc(210mm - (12mm + 12mm)) !important;
-      min-height: calc(297mm - (14mm + 20mm)) !important;
-
-      width: 100% !important;
-      margin: 0 auto !important;
-      background: #fff !important;
-
-      /* inner padding so content doesn’t slam into edges */
-      padding: 20px 18px !important; /* ~5–6mm visual padding */
-
-      /* rounded + shadow will print because of color-adjust above */
-      border-radius: 8px !important;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05) !important;
-
-      border: none !important;
-      position: relative !important;
-      overflow: visible !important;
-    }
-
-    /* Ensure responsive grid works in print */
-    .grid{ display: grid !important; }
-    .grid-cols-12{ grid-template-columns: repeat(12, minmax(0, 1fr)) !important; }
-    .gap-6{ gap: 1.5rem !important; }
-    .md\:col-span-4{ grid-column: span 4 / span 4 !important; }
-    .md\:col-span-8{ grid-column: span 8 / span 8 !important; }
-
-    /* Keep critical blocks intact across page breaks */
-    .rx-keep,
-    .border,
-    .rounded-lg,
-    .p-2, .p-4, .p-6, .p-8,
-    .text-right,
-    ul, li, table, thead, tr, img, svg {
-      break-inside: avoid !important;
-      page-break-inside: avoid !important;
-    }
-    thead { display: table-header-group !important; }
-
-    /* Sticky footer inside the page box */
-    #rx-footer{
-      position: fixed !important;
-      left: 0; right: 0;
-      bottom: 10mm; /* sits above bottom margin */
-      text-align: center;
-      font-size: 11px;
-      color: #6b7280;
-    }
-
-    /* Paper-friendly typography */
-    body { font-size: 12pt !important; line-height: 1.35 !important; }
-    h1,h2,h3,.text-2xl,.text-xl { break-after: avoid !important; }
-    svg { width: auto; height: auto; }
+  html, body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
+/* Chrome only CSS */
+@supports (-webkit-touch-callout: none) {
+  body {
+    margin: 0;
+  }
+}
+  /* --- Patient bar: lock to one horizontal row with 3 columns on print --- */
+#patient-bar{
+  display: flex !important;
+  flex-wrap: nowrap !important;       /* keep all three blocks on the same row */
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 8mm !important;
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+  padding: 6px 8px !important;
+}
+
+/* Column widths: 40% | 30% | 30% (matches your screenshot) */
+#patient-bar > div:nth-child(1){ flex: 0 0 30% !important; min-width: 0 !important; }
+#patient-bar > div:nth-child(2){ flex: 0 0 30% !important; min-width: 0 !important; }
+#patient-bar > div:nth-child(3){ flex: 0 0 20% !important; min-width: 0 !important; }
+
+/* Keep field labels + values tidy */
+#patient-bar > div > div{
+  display: block !important;
+  white-space: nowrap !important;     /* avoid mid-line wraps like 'Age / Gender' */
+  line-height: 1.25 !important;
+  margin-bottom: 2px !important;
+}
+
+/* Date + barcode compact, aligned right like the image */
+#patient-bar > div:nth-child(3){
+  text-align: right !important;
+}
+#patient-bar svg{
+  height: 26px !important;            /* adjust if you want bigger/smaller */
+  width: auto !important;
+  display: inline-block !important;
+  margin-top: 2px !important;
+}
+
+/* Slightly smaller type so the whole row fits neatly */
+#patient-bar, #patient-bar *{
+  font-size: 9.5pt !important;
+}
+
+
+  .no-print { display: none !important; }
+
+  /* Paper container: no min-height, no positioning quirks */
+  #rx-paper{
+    /* max-width: calc(210mm - 20mm) !important; 10+10mm page side margins */
+    width: 110% !important;
+
+    background: #fff !important;
+    padding: 5mm 0mm 0mm 0mm !important; /* inner gutter so it breathes */
+
+    border-radius: 6px !important;          /* keeps your nice rounded look */
+    box-shadow: 0 0 0 rgba(0,0,0,0) !important;  drop shadow not needed on print
+    border: 1px solid #e5e7eb !important;   /* subtle outline */
+
+    position: static !important;
+    overflow: visible !important;
+  }
+
+  /* Header & patient bar should not split */
+  .rx-keep, thead, img, svg {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* ===== Two-column PRINT layout (robust for pagination) ===== */
+  /* Use flex for print (Grid sometimes refuses to break rows) */
+  #rx-body{
+    display: flex !important;
+    gap: 10mm !important;
+  }
+  /* left = ~38%, right = ~62% like your screenshot */
+  #rx-body > .md\:col-span-4 { width: 38% !important; }
+  #rx-body > .md\:col-span-8 { width: 62% !important; border-left: 2px solid !important; }
+
+  /* If the right column is absent, left takes full width */
+  #rx-body > :only-child { width: 100% !important; }
+
+  /* Allow cards/lists to break normally (prevents big white gaps) */
+  /* (Do NOT blanket-avoid breaks on .border/.p- classes) */
+
+  /* Tighter cards for Medicines/Advice look */
+  /* .border { border-color: #030303 !important; }
+  .rounded-lg { border-radius: 8px !important; } */
+  .p-4 { padding: 10px !important; }
+  .mb-4 { margin-bottom: 8px !important; }
+
+  /* Typography sizing tuned to match your sample */
+  body { font-size: 11pt !important; line-height: 1.35 !important; }
+  .text-sm { font-size: 10pt !important; }
+  .text-xs { font-size: 9pt  !important; }
+  .text-2xl { font-size: 16pt !important; font-weight: 700 !important; }
+  .font-semibold, .font-medium { font-weight: 600 !important; }
+  .uppercase { letter-spacing: .06em !important; }
+
+  /* Barcode: keep compact */
+  svg { height: 28px !important; width: auto !important; }
+
+  /* Footer: flow after content (no fixed position) */
+  /* #rx-footer{
+    position: static !important;
+    margin-top: 6mm !important;
+    text-align: center !important;
+    font-size: 9pt !important;
+    color: #121313 !important;
+  } */
+
+  #rx-footer {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  text-align: center !important;
+  font-size: 9pt !important;
+  color: #121313 !important;
+  background: #fff !important; /* optional, to avoid overlap text visibility */
+  padding: 5px 0 !important;
+}
+
+  /* Avoid widows/orphans on titles */
+  h1,h2,h3,.text-xl,.text-2xl { break-after: avoid !important; }
+}
+
   </style>
 </x-app-layout>

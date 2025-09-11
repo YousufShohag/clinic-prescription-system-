@@ -72,8 +72,6 @@
 
           {{-- contents (start hidden) --}}
           <div id="cf-body" class="p-5 border-t hidden">
-            {{-- NOTE: O/E moved to segmented panel below. This block only holds vitals. --}}
-
             {{-- Vitals --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -120,7 +118,7 @@
         {{-- ===== Segmented History panel (O/E, P/H, D/H, M/H, …) ===== --}}
         @php
           $histTabs = [
-            'oe' => 'O/E',                         // O/E now lives here
+            'oe' => 'O/E',
             'ph' => 'P/H',
             'dh' => 'D/H',
             'mh' => 'M/H',
@@ -182,16 +180,15 @@
             @php
               $preselectDoctorId = (string) old(
                 'doctor_id',
-                $prescription->doctor_id ?? ($defaultDoctorId ?? (auth()->user()->doctor_id ?? optional($doctors->first())->id))
+                $defaultDoctorId ?? (auth()->user()->doctor_id ?? optional($doctors->first())->id)
               );
             @endphp
             <select name="doctor_id" id="doctor_id" required class="w-full border rounded px-3 py-2">
               <option value="" {{ $preselectDoctorId ? '' : 'selected' }} disabled>-- Select Doctor --</option>
               @foreach($doctors as $doc)
                 <option value="{{ $doc->id }}" @selected((string)$doc->id === $preselectDoctorId)>
-  {{ $doc->name }} {{ $doc->specialization ? "({$doc->specialization})" : '' }}
-</option>
-
+                  {{ $doc->name }} {{ $doc->specialization ? "({$doc->specialization})" : '' }}
+                </option>
               @endforeach
             </select>
           </div>
@@ -226,7 +223,7 @@
               <option value="others" @selected(old('new_patient.sex')==='others')>Others</option>
             </select>
 
-           <select name="new_patient[blood_group]" class="border rounded px-3 py-2">
+            <select name="new_patient[blood_group]" class="border rounded px-3 py-2">
               <option value="">Blood Group</option>
               @foreach(['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $bg)
                 <option value="{{ $bg }}" @selected(old('new_patient.blood_group')===$bg)>{{ $bg }}</option>
@@ -307,7 +304,7 @@
         {{-- Return Date --}}
         <div>
           <label class="block text-sm font-medium text-gray-700">Return Date</label>
-          <input type="date" name="return_date" value="{{ old('return_date', isset($prescription)? optional($prescription->return_date)->format('Y-m-d') : '') }}" class="w-full border rounded px-3 py-2">
+          <input type="date" name="return_date" value="{{ old('return_date') }}" class="w-full border rounded px-3 py-2">
           <p class="text-xs text-gray-500">The patient should revisit on this date.</p>
         </div>
 
@@ -535,7 +532,7 @@
   });
   </script>
 
-  {{-- ===== Select2: Medicine picker (AJAX) ===== --}}
+  {{-- ===== Select2: Medicine picker (AJAX) with TYPE + SUGGESTION CHIPS ===== --}}
   <script>
   $(function () {
     const $picker   = $('#medicine_picker');
@@ -546,30 +543,101 @@
     const AJAX_URL = "{{ route('medicines.search') }}";
     function ensureWrap(){ $selWrap.toggleClass('hidden', $selList.children().length === 0); }
 
+    // ---- Suggestion rules (frontend only; tweak as you like) ----
+    const SUGGESTION_RULES = {
+      byType: {
+        'Tab':   { times: ['1-0-1', '1-1-1', '0-0-1'],       duration: ['3 days','5 days','7 days','14 days'] },
+        'Cap':   { times: ['1-0-1', '1-1-1'],                 duration: ['5 days','7 days','10 days'] },
+        'Syrup': { times: ['5 ml TDS','10 ml BD'],            duration: ['3 days','5 days','7 days'] },
+        'Inj':   { times: ['STAT','OD','BD'],                 duration: ['1 day','3 days'] }
+      },
+      byGeneric: {
+        'Paracetamol': { times: ['1-1-1','SOS'],              duration: ['3 days','5 days'] },
+        'Omeprazole':  { times: ['0-0-1 (before breakfast)'], duration: ['14 days','28 days'] }
+      },
+      byName: {
+        // 'Losec 20': { times: ['0-0-1'], duration: ['14 days'] }
+      }
+    };
+    function getSuggestionsFor(item) {
+      const out = { times: [], duration: [] };
+      const push = (src) => {
+        if (!src) return;
+        if (Array.isArray(src.times))     src.times.forEach(v => { if (!out.times.includes(v)) out.times.push(v); });
+        if (Array.isArray(src.duration))  src.duration.forEach(v => { if (!out.duration.includes(v)) out.duration.push(v); });
+      };
+      if (item?.name && SUGGESTION_RULES.byName[item.name])        push(SUGGESTION_RULES.byName[item.name]);
+      if (item?.generic && SUGGESTION_RULES.byGeneric[item.generic]) push(SUGGESTION_RULES.byGeneric[item.generic]);
+      if (item?.type && SUGGESTION_RULES.byType[item.type])        push(SUGGESTION_RULES.byType[item.type]);
+      return out;
+    }
+
+    // ---- helpers to show TYPE everywhere ----
+    function typeBadge(type) {
+      return type ? `<span class="inline-block text-[10px] px-1.5 py-0.5 rounded border mr-1 align-middle">${type}</span>` : '';
+    }
+    function medTitle(item) {
+      const head = [item.type, (item.name ?? item.text ?? '')].filter(Boolean).join(' ');
+      const tail = [
+        item.generic ? '— ' + item.generic : '',
+        item.strength ? '[' + item.strength + ']' : ''
+      ].filter(Boolean).join(' ');
+      return [head, tail].filter(Boolean).join(' ');
+    }
+
+    // ---- selected row with suggestion chips ----
     function selectedRow(item) {
-      const id = item.id;
+      const id  = item.id;
+      const sug = getSuggestionsFor(item);
+      const esc = (v)=>String(v).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[s]));
+
+      const timesChips = (sug.times || []).map(t => `
+        <button type="button" class="sugg-chip sugg-times px-2 py-1 text-xs border rounded hover:bg-gray-50" data-val="${esc(t)}">${esc(t)}</button>
+      `).join(' ');
+
+      const durChips = (sug.duration || []).map(d => `
+        <button type="button" class="sugg-chip sugg-duration px-2 py-1 text-xs border rounded hover:bg-gray-50" data-val="${esc(d)}">${esc(d)}</button>
+      `).join(' ');
+
       const $row = $(`
         <div class="border rounded p-2" data-id="${id}">
           <div class="flex items-center justify-between gap-2">
             <div class="text-sm">
               <div class="font-medium">
-                ${item.name ?? item.text ?? ''} ${item.generic ? ' — ' + item.generic : ''} ${item.strength ? ' (' + item.strength + ')' : ''}
+                ${typeBadge(item.type)}${medTitle(item)}
               </div>
             </div>
             <button type="button" class="text-red-600 text-sm remove-btn">Remove</button>
           </div>
           <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
             <input type="hidden" name="medicines[${id}][selected]" value="1">
-            <input type="text" class="border rounded px-2 py-1" name="medicines[${id}][duration]" placeholder="Duration (e.g., 5 days)">
-            <input type="text" class="border rounded px-2 py-1" name="medicines[${id}][times_per_day]" placeholder="Times/day (e.g., 3x)">
+            <div>
+              <input type="text" class="border rounded px-2 py-1 w-full" name="medicines[${id}][times_per_day]" placeholder="Times/day (e.g., 1-0-1)">
+              ${ timesChips ? `<div class="mt-1 flex flex-wrap gap-1">${timesChips}</div>` : '' }
+            </div>
+            <div>
+              <input type="text" class="border rounded px-2 py-1 w-full" name="medicines[${id}][duration]" placeholder="Duration (e.g., 5 days)">
+              ${ durChips ? `<div class="mt-1 flex flex-wrap gap-1">${durChips}</div>` : '' }
+            </div>
           </div>
         </div>
       `);
+
+      // Remove button
       $row.find('.remove-btn').on('click', function () {
         const remaining = $picker.select2('data').filter(d => d.id !== id).map(d => d.id);
         $picker.val(remaining).trigger('change');
         $row.remove(); ensureWrap();
       });
+
+      // Chip click -> set inputs
+      $row.on('click', '.sugg-times', function(){
+        $row.find(`input[name="medicines[${id}][times_per_day]"]`).val($(this).data('val')).trigger('input');
+      });
+      $row.on('click', '.sugg-duration', function(){
+        $row.find(`input[name="medicines[${id}][duration]"]`).val($(this).data('val')).trigger('input');
+      });
+
       return $row;
     }
 
@@ -589,8 +657,20 @@
         data: params => ({ term: params.term, page: params.page || 1 }),
         processResults: (data, params) => {
           params.page = params.page || 1;
-          const results = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
-          const more    = Array.isArray(data) ? false : !!(data?.pagination && data.pagination.more);
+
+          // normalize results and guarantee 'type' if API returns dosage_form
+          const results = (Array.isArray(data) ? data : (data?.results || []))
+            .map(r => ({
+              id: r.id,
+              type: r.type ?? r.dosage_form ?? null,  // <-- adjust if your API uses a different field
+              name: r.name,
+              text: r.text || r.name,
+              generic: r.generic ?? null,
+              strength: r.strength ?? null,
+              manufacturer: r.manufacturer ?? null
+            }));
+
+          const more = Array.isArray(data) ? false : !!(data?.pagination && data.pagination.more);
           return { results, pagination: { more } };
         },
         cache: true,
@@ -605,23 +685,34 @@
           return req;
         }
       },
+
+      // allow HTML badges
+      escapeMarkup: function (m) { return m; },
+
+      // show type in search dropdown
       templateResult: (item) => {
         if (!item.id) return item.text;
-        const extra = [item.generic, item.strength, item.manufacturer].filter(Boolean).join(' • ');
-        return $(`
+        const sub = [item.manufacturer].filter(Boolean).join(' • ');
+        return `
           <div class="flex flex-col">
-            <div class="font-medium">${item.name || item.text}</div>
-            <div class="text-xs text-gray-600">${extra}</div>
+            <div class="font-medium">${typeBadge(item.type)}${medTitle(item)}</div>
+            ${sub ? `<div class="text-xs text-gray-600">${sub}</div>` : ''}
           </div>
-        `);
+        `;
       },
-      templateSelection: (item) => item.text || item.name || ''
+
+      // show type in the selected chip
+      templateSelection: (item) => {
+        return `${typeBadge(item.type)}${item.name || item.text || ''}`;
+      }
     });
 
+    // Sync selected list under the control
     $picker.on('select2:select', function (e) {
       const item = e.params.data;
       if ($selList.find(`[data-id="${item.id}"]`).length) return;
-      $selList.append(selectedRow(item)); ensureWrap();
+      const $row = selectedRow(item);
+      $selList.append($row); ensureWrap();
     });
 
     $picker.on('select2:unselect', function (e) {
@@ -881,7 +972,7 @@
       ],
       '#doctor_advice': [
         'বেশি করে পানি খাবেন','ঝাল, তেল-চর্বিযুক্ত খাবার এড়িয়ে চলুন','ধূমপান ও মাদক সম্পূর্ণভাবে পরিহার করুন','প্রতিদিন পর্যাপ্ত ঘুমান (৬–৮ ঘণ্টা)',
-        'প্রেসক্রিপশনে দেওয়া ওষুধ নিয়মিত এবং সঠিক সময়ে গ্রহণ করুন'
+        'প্রেসক্রিপশনে দেওয়া ওষুধ নিয়মিত এবং সঠিক সময়ে গ্রহণ করুন','Home glucose monitoring','BP log daily','ER if red flags'
       ],
       '#ph': ['HTN','DM','BA','CKD','IHD'],
       '#dh': ['NSAIDs use','PPIs use','Steroid use','Antibiotics recently'],
@@ -899,13 +990,13 @@
       urti: {
         problem_description: '• Fever with sore throat\n• Runny nose\n• Dry cough',
         oe: '• GA: NAD\n• ENT: Congested oropharynx, no exudate\n• RS: Clear, no added sound\n• CVS: S1 S2 normal',
-        doctor_advice: '• বেশি করে পানি খাবেন\n• ঝাল, তেল-চর্বিযুক্ত খাবার এড়িয়ে চলুন\n• ধূমপান ও মাদক সম্পূর্ণভাবে পরিহার করুন\n• ER if red flags',
+        doctor_advice: '• Hydration + rest\n• Salt-water gargle\n• Paracetamol PRN\n• ER if red flags',
         dx: '• URTI'
       },
       gerd: {
         problem_description: '• Epigastric burning\n• Post-meal fullness',
         oe: '• P/A: Soft, mild epigastric tenderness\n• CVS/RS: Normal',
-        doctor_advice: '• প্রতিদিন পর্যাপ্ত ঘুমান (৬–৮ ঘণ্টা)\n• প্রেসক্রিপশনে দেওয়া ওষুধ নিয়মিত এবং সঠিক সময়ে গ্রহণ করুন\n• Elevate head-end while sleeping',
+        doctor_advice: '• Avoid spicy/oily foods\n• Small frequent meals\n• Elevate head-end while sleeping',
         dx: '• Acute gastritis / GERD'
       },
       htn: {
@@ -917,7 +1008,7 @@
       dm2: {
         problem_description: '• Follow-up for Type-2 DM',
         oe: '• GA: NAD\n• No neuropathic deficits',
-        // doctor_advice: '• gHome lucose monitoring\n• Diet counseling\n• Foot care advice',
+        doctor_advice: '• Home glucose monitoring\n• Diet counseling\n• Foot care advice',
         dx: '• Type-2 DM – controlled'
       }
     };
@@ -968,7 +1059,6 @@
       });
     }
 
-    // Preview
     function openPreview(){
       const data = {
         Doctor: $('#doctor_id option:selected').text().trim(),
@@ -1004,7 +1094,6 @@
       document.getElementById('pv_submit')?.addEventListener('click', ()=>{ wrap.remove(); document.getElementById('submit_btn')?.click(); });
     }
 
-    // Drafts
     function collectForm(){
       const data = {};
       document.querySelectorAll('input, textarea, select').forEach(el=>{
@@ -1055,7 +1144,6 @@
       statusTimer = setTimeout(()=>{ el.textContent=''; }, 2000);
     }
 
-    // Template dropdown + wiring
     document.addEventListener('DOMContentLoaded', ()=>{
       addChips();
 
@@ -1076,22 +1164,18 @@
 
       document.getElementById('btn_preview')?.addEventListener('click', openPreview);
 
-      // drafts
       document.getElementById('btn_save_draft')?.addEventListener('click', ()=>saveDraft(true));
       document.getElementById('btn_restore_draft')?.addEventListener('click', restoreDraft);
       document.getElementById('btn_clear_draft')?.addEventListener('click', clearDraft);
 
-      // autosave on change
       ['input','change'].forEach(evt=>{
         document.addEventListener(evt, (e)=>{
           if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement)) return;
           saveDraft(false);
         }, true);
       });
-      // also catch select2 select/unselect
       $(document).on('select2:select select2:unselect', ()=>saveDraft(false));
 
-      // keyboard shortcuts
       document.addEventListener('keydown', (e)=>{
         if (!e.altKey) return;
         const k = e.key.toLowerCase();
@@ -1132,17 +1216,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', ()=>{
-      // click-to-switch
       document.querySelectorAll('.hist-tab').forEach(b=>{
         b.addEventListener('click', ()=> activate(b.dataset.target));
       });
 
-      // default active: O/E if present; otherwise first
       const oeTab = document.querySelector('.hist-tab[data-target="#hist_oe"]');
       const first = oeTab || document.querySelector('.hist-tab');
       if (first) activate(first.dataset.target);
 
-      // live dot update
       document.querySelectorAll('.hist-pane textarea').forEach(ta=>{
         ta.addEventListener('input', refreshDots);
       });

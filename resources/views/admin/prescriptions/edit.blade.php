@@ -9,9 +9,11 @@
     // Precompute arrays for safe @json usage
     $initialPatientJson = optional($prescription->patient)->only(['id','name','age','sex','dob','phone']);
 
+    // Include 'type' for preloaded medicines so Select2 chips & rows can show it
     $initialMeds = $prescription->medicines->map(function($m){
       return [
         'id'            => $m->id,
+        'type'          => $m->type,   // ← IMPORTANT
         'name'          => $m->name,
         'text'          => $m->name,
         'generic'       => $m->generic,
@@ -87,7 +89,6 @@
       <aside class="xl:col-span-3 space-y-6">
         {{-- ================= Clinical Findings (collapsible) ================= --}}
         <section id="cf-card" class="border rounded-lg">
-          {{-- clickable header --}}
           <button type="button"
                   id="cf-toggle"
                   class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
@@ -99,11 +100,7 @@
             </svg>
           </button>
 
-          {{-- contents (start hidden) --}}
           <div id="cf-body" class="p-5 border-t hidden">
-            {{-- NOTE: O/E moved to segmented panel below. This block only holds vitals. --}}
-
-            {{-- Vitals --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm text-gray-700">BP</label>
@@ -146,7 +143,6 @@
           </div>
         </section>
 
-        {{-- ===== Segmented History panel (O/E, P/H, D/H, M/H, …) ===== --}}
         @php
           $histTabs = [
             'oe' => 'O/E',
@@ -164,7 +160,6 @@
         @endphp
 
         <section class="border rounded-lg">
-          {{-- segmented buttons --}}
           <div id="hist-tabs" class="p-3 border-b flex flex-wrap gap-2">
             @foreach($histTabs as $key => $label)
               <button type="button"
@@ -176,7 +171,6 @@
             @endforeach
           </div>
 
-          {{-- panes --}}
           <div class="p-4">
             @foreach($histTabs as $key => $label)
               <div id="hist_{{ $key }}" class="hist-pane hidden">
@@ -190,7 +184,6 @@
                   </div>
                 </div>
 
-                {{-- quick chips row --}}
                 <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#{{ $key }}"></div>
 
                 <textarea id="{{ $key }}" name="{{ $key }}" rows="3"
@@ -318,10 +311,10 @@
             <button type="button" id="test_clear" class="px-3 py-2 border rounded">Clear</button>
           </div>
 
-          <div id="test_selected_wrap" class="hidden">
-            <div class="text-sm text-gray-600 mb-1">Selected tests</div>
-            <div id="test_selected" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
-          </div>
+        <div id="test_selected_wrap" class="hidden">
+          <div class="text-sm text-gray-600 mb-1">Selected tests</div>
+          <div id="test_selected" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+        </div>
         </div>
 
         {{-- Advice + Submit --}}
@@ -338,7 +331,6 @@
         {{-- Return Date --}}
         <div>
           <label class="block text-sm font-medium text-gray-700">Return Date</label>
-          {{-- Assuming DB stores Y-m-d already --}}
           <input type="date" name="return_date" value="{{ old('return_date', $prescription->return_date) }}" class="w-full border rounded px-3 py-2">
           <p class="text-xs text-gray-500">The patient should revisit on this date.</p>
         </div>
@@ -577,7 +569,7 @@
   });
   </script>
 
-  {{-- ===== Select2: Medicine picker (AJAX) ===== --}}
+  {{-- ===== Select2: Medicine picker (AJAX) with TYPE everywhere ===== --}}
   <script>
   $(function () {
     const $picker   = $('#medicine_picker');
@@ -588,6 +580,20 @@
     const AJAX_URL = "{{ route('medicines.search') }}";
     function ensureWrap(){ $selWrap.toggleClass('hidden', $selList.children().length === 0); }
 
+    // ---- helpers to show TYPE everywhere ----
+    function typeBadge(type) {
+      return type ? `<span class="inline-block text-[10px] px-1.5 py-0.5 rounded border mr-1 align-middle">${type}</span>` : '';
+    }
+    function medTitle(item) {
+      const head = [item.type, (item.name ?? item.text ?? '')].filter(Boolean).join(' ');
+      const tail = [
+        item.generic ? '— ' + item.generic : '',
+        item.strength ? '[' + item.strength + ']' : ''
+      ].filter(Boolean).join(' ');
+      return [head, tail].filter(Boolean).join(' ');
+    }
+    // -----------------------------------------
+
     function selectedRow(item) {
       const id = item.id;
       const $row = $(`
@@ -595,7 +601,7 @@
           <div class="flex items-center justify-between gap-2">
             <div class="text-sm">
               <div class="font-medium">
-                ${item.name ?? item.text ?? ''} ${item.generic ? ' — ' + item.generic : ''} ${item.strength ? ' (' + item.strength + ')' : ''}
+                ${typeBadge(item.type)}${medTitle(item)}
               </div>
             </div>
             <button type="button" class="text-red-600 text-sm remove-btn">Remove</button>
@@ -631,8 +637,20 @@
         data: params => ({ term: params.term, page: params.page || 1 }),
         processResults: (data, params) => {
           params.page = params.page || 1;
-          const results = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
-          const more    = Array.isArray(data) ? false : !!(data?.pagination && data.pagination.more);
+
+          // normalize results and guarantee 'type'
+          const results = (Array.isArray(data) ? data : (data?.results || []))
+            .map(r => ({
+              id: r.id,
+              type: r.type ?? r.dosage_form ?? null, // <-- change RHS if your API field differs
+              name: r.name,
+              text: r.text || r.name,
+              generic: r.generic ?? null,
+              strength: r.strength ?? null,
+              manufacturer: r.manufacturer ?? null
+            }));
+
+          const more = Array.isArray(data) ? false : !!(data?.pagination && data.pagination.more);
           return { results, pagination: { more } };
         },
         cache: true,
@@ -647,19 +665,29 @@
           return req;
         }
       },
+
+      // allow our HTML badge to render
+      escapeMarkup: function (m) { return m; },
+
+      // show type in search dropdown
       templateResult: (item) => {
         if (!item.id) return item.text;
-        const extra = [item.generic, item.strength, item.manufacturer].filter(Boolean).join(' • ');
-        return $(`
+        const sub = [item.manufacturer].filter(Boolean).join(' • ');
+        return `
           <div class="flex flex-col">
-            <div class="font-medium">${item.name || item.text}</div>
-            <div class="text-xs text-gray-600">${extra}</div>
+            <div class="font-medium">${typeBadge(item.type)}${medTitle(item)}</div>
+            ${sub ? `<div class="text-xs text-gray-600">${sub}</div>` : ''}
           </div>
-        `);
+        `;
       },
-      templateSelection: (item) => item.text || item.name || ''
+
+      // show type in the selected chip (inside the Select2 control)
+      templateSelection: (item) => {
+        return `${typeBadge(item.type)}${item.name || item.text || ''}`;
+      }
     });
 
+    // Sync selected list under the control
     $picker.on('select2:select', function (e) {
       const item = e.params.data;
       if ($selList.find(`[data-id="${item.id}"]`).length) return;
@@ -676,17 +704,25 @@
       $selList.empty(); ensureWrap();
     });
 
-    // Preload existing medicines
+    // Preload existing medicines WITH TYPE
     const initialMeds = @json($initialMeds);
     if (initialMeds.length) {
       initialMeds.forEach(item => {
-        $picker.append(new Option(item.name, item.id, true, true));
-        const $row = selectedRow(item);
-        $row.find(`input[name="medicines[${item.id}][duration]"]`).val(item.duration || '');
-        $row.find(`input[name="medicines[${item.id}][times_per_day]"]`).val(item.times_per_day || '');
-        $selList.append($row);
+        // attach full data to option so templateSelection can read 'type'
+        const opt = new Option(item.name, item.id, true, true);
+        $(opt).data('data', item);
+        $picker.append(opt);
+
+        // trigger select for chip + row rendering
+        $picker.trigger({ type: 'select2:select', params: { data: item } });
+
+        // ensure fields are filled
+        const $row = $selList.find(`[data-id="${item.id}"]`);
+        if ($row.length === 0) $selList.append(selectedRow(item));
+        $selList.find(`[data-id="${item.id}"] input[name="medicines[${item.id}][duration]"]`).val(item.duration || '');
+        $selList.find(`[data-id="${item.id}"] input[name="medicines[${item.id}][times_per_day]"]`).val(item.times_per_day || '');
       });
-      $picker.trigger('change');
+      $picker.trigger('change.select2');
     }
     ensureWrap();
   });
@@ -890,13 +926,11 @@
       });
     });
 
-    // expose globally for shortcut toggle
     window.__toggleBulletsFocused = function(){
       const el = document.activeElement;
       if (!el || el.tagName !== 'TEXTAREA' || !el.hasAttribute('data-bullets')) return;
       const on = el.dataset.bulletsOn === '1';
       if (on) disable(el); else enable(el);
-      // update paired button via existing handler
       document.querySelectorAll(`[data-bullets-toggle="#${el.id}"]`).forEach(btn=>{ btn.click(); });
     }
   })();
@@ -943,8 +977,8 @@
         'Follow-up for DM','Dyspepsia','Dizziness'
       ],
       '#doctor_advice': [
-        'Hydration + rest','Salt-water gargle','Paracetamol PRN','Avoid spicy/oily foods',
-        'Small frequent meals','Home glucose monitoring','BP log daily','ER if red flags'
+        'বেশি করে পানি খাবেন','ঝাল, তেল-চর্বিযুক্ত খাবার এড়িয়ে চলুন','ধূমপান ও মাদক সম্পূর্ণভাবে পরিহার করুন','প্রতিদিন পর্যাপ্ত ঘুমান (৬–৮ ঘণ্টা)',
+        'প্রেসক্রিপশনে দেওয়া ওষুধ নিয়মিত এবং সঠিক সময়ে গ্রহণ করুন','Home glucose monitoring','BP log daily','ER if red flags'
       ],
       '#ph': ['HTN','DM','BA','CKD','IHD'],
       '#dh': ['NSAIDs use','PPIs use','Steroid use','Antibiotics recently'],
@@ -1031,7 +1065,6 @@
       });
     }
 
-    // Preview
     function openPreview(){
       const data = {
         Doctor: $('#doctor_id option:selected').text().trim(),
@@ -1067,7 +1100,6 @@
       document.getElementById('pv_submit')?.addEventListener('click', ()=>{ wrap.remove(); document.getElementById('submit_btn')?.click(); });
     }
 
-    // Drafts
     function collectForm(){
       const data = {};
       document.querySelectorAll('input, textarea, select').forEach(el=>{
@@ -1118,7 +1150,6 @@
       statusTimer = setTimeout(()=>{ el.textContent=''; }, 2000);
     }
 
-    // Template dropdown + wiring
     document.addEventListener('DOMContentLoaded', ()=>{
       addChips();
 
@@ -1139,22 +1170,18 @@
 
       document.getElementById('btn_preview')?.addEventListener('click', openPreview);
 
-      // drafts
       document.getElementById('btn_save_draft')?.addEventListener('click', ()=>saveDraft(true));
       document.getElementById('btn_restore_draft')?.addEventListener('click', restoreDraft);
       document.getElementById('btn_clear_draft')?.addEventListener('click', clearDraft);
 
-      // autosave on change
       ['input','change'].forEach(evt=>{
         document.addEventListener(evt, (e)=>{
           if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement)) return;
           saveDraft(false);
         }, true);
       });
-      // also catch select2 select/unselect
       $(document).on('select2:select select2:unselect', ()=>saveDraft(false));
 
-      // keyboard shortcuts
       document.addEventListener('keydown', (e)=>{
         if (!e.altKey) return;
         const k = e.key.toLowerCase();
@@ -1195,17 +1222,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', ()=>{
-      // click-to-switch
       document.querySelectorAll('.hist-tab').forEach(b=>{
         b.addEventListener('click', ()=> activate(b.dataset.target));
       });
 
-      // default active: O/E if present; otherwise first
       const oeTab = document.querySelector('.hist-tab[data-target="#hist_oe"]');
       const first = oeTab || document.querySelector('.hist-tab');
       if (first) activate(first.dataset.target);
 
-      // live dot update
       document.querySelectorAll('.hist-pane textarea').forEach(ta=>{
         ta.addEventListener('input', refreshDots);
       });

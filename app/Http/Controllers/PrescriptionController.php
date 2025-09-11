@@ -14,6 +14,8 @@ use Illuminate\Support\Carbon;
 // use Illuminate\Http\Request;
 // TCPDF ships as \TCPDF
 use TCPDF;
+// use Spatie\Browsershot\Browsershot;
+
 
 
 class PrescriptionController extends Controller
@@ -197,7 +199,7 @@ class PrescriptionController extends Controller
  /** TCPDF version of the PDF */
     public function pdfTcpdf(Request $request, Prescription $prescription)
     {
-        $prescription->load(['doctor', 'patient', 'medicines', 'tests']);
+         $prescription->load(['doctor', 'patient', 'medicines', 'tests']);
 
         // --- init tcpdf ---
         $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);

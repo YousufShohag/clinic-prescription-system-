@@ -726,7 +726,7 @@ public function search(Request $r)
         $results = $builder->orderBy('name')
             ->skip(($page - 1) * $per)
             ->take($per)
-            ->get(['id', 'name', 'generic', 'manufacturer', 'strength', 'price']);
+            ->get(['id', 'name', 'generic', 'manufacturer', 'strength', 'price','type']);
 
         return response()->json([
             'results' => $results->map(fn ($m) => [
@@ -737,6 +737,7 @@ public function search(Request $r)
                 'manufacturer' => $m->manufacturer,
                 'strength'     => $m->strength,
                 'price'        => $m->price,
+                'type'        => $m->type,
             ]),
             'pagination' => [ 'more' => ($page * $per) < $total ],
         ]);
