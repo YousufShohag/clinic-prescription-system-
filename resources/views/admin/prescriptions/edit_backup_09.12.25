@@ -66,12 +66,12 @@
       </div>
     </div>
 
-    {{-- <p class="text-xs text-gray-500 mt-1">
+    <p class="text-xs text-gray-500 mt-1">
       Shortcuts: <kbd class="px-1 border rounded">Alt</kbd>+<kbd class="px-1 border rounded">1</kbd> CF Panel •
       <kbd class="px-1 border rounded">Alt</kbd>+<kbd class="px-1 border rounded">N</kbd> Normal Vitals •
       <kbd class="px-1 border rounded">Alt</kbd>+<kbd class="px-1 border rounded">B</kbd> Toggle bullets •
       <kbd class="px-1 border rounded">Alt</kbd>+<kbd class="px-1 border rounded">S</kbd> Submit
-    </p> --}}
+    </p>
 
     @if($errors->any())
       <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
@@ -196,7 +196,7 @@
       </aside>
 
       {{-- MIDDLE --}}
-      <section class="xl:col-span-5 space-y-6">
+      <section class="xl:col-span-6 space-y-6">
         {{-- Doctor & Patient --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -317,20 +317,7 @@
         </div>
         </div>
 
-       
-
-       
-
-        <div class="flex justify-end">
-          <button id="submit_btn" type="submit" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700" title="Alt+S">
-            Update Prescription
-          </button>
-        </div>
-      </section>
-
-      {{-- RIGHT (optional area) --}}
-      <aside class="xl:col-span-4 space-y-6">
-         {{-- Advice + Submit --}}
+        {{-- Advice + Submit --}}
         <div class="flex items-center justify-between mt-6 mb-2">
           <label class="block text-sm font-medium text-gray-700">Doctor Advice</label>
           <div class="flex items-center gap-2">
@@ -341,13 +328,22 @@
         <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#doctor_advice"></div>
         <textarea id="doctor_advice" name="doctor_advice" rows="3" class="w-full border rounded px-3 py-2" data-bullets>{{ old('doctor_advice', $prescription->doctor_advice) }}</textarea>
 
-         {{-- Return Date --}}
+        {{-- Return Date --}}
         <div>
           <label class="block text-sm font-medium text-gray-700">Return Date</label>
           <input type="date" name="return_date" value="{{ old('return_date', $prescription->return_date) }}" class="w-full border rounded px-3 py-2">
           <p class="text-xs text-gray-500">The patient should revisit on this date.</p>
         </div>
 
+        <div class="flex justify-end">
+          <button id="submit_btn" type="submit" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700" title="Alt+S">
+            Update Prescription
+          </button>
+        </div>
+      </section>
+
+      {{-- RIGHT (optional area) --}}
+      <aside class="xl:col-span-3 space-y-6">
         {{-- Patient history panel (loads after a patient is selected) --}}
         <section id="prev_rx_panel" class="hidden border rounded-lg p-5 sticky top-6">
           <div class="flex items-center justify-between mb-3">

@@ -20,20 +20,69 @@ use TCPDF;
 
 class PrescriptionController extends Controller
 {
-    public function index()
-    {
-        $patients = Patient::with(['doctor'])
-            ->withCount('prescriptions')
-            ->latest()
-            // ->orderBy('name')
-            ->paginate(10);
+    // public function index()
+    // {
+    //     $patients = Patient::with(['doctor'])
+    //         ->withCount('prescriptions')
+    //         ->latest()
+    //         // ->orderBy('name')
+    //         ->paginate(10);
 
-        $prescriptions = Prescription::with(['doctor','patient'])
-            ->latest()
-            ->paginate(15);
+    //     $prescriptions = Prescription::with(['doctor','patient'])
+    //         ->latest()
+    //         ->paginate(15);
 
-        return view('admin.prescriptions.index', compact('prescriptions','patients'));
-    }
+    //     return view('admin.prescriptions.index', compact('prescriptions','patients'));
+    // }
+
+public function index(Request $request)
+{
+    $q        = (string) $request->query('q', '');
+    $doctorId = $request->integer('doctor_id');
+    $status   = (string) $request->query('status', ''); // overdue|today|upcoming|none
+    $from     = $request->date('from');
+    $to       = $request->date('to');
+
+    // Optional: doctor dropdown in filters
+    $doctors = Doctor::orderBy('name')->get(['id','name']);
+
+    // (Left side panel you already had; keep if you need it)
+    $patients = Patient::with('doctor')->withCount('prescriptions')->latest()->paginate(10);
+
+    $today = Carbon::today();
+
+    $prescriptions = Prescription::with(['doctor','patient'])
+        ->withCount(['medicines','tests'])
+        ->when($doctorId, fn($q) => $q->where('doctor_id', $doctorId))
+        ->when($q, function ($query) use ($q) {
+            $query->where(function ($qq) use ($q) {
+                $qq->where('id', $q) // quick jump by id
+                   ->orWhere('problem_description', 'like', "%{$q}%")
+                   ->orWhereHas('patient', fn($p) => $p->where('name', 'like', "%{$q}%"))
+                   ->orWhereHas('doctor',  fn($d) => $d->where('name',  'like', "%{$q}%"));
+            });
+        })
+        ->when($status, function ($query) use ($status, $today) {
+            if ($status === 'overdue') {
+                $query->whereNotNull('return_date')->whereDate('return_date', '<',  $today);
+            } elseif ($status === 'today') {
+                $query->whereDate('return_date', '=', $today);
+            } elseif ($status === 'upcoming') {
+                $query->whereDate('return_date', '>',  $today);
+            } elseif ($status === 'none') {
+                $query->whereNull('return_date');
+            }
+        })
+        ->when($from, fn($q) => $q->whereDate('created_at', '>=', $from))
+        ->when($to,   fn($q) => $q->whereDate('created_at', '<=', $to))
+        ->latest()
+        ->paginate(15)
+        ->withQueryString();
+
+    return view('admin.prescriptions.index', compact(
+        'prescriptions','patients','doctors','q','doctorId','status','from','to'
+    ));
+}
 
     public function create()
     {

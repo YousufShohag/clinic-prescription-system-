@@ -243,34 +243,73 @@ class PatientController extends Controller
         ]);
     }
 
-    public function history(Patient $patient, Request $request)
-{
-    $limit = min(50, max(1, (int) $request->input('limit', 10)));
+//     public function history(Patient $patient, Request $request)
+// {
+//     $limit = min(50, max(1, (int) $request->input('limit', 10)));
 
-    $items = Prescription::where('patient_id', $patient->id)
+//     $items = Prescription::where('patient_id', $patient->id)
+//         ->orderByDesc('id')
+//         ->limit($limit)
+//         ->get(['id', 'created_at', 'doctor_id', 'problem_description']); // rename fields if needed
+
+//     // Optional: resolve doctor names (only if doctors table exists)
+//     $doctorNames = [];
+//     if (Schema::hasTable('doctors')) {
+//         $doctorIds = $items->pluck('doctor_id')->filter()->unique();
+//         if ($doctorIds->isNotEmpty()) {
+//             $doctorNames = Doctor::whereIn('id', $doctorIds)->pluck('name', 'id')->toArray();
+//         }
+//     }
+
+//     return response()->json([
+//         'patient' => ['id' => $patient->id, 'name' => $patient->name],
+//         'count'   => $items->count(),
+//         'items'   => $items->map(function ($p) use ($doctorNames) {
+//             return [
+//                 'id'          => $p->id,
+//                 'date'        => optional($p->created_at)->format('Y-m-d'),
+//                 'doctor_name' => $doctorNames[$p->doctor_id] ?? null,
+//                 'problem'     => $p->problem_description ? Str::limit($p->problem_description, 120) : null,
+//                 'url'         => url('/prescriptions/'.$p->id),
+//             ];
+//         }),
+//     ]);
+// }
+
+public function history(Patient $patient, Request $request)
+{
+    // default show only 3; clamp to a safe max for the "See more" click
+    $limit = min(200, max(1, (int) $request->input('limit', 3)));
+
+    // total prescriptions for this patient (for "See more" logic)
+    $total = \App\Models\Prescription::where('patient_id', $patient->id)->count();
+
+    // fetch the latest N
+    $items = \App\Models\Prescription::where('patient_id', $patient->id)
         ->orderByDesc('id')
         ->limit($limit)
-        ->get(['id', 'created_at', 'doctor_id', 'problem_description']); // rename fields if needed
+        ->get(['id', 'created_at', 'doctor_id', 'problem_description']);
 
-    // Optional: resolve doctor names (only if doctors table exists)
+    // Optional: resolve doctor names (kept from your version)
     $doctorNames = [];
     if (Schema::hasTable('doctors')) {
         $doctorIds = $items->pluck('doctor_id')->filter()->unique();
         if ($doctorIds->isNotEmpty()) {
-            $doctorNames = Doctor::whereIn('id', $doctorIds)->pluck('name', 'id')->toArray();
+            $doctorNames = \App\Models\Doctor::whereIn('id', $doctorIds)->pluck('name', 'id')->toArray();
         }
     }
 
     return response()->json([
         'patient' => ['id' => $patient->id, 'name' => $patient->name],
-        'count'   => $items->count(),
+        // IMPORTANT: return the TOTAL (not the page size)
+        'count'   => $total,
         'items'   => $items->map(function ($p) use ($doctorNames) {
             return [
                 'id'          => $p->id,
-                'date'        => optional($p->created_at)->format('Y-m-d'),
+                'date'        => optional($p->created_at)->format('d M Y, h:i A'),
                 'doctor_name' => $doctorNames[$p->doctor_id] ?? null,
-                'problem'     => $p->problem_description ? Str::limit($p->problem_description, 120) : null,
-                'url'         => url('/prescriptions/'.$p->id),
+                'problem'     => $p->problem_description ? Str::limit(strip_tags($p->problem_description), 120) : null,
+                'url'         => route('prescriptions.show', ['prescription' => $p->id]),
             ];
         }),
     ]);

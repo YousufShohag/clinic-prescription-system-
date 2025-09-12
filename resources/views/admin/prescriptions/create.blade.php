@@ -169,7 +169,7 @@
       </aside>
 
       {{-- MIDDLE --}}
-      <section class="xl:col-span-6 space-y-6">
+      <section class="xl:col-span-5 space-y-6">
         {{-- Doctor & Patient --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -192,20 +192,30 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700">Patient</label>
+            {{-- <select
+              name="patient_id"
+              id="patient_select"
+              class="w-full border rounded px-3 py-2"
+              data-search-url="{{ route('patients.search') }}"
+              data-history-url-template="{{ route('patients.history', ['patient' => '__ID__']) }}">
+              <option value="">-- Select existing patient --</option>
+              <option value="__new">+ Add new patient</option>
+            </select> --}}
             <select
               name="patient_id"
               id="patient_select"
               class="w-full border rounded px-3 py-2"
               data-search-url="{{ route('patients.search') }}"
               data-history-url-template="{{ route('patients.history', ['patient' => '__ID__']) }}"
-            >
+              data-show-url-template="{{ route('patients.show', ['patient' => '__ID__']) }}" >
               <option value="">-- Select existing patient --</option>
               <option value="__new">+ Add new patient</option>
-            </select>
+            </select> 
+
+
             <div id="patient_age_display" class="mt-2 text-sm text-gray-600"></div>
           </div>
         </div>
-
         {{-- New patient --}}
         <div id="new_patient_block" class="hidden bg-gray-50 border rounded p-5">
           <h3 class="text-md font-semibold mb-4">New Patient Details</h3>
@@ -305,23 +315,17 @@
               aria-label="Scroll right">›</button>
           </div>
         </div>
-
-
-
-
             {{-- <div class="mt-1">
               <div class="text-xs text-gray-600 mb-1">Duration</div>
               <div id="med_sugg_duration" class="flex flex-wrap gap-1"></div>
             </div> --}}
-
-
           {{-- <pre id="med_debug" class="text-xs text-gray-500 bg-gray-50 p-2 rounded border"></pre> --}}
 
           <div id="medicine_selected_wrap" class="hidden">
             <div class="text-sm text-gray-600 mb-1">Selected medicines</div>
             <div id="medicine_selected" class="space-y-2"></div>
           </div>
-</div>
+      </div>
 
 
 
@@ -342,16 +346,7 @@
           </div>
         </div>
 
-        {{-- Advice + Submit --}}
-        <div class="flex items-center justify-between mt-6 mb-2">
-          <label class="block text-sm font-medium text-gray-700">Doctor Advice</label>
-          <div class="flex items-center gap-2">
-            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-toggle="#doctor_advice">• Bullets: OFF</button>
-            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-clear="#doctor_advice">Clear</button>
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#doctor_advice"></div>
-        <textarea id="doctor_advice" name="doctor_advice" rows="3" class="w-full border rounded px-3 py-2" data-bullets>{{ old('doctor_advice') }}</textarea>
+        
 
         {{-- Return Date --}}
         <div>
@@ -368,7 +363,19 @@
       </section>
 
       {{-- RIGHT (optional area) --}}
-      <aside class="xl:col-span-3 space-y-6">
+      <aside class="xl:col-span-4 space-y-6">
+        {{-- Advice + Submit --}}
+        <div class="flex items-center justify-between mt-6 mb-2">
+          <label class="text-xl font-semibold">Doctor Advice</label>
+          <div class="flex items-center gap-2">
+            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-toggle="#doctor_advice">• Bullets: OFF</button>
+            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-clear="#doctor_advice">Clear</button>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#doctor_advice"></div>
+        <textarea id="doctor_advice" name="doctor_advice" rows="3" class="w-full border rounded px-3 py-2" data-bullets>{{ old('doctor_advice') }}</textarea>
+
+
         <section id="prev_rx_panel" class="hidden border rounded-lg p-5 sticky top-6">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-lg font-semibold">
@@ -384,6 +391,11 @@
 
           <div id="prev_rx_list" class="hidden">
             <ul id="prev_rx_ul" class="space-y-2"></ul>
+          </div>
+          <div id="prev_rx_more_wrap" class="hidden mt-2 flex items-center justify-end">
+            <button type="button" id="prev_rx_toggle" class="text-blue-600 text-sm hover:underline">
+              See more
+            </button>
           </div>
         </section>
       </aside>
@@ -545,10 +557,10 @@ $(function () {
 
 
   {{-- ===== Patient History: load into right panel on selection ===== --}}
- <script>
+<script>
   $(function () {
     const $patient  = $('#patient_select');
-    const tpl       = $patient.data('history-url-template') || "{{ route('patients.history', ['patient' => '__ID__']) }}";
+    const histTpl   = $patient.data('history-url-template') || "{{ route('patients.history', ['patient' => '__ID__']) }}";
 
     const $panel    = $('#prev_rx_panel');
     const $name     = $('#prev_rx_patient_name');
@@ -559,11 +571,22 @@ $(function () {
     const $listWrap = $('#prev_rx_list');
     const $ul       = $('#prev_rx_ul');
 
+    const $moreWrap = $('#prev_rx_more_wrap');
+    const $toggle   = $('#prev_rx_toggle');
+
+    const FIRST_LIMIT = 3;
+    let currentPatientId = null;
+    let currentPatientLabel = '';
+    let expanded = false;        // are we showing “all”?
+    let totalAvailable = 0;      // total prescriptions for patient
+
+    const buildUrl = (tpl, id) => (tpl || '').replace('__ID__', encodeURIComponent(id));
+
     function showPanel(){ $panel.removeClass('hidden'); }
     function hidePanel(){ $panel.addClass('hidden'); }
-    function stateLoading(){ $loading.removeClass('hidden'); $empty.addClass('hidden'); $error.addClass('hidden'); $listWrap.addClass('hidden'); }
-    function stateEmpty(){ $loading.addClass('hidden'); $empty.removeClass('hidden'); $error.addClass('hidden'); $listWrap.addClass('hidden'); }
-    function stateError(msg){ $loading.addClass('hidden'); $empty.addClass('hidden'); $error.removeClass('hidden').text(msg || 'Could not load prescriptions.'); $listWrap.addClass('hidden'); }
+    function stateLoading(){ $loading.removeClass('hidden'); $empty.addClass('hidden'); $error.addClass('hidden'); $listWrap.addClass('hidden'); $moreWrap.addClass('hidden'); }
+    function stateEmpty(){ $loading.addClass('hidden'); $empty.removeClass('hidden'); $error.addClass('hidden'); $listWrap.addClass('hidden'); $moreWrap.addClass('hidden'); }
+    function stateError(msg){ $loading.addClass('hidden'); $empty.addClass('hidden'); $error.removeClass('hidden').text(msg || 'Could not load prescriptions.'); $listWrap.addClass('hidden'); $moreWrap.addClass('hidden'); }
     function stateList(){ $loading.addClass('hidden'); $empty.addClass('hidden'); $error.addClass('hidden'); $listWrap.removeClass('hidden'); }
 
     function renderItems(items) {
@@ -586,31 +609,71 @@ $(function () {
       });
     }
 
-    function loadHistory(id, label){
+    function loadHistory(id, label, limit) {
       if (!id) return hidePanel();
-      const url = (tpl || '').replace('__ID__', encodeURIComponent(id));
-      showPanel(); stateLoading(); $name.text(label || '');
+      const url = buildUrl(histTpl, id);
 
-      $.ajax({ url, method: 'GET', dataType: 'json', data: { limit: 10 } })
-        .done(res => {
-          $count.text(res.count + ' total');
-          if (!res.items || res.items.length === 0) return stateEmpty();
-          renderItems(res.items); stateList();
-        })
-        .fail(xhr => {
-          const msg = `Could not load prescriptions (${xhr.status}). ${
-            (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message :
-            (xhr.responseText || '').slice(0, 180)
-          }`;
-          stateError(msg);
-          console.error('History load failed:', xhr);
-        });
+      currentPatientId    = id;
+      currentPatientLabel = label || '';
+      expanded            = !!(limit && limit > FIRST_LIMIT);
+
+      showPanel();
+      stateLoading();
+      $name.text(currentPatientLabel);
+
+      $.ajax({
+        url,
+        method: 'GET',
+        dataType: 'json',
+        data: { limit: limit || FIRST_LIMIT }
+      })
+      .done(res => {
+        const items = res.items || [];
+        const total = res.count || res.total || items.length; // fallback if API doesn’t return total
+        totalAvailable = total;
+
+        $count.text(total + ' total');
+
+        if (items.length === 0) return stateEmpty();
+
+        renderItems(items);
+        stateList();
+
+        // Show toggle only if there’s more than FIRST_LIMIT
+        if (total > FIRST_LIMIT) {
+          $moreWrap.removeClass('hidden');
+          $toggle.text(expanded ? 'Minimize' : 'See more');
+        } else {
+          $moreWrap.addClass('hidden');
+        }
+      })
+      .fail(xhr => {
+        const msg = `Could not load prescriptions (${xhr.status}). ${
+          (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message :
+          (xhr.responseText || '').slice(0, 180)
+        }`;
+        stateError(msg);
+        console.error('History load failed:', xhr);
+      });
     }
 
+    // Toggle button: expand to ALL, or minimize back to 3
+    $toggle.on('click', function(){
+      if (!currentPatientId) return;
+      if (!expanded) {
+        // Show all (use totalAvailable if known, else a big number)
+        loadHistory(currentPatientId, currentPatientLabel, Math.max(totalAvailable || 0, 200));
+      } else {
+        // Minimize back to 3
+        loadHistory(currentPatientId, currentPatientLabel, FIRST_LIMIT);
+      }
+    });
+
+    // When a patient is selected: load top 3
     $patient.on('select2:select', (e) => {
       const it = e.params.data;
       if (!it || !it.id || it.id === '__new') return hidePanel();
-      loadHistory(it.id, it.text || it.name);
+      loadHistory(it.id, it.text || it.name, FIRST_LIMIT);
     });
 
     $patient.on('change', function(){
@@ -618,7 +681,9 @@ $(function () {
       if (!val || val === '__new') hidePanel();
     });
   });
-  </script>
+</script>
+
+
 
   {{-- ===== Select2: Medicine picker (AJAX) + TIMES/DURATION CHIP AUTOFILL ===== --}}
     <script>

@@ -25,7 +25,10 @@ class Prescription extends Model
         'pulse'            => 'integer',
         'spo2'             => 'integer',
         'respiratory_rate' => 'integer',
+        'return_date' => 'date',
     ];
+    
+
 
     public function doctor()  { return $this->belongsTo(Doctor::class); }
     public function patient() { return $this->belongsTo(Patient::class); }

@@ -2,19 +2,29 @@
 <x-app-layout>
   <div class="container mx-auto  ">
     {{-- Print / Back controls (hidden on print) --}}
-    <div class="no-print flex items-center justify-between mb-4 py-4">
+    <div class="no-print flex items-center justify-between mb-1 py-4">
       <a href="{{ route('prescriptions.index') }}" class="text-blue-600 hover:underline">← Back to prescriptions</a>
-      <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
-       <a href="{{ route('prescriptions.pdf.tcpdf', $prescription->id) }}" target="_blank"
+      {{-- <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button> --}}
+       {{-- <a href="{{ route('prescriptions.pdf.tcpdf', $prescription->id) }}" target="_blank"
       class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
       Print as PDF (TCPDF)
-    </a>
-    <a href="{{ route('prescriptions.pdf.mpdf', $prescription->id) }}" target="_blank"
+    </a> --}}
+    {{-- <a href="{{ route('prescriptions.pdf.mpdf', $prescription->id) }}" target="_blank"
    class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
   Print as PDF (mPDF)
-</a>
+</a> --}}
 
+        <div class="flex justify-between items-center mb-1 gap-2">
+            <a href="{{ route('prescriptions.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ">+ New Prescription</a>
+            <a href="{{ route('prescriptions.pdf.mpdf', $prescription->id) }}" target="_blank"
+            class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+            Print as PDF (mPDF)
+          </a>
+          <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
+          {{-- pass the model instance (cleanest with resource routes) --}}
+          <a href="{{ route('prescriptions.edit', $prescription) }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Edit</a>
 
+        </div>
 
     </div>
 
