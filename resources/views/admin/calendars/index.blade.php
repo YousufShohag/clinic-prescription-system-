@@ -25,7 +25,14 @@
     {{-- Calendar --}}
     <div class="bg-white rounded shadow p-4 mb-6">
  
-      <div id="calendar"></div>
+      {{-- <div id="calendar"></div> --}}
+
+
+    <div id="calendar"
+        data-calendar-url="{{ route('appointments.calendarData') }}"
+        data-day-url="{{ route('appointments.day') }}">
+    </div>
+
       
     </div>
 
@@ -92,7 +99,8 @@
   {{-- FullCalendar + JS --}}
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-  <script>
+  @vite('resources/js/others/calendars-index.js')
+  {{-- <script>
     const doctorId = document.getElementById('filter_doctor')?.value || '';
     const modal    = document.getElementById('dayModal');
     const modalDate= document.getElementById('modalDate');
@@ -173,5 +181,7 @@
       });
       calendar.render();
     });
-  </script>
+  </script> --}}
 </x-app-layout>
+
+

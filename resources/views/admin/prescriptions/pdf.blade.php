@@ -99,54 +99,6 @@
   </style>
 </head>
 <body>
-{{-- @unless($isPdf ?? false)
-  <div class="no-print" style="
-      position:sticky; top:0; z-index:9999; display:flex; gap:8px;
-      justify-content:flex-end; align-items:center; padding:8px 12px;
-      background:#fff; border-bottom:1px solid #e5e7eb; box-shadow:0 1px 2px rgba(0,0,0,.04);
-    ">
-    <button type="button" onclick="window.print()"
-      style="border:1px solid #2563eb; background:#2563eb; color:#fff; padding:6px 12px; border-radius:6px; cursor:pointer;">
-      Print
-    </button>
-
-    <button type="button" onclick="tryClose('{{ route('prescriptions.index') }}')"
-      style="border:1px solid #9ca3af; background:#fff; color:#111827; padding:6px 12px; border-radius:6px; cursor:pointer;">
-      Close
-    </button>
-  </div>
-
-  <script>
-    function tryClose(fallbackUrl) {
-      // If opened via window.open (popup), this will work:
-      if (window.opener && !window.opener.closed) {
-        window.close();
-        return;
-      }
-      // If there is browser history, go back:
-      if (history.length > 1) {
-        history.back();
-        return;
-      }
-      // As a last resort, go to a safe page (index):
-      if (fallbackUrl) {
-        window.location.href = fallbackUrl;
-      }
-    }
-
-    // Optional: if you want auto-print when visiting ?print=1
-    if (new URLSearchParams(location.search).get('print') === '1') {
-      setTimeout(() => window.print(), 300);
-    }
-  </script>
-
-  <style>
-    @media print { .no-print { display: none !important; } }
-  </style>
-@endunless --}}
-
-  
-
   {{-- Letterhead --}}
   <table class="w-100 mb8">
     <tr>
