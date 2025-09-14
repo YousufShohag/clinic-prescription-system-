@@ -157,6 +157,58 @@
       *{animation:none!important;transition:none!important}
       html{scroll-behavior:auto}
     }
+
+    @media (max-width: 768px) {
+    /* About collapses into 1 column */
+    .about-container {
+      grid-template-columns: 1fr !important;
+      gap: 24px !important;
+    }
+
+    /* Appointment section stacks */
+    .contact-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* Hero spacing */
+    .hero {
+      gap: 34px;
+    }
+
+    /* Buttons and pills wrap nicely */
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+    .pill {
+      flex: 1 1 auto;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    /* Avatar responsive */
+    .avatar {
+      width: 90vw !important;
+      border-radius: 16px;
+    }
+
+    /* Footer links touch-friendly */
+    .footer-links ul li {
+      margin-bottom: 8px;
+    }
+
+    /* Form inputs full-width */
+    .contact-form input,
+    .contact-form textarea {
+      font-size: 16px; /* avoids iOS zoom */
+    }
+  }
+
+  /* Smooth dropdown transition */
+  .menu {
+    transition: all 0.3s ease;
+  }
   </style>
 </head>
 <body>
