@@ -8,8 +8,117 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
+
+<style>
+  /* Preview-only helpers (won't affect your show blade) */
+  #rx_preview_canvas .rx-card { border:1px solid #e5e7eb; border-radius: .5rem; }
+  #rx_preview_canvas .rx-left { border-right:1px solid #e5e7eb; }
+  #rx_preview_canvas .rx-section-title { font-weight:600; }
+  #rx_preview_canvas .rx-dot { display:inline-block; width:.4rem; }
+</style>
+
+
+
+{{-- <style>
+/* -------- Doctor-friendly theme (keeps your Tailwind utilities) -------- */
+:root{
+  --df-accent:#0ea5e9;       /* sky-500 */
+  --df-ink:#0f172a;          /* slate-900 */
+  --df-muted:#64748b;        /* slate-500 */
+  --df-border:#e5e7eb;       /* gray-200 */
+  --df-soft:#f8fafc;         /* slate-50 */
+}
+
+/* Card shells */
+section.border.rounded-lg{
+  border-color: var(--df-border) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(15,23,42,.03);
+}
+
+/* Header buttons */
+section.border.rounded-lg > button{
+  position: relative;
+  padding: .85rem 1rem;
+  background: var(--df-soft);
+  font-weight: 600;
+  color: var(--df-ink);
+  border-bottom: 1px solid var(--df-border);
+}
+
+/* Accent stripe on header */
+section.border.rounded-lg > button::before{
+  content:"";
+  position:absolute; inset:0 auto 0 0;
+  width:4px; background:var(--df-accent); opacity:.7;
+  border-top-left-radius:12px; border-bottom-left-radius:12px;
+}
+
+/* Chevron rotation on expand */
+section.border.rounded-lg > button[aria-expanded="true"] svg{
+  transform: rotate(180deg);
+}
+
+/* Count badges (auto via data-count attr set by JS) */
+#cf-toggle,#hist-toggle,#cc-toggle,#med-toggle,#test-toggle,#advice-toggle{ padding-right: 2.25rem; }
+#cf-toggle[data-count]::after,
+#hist-toggle[data-count]::after,
+#cc-toggle[data-count]::after,
+#med-toggle[data-count]::after,
+#test-toggle[data-count]::after,
+#advice-toggle[data-count]::after{
+  content: attr(data-count);
+  position:absolute; right:.8rem; top:50%; transform: translateY(-50%);
+  min-width: 1.25rem; height: 1.25rem; line-height: 1.25rem; text-align:center;
+  font-size: .75rem; color:#0b3b53; background:#e0f2fe; border:1px solid #bae6fd; border-radius:999px;
+}
+
+/* Section bodies */
+section.border.rounded-lg > .border-t{ border-color: var(--df-border) !important; }
+
+/* Inputs: friendlier focus ring & radius */
+input[type="text"], input[type="number"], input[type="date"], input[type="email"],
+select, textarea{
+  border-color: var(--df-border);
+  border-radius: 10px;
+}
+input:focus, select:focus, textarea:focus{
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(14,165,233,.25);
+  border-color:#7dd3fc;
+}
+
+/* Little refinements */
+label.block.text-sm{ color: #334155; } /* slate-700 */
+.text-sm.text-gray-600{ color: var(--df-muted) !important; }
+
+/* Medicine rows: sightline + active highlight is already added by your JS */
+#medicine_selected [data-id]{
+  border-color: var(--df-border);
+  border-radius: 10px;
+}
+#medicine_selected [data-id].ring{
+  box-shadow: 0 0 0 3px rgba(14,165,233,.25);
+}
+
+/* Live preview card tweaks */
+#rx_live_preview_card .bg-gray-50{ background: var(--df-soft) !important; }
+#rx_preview_canvas{ line-height: 1.65; }
+#rx_preview_canvas .font-semibold{ color: #111827; }
+
+/* Print: cleaner output (hides buttons/controls) */
+@media print{
+  #tpl_btn, #btn_normals, #btn_preview, #btn_save_draft, #btn_restore_draft, #btn_clear_draft,
+  #rx_preview_print, #rx_preview_toggle, .select2-container{ display:none !important; }
+  #rx_preview_canvas{ max-width: none !important; }
+}
+</style> --}}
+
+
   <div class="w-full min-h-screen bg-white p-6 md:p-8">
-    <div class="flex items-start justify-between gap-4">
+    <div class="flex items-start justify-between gap-2">
       <h2 class="text-3xl font-semibold">New Prescription</h2>
 
       {{-- SMART BAR --}}
@@ -66,7 +175,7 @@
                   class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
                   aria-controls="cf-body"
                   aria-expanded="false">
-            <span class="text-lg font-semibold">Clinical Findings</span>
+            <span class="text-sm font-semibold">Clinical Findings</span>
             <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
             </svg>
@@ -132,52 +241,207 @@
           ];
         @endphp
 
-        <section class="border rounded-lg">
-          <div id="hist-tabs" class="p-3 border-b flex flex-wrap gap-2">
-            @foreach($histTabs as $key => $label)
-              <button type="button"
-                      class="hist-tab px-3 py-1 text-sm rounded-full border hover:bg-gray-50"
-                      data-target="#hist_{{ $key }}">
-                <span class="tab-text">{{ $label }}</span>
-                <span class="ml-1 hidden tab-dot">•</span>
-              </button>
-            @endforeach
+     <!-- ===== History (O/E, P/H, D/H, M/H, OH, P/A/E, DX, Previous Investigation, A/H, Special Note, Referred To) – Collapsible ===== -->
+<section class="border rounded-lg" id="hist-card">
+  <button type="button"
+          class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
+          aria-controls="hist-body" aria-expanded="false" id="hist-toggle">
+    <span class="text-sm font-semibold">History (O/E, P/H, D/H, …)</span>
+    <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
+    </svg>
+  </button>
+
+  <div id="hist-body" class="p-0 border-t hidden">
+    <div id="hist-tabs" class="p-3 border-b flex flex-wrap gap-2">
+      @foreach($histTabs as $key => $label)
+        <button type="button"
+                class="hist-tab px-3 py-1 text-sm rounded-full border hover:bg-gray-50"
+                data-target="#hist_{{ $key }}">
+          <span class="tab-text">{{ $label }}</span>
+          <span class="ml-1 hidden tab-dot">•</span>
+        </button>
+      @endforeach
+    </div>
+
+    <div class="p-4">
+      @foreach($histTabs as $key => $label)
+        <div id="hist_{{ $key }}" class="hist-pane hidden">
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-sm font-medium text-gray-700">{{ $label }}</label>
+            <div class="flex items-center gap-2">
+              <!-- (Optional) Suggestions menu is auto-added by your existing script -->
+              <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                      data-bullets-toggle="#{{ $key }}">• Bullets: OFF</button>
+              <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                      data-bullets-clear="#{{ $key }}">Clear</button>
+            </div>
           </div>
 
-          <div class="p-4">
-            @foreach($histTabs as $key => $label)
-              <div id="hist_{{ $key }}" class="hist-pane hidden">
-                <div class="flex items-center justify-between mb-2">
-                  <label class="block text-sm font-medium text-gray-700">{{ $label }}</label>
-                  <div class="flex items-center gap-2">
-                    <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
-                            data-bullets-toggle="#{{ $key }}">• Bullets: OFF</button>
-                    <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
-                            data-bullets-clear="#{{ $key }}">Clear</button>
-                  </div>
-                </div>
+          {{-- <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#{{ $key }}"></div> --}}
 
-                
+          <textarea id="{{ $key }}" name="{{ $key }}" rows="3"
+                    class="w-full border rounded px-3 py-2"
+                    data-bullets>{{ old($key) }}</textarea>
+        </div>
+      @endforeach
+    </div>
+  </div>
+</section>
 
-                {{-- <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#{{ $key }}"></div> --}}
+<section id="cc-card" class="border rounded-lg mt-4">
+  <!-- Header -->
+  <button type="button"
+          id="cc-toggle"
+          class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
+          aria-controls="cc-body"
+          aria-expanded="true">
+    <span class="text-sm font-semibold">Chief Complain (C/C)</span>
+    <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path fill-rule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z"
+            clip-rule="evenodd" />
+    </svg>
+  </button>
 
-                <textarea id="{{ $key }}" name="{{ $key }}" rows="3"
-                          class="w-full border rounded px-3 py-2"
-                          data-bullets>{{ old($key) }}</textarea>
-              </div>
-            @endforeach
+  <!-- Body -->
+  <div id="cc-body" class="p-4 border-t">
+    <div class="flex items-center justify-between mb-2">
+      <label for="problem_description" class="block text-sm font-medium text-gray-700">Chief Complain (C/C)</label>
+
+      <div class="flex items-center gap-2 relative">
+        <!-- Suggestions button + menu (unchanged IDs) -->
+        <div class="relative">
+          <button type="button" id="btn_cc_suggestions"
+                  class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">
+            Suggestions ▾
+          </button>
+          <div id="cc_sugg_menu"
+               class="hidden absolute right-0 z-30 mt-1 w-80 bg-white border rounded shadow p-2 max-h-64 overflow-auto">
+            <div class="text-xs text-gray-500 px-1 mb-1">Click to insert</div>
+            <div id="cc_sugg_list" class="flex flex-wrap gap-1"></div>
           </div>
-        </section>
+        </div>
+
+        <button type="button"
+                class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                data-bullets-toggle="#problem_description">• Bullets: OFF</button>
+        <button type="button"
+                class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                data-bullets-clear="#problem_description">Clear</button>
+      </div>
+    </div>
+
+    <textarea id="problem_description"
+              name="problem_description"
+              rows="3"
+              class="w-full border rounded px-2 py-2"
+              data-bullets>{{ old('problem_description') }}</textarea>
+  </div>
+</section>
+
+<section id="med-card" class="border rounded-lg">
+  <!-- Header -->
+  <button type="button"
+          id="med-toggle"
+          class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
+          aria-controls="med-body"
+          aria-expanded="true">
+    <span class="text-sm font-semibold">Medicines</span>
+    <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path fill-rule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z"
+            clip-rule="evenodd" />
+    </svg>
+  </button>
+
+  <!-- Body -->
+  <div id="med-body" class="p-4 border-t">
+    <!-- START: MED BODY (your original content) -->
+    <div class="space-y-3">
+      <div class="flex flex-col md:flex-row md:items-center gap-2">
+        {{-- <h3 class="text-sm font-semibold">Medicines</h3> --}}
+        <div class="flex-1"></div>
+        <select id="medicine_picker" multiple class="w-full md:w-96"></select>
+        <button type="button" id="medicine_clear" class="px-1 py-1 border rounded">Clear</button>
+      </div>
+
+      <!-- Central times/duration suggestions (applies to the active medicine row) -->
+      <div id="med_central_suggestions" class="hidden border rounded p-3">
+        <div class="mt-1">
+          <div class="relative">
+            <button type="button" id="med_sugg_prev"
+                    class="hidden md:flex items-center justify-center w-7 h-7 rounded-full border bg-white shadow absolute left-0 top-1/2 -translate-y-1/2 z-10 disabled:opacity-40"
+                    aria-label="Scroll left">‹</button>
+
+            <div id="med_sugg_scroller"
+                 class="flex items-center gap-2 flex-nowrap overflow-x-auto whitespace-nowrap no-scrollbar py-1 px-8">
+              <div id="med_sugg_times" class="inline-flex gap-1 shrink-0"></div>
+              <span class="text-gray-300 shrink-0">|</span>
+              <div id="med_sugg_duration" class="inline-flex gap-1 shrink-0"></div>
+            </div>
+
+            <button type="button" id="med_sugg_next"
+                    class="hidden md:flex items-center justify-center w-7 h-7 rounded-full border bg-white shadow absolute right-0 top-1/2 -translate-y-1/2 z-10 disabled:opacity-40"
+                    aria-label="Scroll right">›</button>
+          </div>
+        </div>
+
+        <div id="medicine_selected_wrap" class="hidden">
+          <div class="text-sm text-gray-600 mb-1">Selected medicines</div>
+          <div id="medicine_selected" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+    <!-- END: MED BODY -->
+  </div>
+</section>
+
+
+<section id="test-card" class="border rounded-lg">
+  <!-- Header -->
+  <button type="button"
+          id="test-toggle"
+          class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
+          aria-controls="test-body"
+          aria-expanded="true">
+    <span class="text-sm font-semibold">Investigations</span>
+    <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path fill-rule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z"
+            clip-rule="evenodd" />
+    </svg>
+  </button>
+
+  <!-- Body -->
+  <div id="test-body" class="p-4 border-t">
+    <!-- START: TEST BODY (your original content) -->
+    <div class="space-y-3">
+      <div class="flex flex-col md:flex-row md:items-center gap-2">
+        {{-- <h3 class="text-xl font-semibold">Tests</h3> --}}
+        <div class="flex-1"></div>
+        <select id="test_picker" multiple class="w-full md:w-96"></select>
+        <button type="button" id="test_clear" class="px-1 py-1 border rounded">Clear</button>
+      </div>
+
+      <div id="test_selected_wrap" class="hidden">
+        <div class="text-sm text-gray-600 mb-1">Selected tests</div>
+        <div id="test_selected" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+      </div>
+    </div>
+    <!-- END: TEST BODY -->
+  </div>
+</section>
       </aside>
 
 
       
 
       {{-- MIDDLE --}}
-      <section class="xl:col-span-5 space-y-6">
+      <section class="xl:col-span-6 space-y-6">
         {{-- Doctor & Patient --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
+        <div class="grid grid-cols-1 md:grid-cols-2 ">
+          <div class="hidden">
             <label class="block text-sm font-medium text-gray-700">Doctor <span class="text-red-500">*</span></label>
             @php
               $preselectDoctorId = (string) old(
@@ -195,7 +459,7 @@
             </select>
           </div>
 
-          <div>
+          <div class="">
             <label class="block text-sm font-medium text-gray-700">Patient</label>
             {{-- <select
               name="patient_id"
@@ -216,10 +480,9 @@
               <option value="">-- Select existing patient --</option>
               <option value="__new">+ Add new patient</option>
             </select> 
-
-
-            <div id="patient_age_display" class="mt-2 text-sm text-gray-600"></div>
+            
           </div>
+          <div id="patient_age_display" class="mt-6 text-sm text-gray-600" style="padding-left: 10px;"> </div>
         </div>
         {{-- New patient --}}
         <div id="new_patient_block" class="hidden bg-gray-50 border rounded p-5">
@@ -258,40 +521,34 @@
           </div>
         </div>
 
-        {{-- Problem --}}
-        <div class="flex items-center justify-between mt-4 mb-1">
-  <label class="text-xl font-semibold">Chief Complain (C/C)</label>
 
-  <div class="flex items-center gap-2 relative">
-    <!-- NEW: Suggestions button + menu -->
-    <div class="relative">
-      <button type="button" id="btn_cc_suggestions"
-              class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">
-        Suggestions ▾
-      </button>
-      <div id="cc_sugg_menu"
-           class="hidden absolute right-0 z-30 mt-1 w-80 bg-white border rounded shadow p-2 max-h-64 overflow-auto">
-        <div class="text-xs text-gray-500 px-1 mb-1">Click to insert</div>
-        <div id="cc_sugg_list" class="flex flex-wrap gap-1"></div>
-      </div>
-    </div>
+        <!-- ===== Live Rx Preview ===== -->
+        <section id="rx_live_preview_card" class=" rounded-lg overflow-hidden">
+          {{-- <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b">
+            <h3 class="text-sm font-semibold">Prescription Preview (Live)</h3>
+            <div class="flex gap-2">
+              <button type="button" id="rx_preview_print" class="px-3 py-1 text-sm border rounded hover:bg-gray-100">
+                Print
+              </button>
+              <button type="button" id="rx_preview_toggle" class="px-3 py-1 text-sm border rounded hover:bg-gray-100">
+                Collapse
+              </button>
+            </div>
+          </div> --}}
 
-    <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-toggle="#problem_description">• Bullets: OFF</button>
-    <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-clear="#problem_description">Clear</button>
-  </div>
-</div>
+          <div id="rx_preview_body" class="p-2 bg-white">
+            <!-- Rendered via JS -->
+            <div id="rx_preview_canvas" class="max-w-[680px] mx-auto text-sm leading-6"></div>
+          </div>
+        </section>
 
-        {{-- <div class="flex flex-wrap gap-1 " data-chip-row data-target="#problem_description"></div> --}}
-        <textarea id="problem_description" name="problem_description" rows="3" class="w-full border rounded  px-2 py-2" data-bullets>{{ old('problem_description') }}</textarea>
+
+
+
 
         {{-- Medicines (Select2 AJAX) --}}
         <div class="space-y-3">
-          <div class="flex flex-col md:flex-row md:items-center gap-2">
-            <h3 class="text-xl font-semibold">Medicines</h3>
-            <div class="flex-1"></div>
-            <select id="medicine_picker" multiple class="w-full md:w-96"></select>
-            <button type="button" id="medicine_clear" class="px-1 py-1 border rounded">Clear</button>
-          </div>
+          
 
           <!-- Central times/duration suggestions (applies to the active medicine row) -->
           <div id="med_central_suggestions" class="hidden border rounded p-3">
@@ -301,111 +558,77 @@
                 <span class="text-gray-500">(active medicine: <span id="med_active_label">none</span>)</span>
               </div>
             </div> --}}
- <!-- Central times/duration suggestions (applies to the active medicine row) -->
+         <!-- Central times/duration suggestions (applies to the active medicine row) -->
          <div class="mt-1">
-          <div class="relative">
-            <!-- left -->
-            <button
-              type="button"
-              id="med_sugg_prev"
-              class="hidden md:flex items-center justify-center w-7 h-7 rounded-full border bg-white shadow absolute left-0 top-1/2 -translate-y-1/2 z-10 disabled:opacity-40"
-              aria-label="Scroll left">‹</button>
-
-            <!-- scroller -->
-            <div
-              id="med_sugg_scroller"
-              class="flex items-center gap-2 flex-nowrap overflow-x-auto whitespace-nowrap no-scrollbar py-1 px-8">
-
-              {{-- <span class="text-xs text-gray-600 shrink-0">Times per day / Duration:</span> --}}
-
-              <!-- times -->
-              <div id="med_sugg_times" class="inline-flex gap-1 shrink-0"></div>
-
-              <span class="text-gray-300 shrink-0">|</span>
-
-              <!-- duration -->
-              <div id="med_sugg_duration" class="inline-flex gap-1 shrink-0"></div>
-            </div>
-
-            <!-- right -->
-            <button
-              type="button"
-              id="med_sugg_next"
-              class="hidden md:flex items-center justify-center w-7 h-7 rounded-full border bg-white shadow absolute right-0 top-1/2 -translate-y-1/2 z-10 disabled:opacity-40"
-              aria-label="Scroll right">›</button>
-          </div>
+          
         </div>
             {{-- <div class="mt-1">
               <div class="text-xs text-gray-600 mb-1">Duration</div>
               <div id="med_sugg_duration" class="flex flex-wrap gap-1"></div>
             </div> --}}
           {{-- <pre id="med_debug" class="text-xs text-gray-500 bg-gray-50 p-2 rounded border"></pre> --}}
-
-          <div id="medicine_selected_wrap" class="hidden">
-            <div class="text-sm text-gray-600 mb-1">Selected medicines</div>
-            <div id="medicine_selected" class="space-y-2"></div>
-          </div>
-      </div>
-
-
-
         </div>
-
-        {{-- Tests (Select2 AJAX multi) --}}
-        <div class="space-y-3">
-          <div class="flex flex-col md:flex-row md:items-center gap-2">
-            <h3 class="text-xl font-semibold">Tests</h3>
-            <div class="flex-1"></div>
-            <select id="test_picker" multiple class="w-full md:w-96"></select>
-            <button type="button" id="test_clear" class="px-1 py-1 border rounded">Clear</button>
-          </div>
-
-          <div id="test_selected_wrap" class="hidden">
-            <div class="text-sm text-gray-600 mb-1">Selected tests</div>
-            <div id="test_selected" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
-          </div>
         </div>
-
-        <div class="flex justify-end">
-          <button id="submit_btn" type="submit" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700" title="Alt+S">
-            Create Prescription
-          </button>
-        </div>
+        
       </section>
 
       {{-- RIGHT (optional area) --}}
-      <aside class="xl:col-span-4 space-y-6">
+      <aside class="xl:col-span-3 space-y-6">
         {{-- Advice + Submit --}}
-        <div class="flex items-center justify-between mt-6 mb-2">
-  <label class="text-xl font-semibold">Doctor Advice</label>
+        <!-- ===== Doctor Advice (collapsible) ===== -->
+<section id="advice-card" class="border rounded-lg">
+  <button type="button"
+          id="advice-toggle"
+          class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
+          aria-controls="advice-body"
+          aria-expanded="false">
+    <span class="text-sm font-semibold">Doctor Advice</span>
+    <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
+    </svg>
+  </button>
 
-  <div class="flex items-center gap-2 relative">
-    <!-- NEW: Suggestions button + menu -->
-    <div class="relative">
-      <button type="button" id="btn_advice_suggestions"
-              class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">
-        Suggestions ▾
-      </button>
-      <div id="advice_sugg_menu"
-           class="hidden absolute right-0 z-30 mt-1 w-72 bg-white border rounded shadow p-2 max-h-64 overflow-auto">
-        <div class="text-xs text-gray-500 px-1 mb-1">Click to insert</div>
-        <div id="advice_sugg_list" class="flex flex-wrap gap-1"></div>
+  <div id="advice-body" class="p-5 border-t hidden">
+    <div class="flex items-center justify-between mb-2">
+      {{-- <label class="block text-sm font-medium text-gray-700">Doctor Advice</label> --}}
+      <div class="flex items-center gap-2 relative">
+        <!-- Suggestions button + menu (unchanged IDs so your existing script keeps working) -->
+        <div class="relative">
+          <button type="button" id="btn_advice_suggestions"
+                  class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">
+            Suggestions ▾
+          </button>
+          <div id="advice_sugg_menu"
+               class="hidden absolute right-0 z-30 mt-1 w-72 bg-white border rounded shadow p-2 max-h-64 overflow-auto">
+            <div class="text-xs text-gray-500 px-1 mb-1">Click to insert</div>
+            <div id="advice_sugg_list" class="flex flex-wrap gap-1"></div>
+          </div>
+        </div>
+
+        <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                data-bullets-toggle="#doctor_advice">• Bullets: OFF</button>
+        <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                data-bullets-clear="#doctor_advice">Clear</button>
       </div>
     </div>
 
-    <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-toggle="#doctor_advice">• Bullets: OFF</button>
-    <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-clear="#doctor_advice">Clear</button>
+    <textarea id="doctor_advice" name="doctor_advice" rows="5"
+              class="w-full border rounded px-3 py-2" data-bullets>{{ old('doctor_advice') }}</textarea>
   </div>
-</div>
+</section>
 
-        {{-- <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#doctor_advice"></div> --}}
-        <textarea id="doctor_advice" name="doctor_advice" rows="5" class="w-full border rounded px-3 py-2" data-bullets>{{ old('doctor_advice') }}</textarea>
 
         {{-- Return Date --}}
         <div>
           <label class="block text-sm font-medium text-gray-700">Return Date</label>
           <input type="date" name="return_date" value="{{ old('return_date', isset($prescription)? optional($prescription->return_date)->format('Y-m-d') : '') }}" class="w-full border rounded px-3 py-2">
           <p class="text-xs text-gray-500">The patient should revisit on this date.</p>
+        </div>
+
+        <div class="flex justify-end">
+          <button id="submit_btn" type="submit" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700" title="Alt+S">
+            Create Prescription
+          </button>
         </div>
 
         <section id="prev_rx_panel" class="hidden border rounded-lg p-5 sticky top-6">
@@ -1760,6 +1983,587 @@ window.CHIP_SETS = CHIP_SETS;
 </script>
 
 
+
+
 @vite('resources/js/others/prescription/prescription-returnDate.js')
+
+<script>
+(function () {
+  // Utilities
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const nl2br = s => (String(s||'').trim().replace(/\n/g, '<br>'));
+  const clean = s => (String(s||'').trim());
+  const bulletize = s => nl2br(s); // you already store with "• " bullets; keep as-is
+
+  // Collect medicines from the center selection list
+  function collectMedicines() {
+    const rows = $$('#medicine_selected [data-id]');
+    return rows.map(r => {
+      const display = r.getAttribute('data-display') || '';
+      const times = $('[data-med-times]', r)?.value || '';
+      const dur   = $('[data-med-dur]', r)?.value || '';
+      return { display, times, dur };
+    });
+  }
+
+  // Collect tests from the right grid
+  function collectTests() {
+    const rows = $$('#test_selected [data-id]');
+    return rows.map(r => {
+      const name = $('.font-medium', r)?.textContent || '';
+      return clean(name);
+    }).filter(Boolean);
+  }
+
+  function patientLabel() {
+    const sel = $('#patient_select');
+    if (!sel) return '';
+    // Select2 renders text inside .select2-selection__rendered; fallback to option text
+    const rendered = document.querySelector('#select2-patient_select-container');
+    const txt = clean(rendered?.textContent || sel.options[sel.selectedIndex]?.text || '');
+    if (!txt || txt.includes('+ Add new patient') || txt.includes('-- Select')) return '';
+    return txt;
+  }
+
+  function doctorLabel() {
+    const el = $('#doctor_id');
+    return el ? clean(el.options[el.selectedIndex]?.text || '') : '';
+  }
+
+  function collectVitals() {
+    const get = id => clean($('#'+id)?.value);
+    return {
+      bp: get('bp'),
+      pulse: get('pulse'),
+      temp: get('temperature_c'),
+      spo2: get('spo2'),
+      rr: get('respiratory_rate'),
+      bmi: get('bmi')
+    };
+  }
+
+  function collectHistory() {
+    const val = id => clean($('#'+id)?.value);
+    return {
+      oe: val('oe'),
+      ph: val('ph'),
+      dh: val('dh'),
+      mh: val('mh'),
+      oh: val('oh'),
+      pae: val('pae'),
+      dx: val('dx'),
+      previous_investigation: val('previous_investigation'),
+      ah: val('ah'),
+      special_note: val('special_note'),
+      referred_to: val('referred_to'),
+    };
+  }
+
+  function model() {
+    const hist = collectHistory();
+    return {
+      doctor: doctorLabel(),
+      patient: patientLabel(),
+      problem: clean($('#problem_description')?.value),
+      advice: clean($('#doctor_advice')?.value),
+      return_date: clean($('[name="return_date"]')?.value),
+      vitals: collectVitals(),
+      medicines: collectMedicines(),
+      tests: collectTests(),
+      dx: hist.dx,
+      hist
+    };
+  }
+
+  // Simple template
+  function renderHTML(m) {
+  const fmt = s => String(s || '').trim();
+  const lines = s => fmt(s).replace(/\n/g, '<br>');
+
+  const vitals = m.vitals || {};
+  const vitalsBits = [
+    vitals.bp && `BP: <b>${vitals.bp}</b>`,
+    vitals.pulse && `Pulse: <b>${vitals.pulse}</b> bpm`,
+    vitals.temp && `Temp: <b>${vitals.temp}</b> °C`,
+    vitals.spo2 && `SpO₂: <b>${vitals.spo2}</b>%`,
+    vitals.rr && `RR: <b>${vitals.rr}</b> /min`,
+    vitals.bmi && `BMI: <b>${vitals.bmi}</b>`
+  ].filter(Boolean).join(' • ');
+
+  const hist = m.hist || {};
+  const histBlock = (label, val) => fmt(val) ? `
+    <div class="mb-2">
+      <div class="font-semibold"><b><u>${label}:</u></b></div>
+      <div class="text-sm whitespace-pre-wrap">${lines(val)}</div>
+    </div>` : '';
+
+  const medsHTML = (m.medicines || []).map(md => {
+    const info = [fmt(md.times), fmt(md.dur)].filter(Boolean).join(' — ');
+    return `
+      <li class="pl-1">
+        <div class="font-medium">${md.display}</div>
+        ${info ? `<div class="text-sm text-gray-600">${info}</div>` : ''}
+      </li>`;
+  }).join('');
+
+  const testsHTML = (m.tests || []).map(t => `<li>${t}</li>`).join('');
+// Get just the doctor's name (strip any specialization in parentheses)
+const docNameRaw = typeof m.doctor === 'string' ? m.doctor : (m.doctor?.name ?? '');
+const docName = docNameRaw.replace(/\s*\([^)]*\)\s*$/, '');
+// ${m.doctor ? `<div class="text-sm font-bold leading-tight">${m.doctor}</div>` : ''}
+  return `
+  <div class="bg-white shadow md:rounded-lg p-5 md:p-6" style="border:1px solid #e5e7eb;">
+
+    <!-- Letterhead -->
+    <div class="flex items-start justify-between">
+      <div>
+         
+        ${docName ? `<div class="text-2xl font-bold leading-tight">${docName}</div>` : ''}
+
+        <div class="text-sm text-gray-600">Medical Officer: Chattagram Medical College Hospital</div>
+      </div>
+      <div class="text-right">
+        <div class="text-sm font-semibold">Chamber: Epic International Hospital</div>
+        <div class="text-xs text-gray-500 leading-4">
+          128, Jubilee Road, Tin pool, Chattagram<br>
+          Phone for Appointment: 01xxxxxxxxx <br>
+          Satuerday-Friday (07.00 PM - 10.00 PM)
+        </div>
+      </div>
+    </div>
+
+    <!-- Patient bar -->
+    <section class="mt-3" style="border:1.5px solid;">
+      <div class="p-2 grid grid-cols-1 md:grid-cols-3 gap-4 bg-white">
+        <div class="space-y-1 text-sm min-w-[220px]">
+          ${m.patient ? `<div>Patient Name: <span class="font-medium">${m.patient}</span></div>` : ''}
+          ${vitalsBits ? `<div class="text-gray-600">${vitalsBits}</div>` : ''}
+        </div>
+        <div class="text-sm space-y-1">
+          ${m.return_date ? `<div>Next Meeting Date: <span class="font-medium">${m.return_date}</span></div>` : ''}
+        </div>
+        <div class="text-sm space-y-1 md:text-right">
+          <div class="text-gray-500">Date:
+            <span class="font-medium text-black">${new Date().toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Body: LEFT = history | RIGHT = medicines + tests -->
+    <div class="mt-4 grid grid-cols-12 gap-6">
+      <!-- LEFT column (History) with vertical divider -->
+      <div class="col-span-12 md:col-span-5 pr-4" style="border-right:2px solid #e5e7eb;">
+        ${fmt(m.problem) ? `
+          <div class="mb-2">
+            <div class="font-semibold"><b><u>C/C:</u></b></div>
+            <div class="text-sm whitespace-pre-wrap">${lines(m.problem)}</div>
+          </div>` : ''}
+
+        ${histBlock('O/E', hist.oe)}
+        ${histBlock('P/H', hist.ph)}
+        ${histBlock('D/H', hist.dh)}
+        ${histBlock('M/H', hist.mh)}
+        ${histBlock('OH', hist.oh)}
+        ${histBlock('P/A/E', hist.pae)}
+        ${histBlock('DX', hist.dx)}
+
+        ${fmt(hist.previous_investigation) ? `
+          <div class="mb-2">
+            <div class="font-semibold"><b><u>Previous Investigation</u></b></div>
+            <div class="text-sm whitespace-pre-wrap">${lines(hist.previous_investigation)}</div>
+          </div>` : ''}
+      </div>
+
+      <!-- RIGHT column (Medicines + Tests + Advice) -->
+      <div class="col-span-12 md:col-span-7">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="text-2xl font-extrabold pl-2">℞</div>
+        </div>
+
+        ${(m.medicines||[]).length ? `
+          <div class="mb-4 pl-6">
+            <div class="font-semibold mb-2">Medicines</div>
+            <ol class="list-decimal space-y-2 pl-5">
+              ${medsHTML}
+            </ol>
+          </div>` : ''}
+
+        ${(m.tests||[]).length ? `
+          <div class="mb-4 pl-6">
+            <div class="font-semibold mb-2">Investigations</div>
+            <ul class="list-disc pl-5 space-y-1">
+              ${testsHTML}
+            </ul>
+          </div>` : ''}
+
+        ${fmt(m.advice) ? `
+          <div class="pl-6 mb-2">
+            <div class="font-semibold">Doctor Advice</div>
+            <div class="text-sm whitespace-pre-wrap">${lines(m.advice)}</div>
+          </div>` : ''}
+
+        ${fmt(hist.referred_to) ? `
+          <div class="pl-6">
+            <div class="font-semibold">Referred To</div>
+            <div class="text-sm whitespace-pre-wrap">${lines(hist.referred_to)}</div>
+          </div>` : ''}
+
+        <div class="mt-9 grid grid-cols-2 gap-8 items-end">
+          <div></div>
+          <div class="text-right">
+            <div class="h-12"></div>
+            <div class="border-t border-gray-400 pt-1 text-sm">
+              ${m.doctor || ''}<br>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-4 text-center text-[11px] text-gray-500">
+      Thank you for visiting. For emergencies, please contact the clinic immediately
+    </div>
+  </div>`;
+}
+
+  function updatePreview() {
+    const m = model();
+    $('#rx_preview_canvas').innerHTML = renderHTML(m);
+  }
+
+  // Wire events for live updates
+  function wirePreview() {
+    // Initial render
+    updatePreview();
+
+    // Any input/select/textarea changes
+    ['input','change'].forEach(evt => {
+      document.addEventListener(evt, (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement)) return;
+        // Only re-render for form fields within our form (cheap check)
+        if (t.closest('form')) updatePreview();
+      }, true);
+    });
+
+    // Select2 events for patient/medicine/test
+    $(document).addEventListener?.call
+    ? null
+    : null; // (no-op to keep linter happy)
+
+    // jQuery-based hooks (since Select2 is jQuery):
+    $(document).addEventListener; // no-op
+
+    if (window.jQuery) {
+      const jq = window.jQuery;
+      jq(document).on('select2:select select2:unselect', '#patient_select, #medicine_picker, #test_picker', updatePreview);
+    }
+
+    // Mutations in medicine/tests lists (add/remove rows)
+    const mo = new MutationObserver(updatePreview);
+    const medList = document.getElementById('medicine_selected');
+    const testList = document.getElementById('test_selected');
+    if (medList) mo.observe(medList, { childList: true, subtree: true });
+    if (testList) mo.observe(testList, { childList: true, subtree: true });
+
+    // Preview controls
+    $('#rx_preview_toggle')?.addEventListener('click', () => {
+      const body = $('#rx_preview_body');
+      const collapsed = body.classList.toggle('hidden');
+      $('#rx_preview_toggle').textContent = collapsed ? 'Expand' : 'Collapse';
+    });
+    $('#rx_preview_print')?.addEventListener('click', () => window.print());
+  }
+
+  // Start
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wirePreview);
+  } else {
+    wirePreview();
+  }
+})();
+</script>
+
+
+
+<script>
+function renderHTML(m) {
+  const fmt = s => String(s || '').trim();
+  const lines = s => fmt(s).replace(/\n/g, '<br>');
+
+  const vitals = m.vitals || {};
+  const vitalsBits = [
+    vitals.bp && `BP: <b>${vitals.bp}</b>`,
+    vitals.pulse && `Pulse: <b>${vitals.pulse}</b> bpm`,
+    vitals.temp && `Temp: <b>${vitals.temp}</b> °C`,
+    vitals.spo2 && `SpO₂: <b>${vitals.spo2}</b>%`,
+    vitals.rr && `RR: <b>${vitals.rr}</b> /min`,
+    vitals.bmi && `BMI: <b>${vitals.bmi}</b>`
+  ].filter(Boolean).join(' • ');
+
+  const hist = m.hist || {};
+  const histBlock = (label, val) => fmt(val) ? `
+    <div class="mb-2">
+      <div class="font-semibold"><b><u>${label}:</u></b></div>
+      <div class="text-sm whitespace-pre-wrap">${lines(val)}</div>
+    </div>` : '';
+
+  const meds = (m.medicines||[]).map(md => {
+    const info = [fmt(md.times), fmt(md.dur)].filter(Boolean).join(' — ');
+    return `
+      <li>
+        <div class="font-medium">${md.display}</div>
+        ${info ? `<div class="text-sm text-gray-600">${info}</div>` : ''}
+      </li>`;
+  }).join('');
+
+  const tests = (m.tests||[]).map(t => `
+    <li class="flex items-start"><span class="mr-2">•</span><span>${t}</span></li>
+  `).join('');
+
+  return `
+  <div class="bg-white shadow md:rounded-lg p-5 md:p-6" style="border:1px solid #e5e7eb;">
+
+    <!-- Letterhead (simple) -->
+    <div class="flex items-start justify-between">
+      <div>
+        ${m.doctor ? `<div class="text-2xl font-bold leading-tight">${m.doctor}</div>` : ''}
+        <div class="text-sm text-gray-600">Medical Officer: Chattagram Medical College Hospital</div>
+      </div>
+      <div class="text-right">
+        <div class="text-lg font-semibold">Chamber: Epic International Hospital</div>
+        <div class="text-xs text-gray-500 leading-4">
+          128, Jubilee Road, Tin pool, Chattagram<br>
+          Phone for Appointment: 01xxxxxxxxx <br>
+          Satuerday-Friday (07.00 PM - 10.00 PM)
+        </div>
+      </div>
+    </div>
+
+    <!-- Patient bar -->
+    <section class="mt-3" style="border:1.5px solid;">
+      <div class="p-2 grid grid-cols-1 md:grid-cols-3 gap-4 bg-white">
+        <div class="space-y-1 text-sm min-w-[220px]">
+          ${m.patient ? `<div>Patient Name: <span class="font-medium">${m.patient}</span></div>` : ''}
+          ${vitalsBits ? `<div class="text-gray-600">${vitalsBits}</div>` : ''}
+        </div>
+        <div class="text-sm space-y-1">
+          ${m.return_date ? `<div>Next Meeting Date: <span class="font-medium">${m.return_date}</span></div>` : ''}
+        </div>
+        <div class="text-sm space-y-1 md:text-right">
+          <div class="text-gray-500">Date:
+            <span class="font-medium text-black">${new Date().toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Body: LEFT = O/E, P/H, D/H, M/H, OH, P/A/E, Prev Inv, Tests | RIGHT = Medicines, Advice, Return, Referred -->
+    <div class="mt-4 grid grid-cols-12 gap-6">
+      <!-- LEFT column -->
+      <div class="col-span-12 md:col-span-4 pr-4" style="border-right:1px solid #e5e7eb;">
+        ${fmt(m.problem) ? `
+          <div class="mb-2">
+            <div class="font-semibold"><b><u>C/C:</u></b></div>
+            <div class="text-sm whitespace-pre-wrap">${lines(m.problem)}</div>
+          </div>` : ''}
+
+        ${histBlock('O/E', hist.oe)}
+        ${histBlock('P/H', hist.ph)}
+        ${histBlock('D/H', hist.dh)}
+        ${histBlock('M/H', hist.mh)}
+        ${histBlock('OH', hist.oh)}
+        ${histBlock('P/A/E', hist.pae)}
+        ${histBlock('DX', hist.dx)}
+
+        ${fmt(hist.previous_investigation) ? `
+          <div class="mb-2">
+            <div class="font-semibold"><b><u>Previous Investigation</u></b></div>
+            <div class="text-sm whitespace-pre-wrap">${lines(hist.previous_investigation)}</div>
+          </div>` : ''}
+
+        ${(m.tests||[]).length ? `
+          <div class="mb-2">
+            <div class="font-semibold"><b><u>Investigation</u></b></div>
+            <ul class="mt-1">${tests}</ul>
+          </div>` : ''}
+      </div>
+
+      <!-- RIGHT column -->
+      <div class="col-span-12 md:col-span-8">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="text-2xl font-extrabold pl-2">℞</div>
+        </div>
+
+        ${(m.medicines||[]).length ? `
+          <div class="mb-4 pl-6">
+            <div class="font-semibold mb-2">Medicines</div>
+            <ol class="list-decimal space-y-2 pl-5">
+              ${meds}
+            </ol>
+          </div>` : ''}
+
+        ${fmt(m.advice) ? `
+          <div class="pl-6 mb-2">
+            <div class="font-semibold">Doctor Advice</div>
+            <div class="text-sm whitespace-pre-wrap">${lines(m.advice)}</div>
+          </div>` : ''}
+
+        ${fmt(hist.referred_to) ? `
+          <div class="pl-6">
+            <div class="font-semibold">Referred To</div>
+            <div class="text-sm whitespace-pre-wrap">${lines(hist.referred_to)}</div>
+          </div>` : ''}
+
+        <div class="mt-9 grid grid-cols-2 gap-8 items-end">
+          <div></div>
+          <div class="text-right">
+            <div class="h-12"></div>
+            <div class="border-t border-gray-400 pt-1 text-sm">
+              ${m.doctor || ''}<br>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-4 text-center text-[11px] text-gray-500">
+      Thank you for visiting. For emergencies, please contact the clinic immediately
+    </div>
+  </div>`;
+}
+
+</script>
+
+<script>
+  // ===== Doctor Advice collapse toggle (with remember state) =====
+  (function(){
+    const key = 'advice-open';
+    function setOpen(open){
+      const body = document.getElementById('advice-body');
+      const btn  = document.getElementById('advice-toggle');
+      const icon = btn?.querySelector('svg');
+      if (!body || !btn) return;
+      body.classList.toggle('hidden', !open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (icon) icon.classList.toggle('rotate-180', open);
+      try { localStorage.setItem(key, open ? '1' : '0'); } catch {}
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      // default collapsed (like CF); load remembered state
+      const remembered = (localStorage.getItem(key) ?? '0') === '1';
+      setOpen(remembered);
+      document.getElementById('advice-toggle')?.addEventListener('click', () => {
+        const body = document.getElementById('advice-body');
+        setOpen(body?.classList.contains('hidden'));
+      });
+    });
+  })();
+</script>
+
+<script>
+  (function () {
+    const KEY = 'hist-open';
+    function setOpen(open) {
+      const body = document.getElementById('hist-body');
+      const btn  = document.getElementById('hist-toggle');
+      const icon = btn?.querySelector('svg');
+      if (!body || !btn) return;
+      body.classList.toggle('hidden', !open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      icon?.classList.toggle('rotate-180', open);
+      try { localStorage.setItem(KEY, open ? '1' : '0'); } catch {}
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const remembered = (localStorage.getItem(KEY) ?? '0') === '1'; // default collapsed
+      setOpen(remembered);
+      document.getElementById('hist-toggle')?.addEventListener('click', () => {
+        const body = document.getElementById('hist-body');
+        setOpen(body?.classList.contains('hidden'));
+      });
+    });
+  })();
+</script>
+
+<script>
+(function(){
+  const key = 'cc-open';
+  function setOpen(open){
+    const body = document.getElementById('cc-body');
+    const btn  = document.getElementById('cc-toggle');
+    const icon = btn?.querySelector('svg');
+    if (!body || !btn) return;
+    body.classList.toggle('hidden', !open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (icon) icon.classList.toggle('rotate-180', !open); // rotate when collapsed
+    try { localStorage.setItem(key, open ? '1' : '0'); } catch {}
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const remember = (localStorage.getItem(key) ?? '1') === '1'; // default open
+    setOpen(remember);
+    document.getElementById('cc-toggle')?.addEventListener('click', () => {
+      const isOpen = document.getElementById('cc-body')?.classList.contains('hidden') === false;
+      setOpen(!isOpen);
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const key = 'med-open';
+  function setOpen(open){
+    const body = document.getElementById('med-body');
+    const btn  = document.getElementById('med-toggle');
+    const icon = btn?.querySelector('svg');
+    if (!body || !btn) return;
+    body.classList.toggle('hidden', !open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    // rotate chevron when collapsed
+    if (icon) icon.classList.toggle('rotate-180', !open);
+    try { localStorage.setItem(key, open ? '1' : '0'); } catch {}
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    // default open; restore remembered state
+    const remembered = (localStorage.getItem(key) ?? '1') === '1';
+    setOpen(remembered);
+    document.getElementById('med-toggle')?.addEventListener('click', () => {
+      const isOpen = !document.getElementById('med-body')?.classList.contains('hidden');
+      setOpen(!isOpen);
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const key = 'test-open';
+  function setOpen(open){
+    const body = document.getElementById('test-body');
+    const btn  = document.getElementById('test-toggle');
+    const icon = btn?.querySelector('svg');
+    if (!body || !btn) return;
+    body.classList.toggle('hidden', !open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    // rotate chevron when collapsed
+    if (icon) icon.classList.toggle('rotate-180', !open);
+    try { localStorage.setItem(key, open ? '1' : '0'); } catch {}
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    // default open; restore remembered state
+    const remembered = (localStorage.getItem(key) ?? '1') === '1';
+    setOpen(remembered);
+    document.getElementById('test-toggle')?.addEventListener('click', () => {
+      const isOpen = !document.getElementById('test-body')?.classList.contains('hidden');
+      setOpen(!isOpen);
+    });
+  });
+})();
+</script>
 
 </x-app-layout>

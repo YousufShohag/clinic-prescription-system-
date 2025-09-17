@@ -157,7 +157,9 @@
                   </div>
                 </div>
 
-                <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#{{ $key }}"></div>
+                
+
+                {{-- <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#{{ $key }}"></div> --}}
 
                 <textarea id="{{ $key }}" name="{{ $key }}" rows="3"
                           class="w-full border rounded px-3 py-2"
@@ -167,6 +169,9 @@
           </div>
         </section>
       </aside>
+
+
+      
 
       {{-- MIDDLE --}}
       <section class="xl:col-span-5 space-y-6">
@@ -255,13 +260,28 @@
 
         {{-- Problem --}}
         <div class="flex items-center justify-between mt-4 mb-1">
-          <label class="text-xl font-semibold">Chief Complain (C/C)</label>
-          <div class="flex items-center gap-2">
-            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-toggle="#problem_description">• Bullets: OFF</button>
-            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-clear="#problem_description">Clear</button>
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-1 " data-chip-row data-target="#problem_description"></div>
+  <label class="text-xl font-semibold">Chief Complain (C/C)</label>
+
+  <div class="flex items-center gap-2 relative">
+    <!-- NEW: Suggestions button + menu -->
+    <div class="relative">
+      <button type="button" id="btn_cc_suggestions"
+              class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">
+        Suggestions ▾
+      </button>
+      <div id="cc_sugg_menu"
+           class="hidden absolute right-0 z-30 mt-1 w-80 bg-white border rounded shadow p-2 max-h-64 overflow-auto">
+        <div class="text-xs text-gray-500 px-1 mb-1">Click to insert</div>
+        <div id="cc_sugg_list" class="flex flex-wrap gap-1"></div>
+      </div>
+    </div>
+
+    <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-toggle="#problem_description">• Bullets: OFF</button>
+    <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-clear="#problem_description">Clear</button>
+  </div>
+</div>
+
+        {{-- <div class="flex flex-wrap gap-1 " data-chip-row data-target="#problem_description"></div> --}}
         <textarea id="problem_description" name="problem_description" rows="3" class="w-full border rounded  px-2 py-2" data-bullets>{{ old('problem_description') }}</textarea>
 
         {{-- Medicines (Select2 AJAX) --}}
@@ -346,15 +366,6 @@
           </div>
         </div>
 
-        
-
-        {{-- Return Date --}}
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Return Date</label>
-          <input type="date" name="return_date" value="{{ old('return_date', isset($prescription)? optional($prescription->return_date)->format('Y-m-d') : '') }}" class="w-full border rounded px-3 py-2">
-          <p class="text-xs text-gray-500">The patient should revisit on this date.</p>
-        </div>
-
         <div class="flex justify-end">
           <button id="submit_btn" type="submit" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700" title="Alt+S">
             Create Prescription
@@ -366,15 +377,36 @@
       <aside class="xl:col-span-4 space-y-6">
         {{-- Advice + Submit --}}
         <div class="flex items-center justify-between mt-6 mb-2">
-          <label class="text-xl font-semibold">Doctor Advice</label>
-          <div class="flex items-center gap-2">
-            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-toggle="#doctor_advice">• Bullets: OFF</button>
-            <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-clear="#doctor_advice">Clear</button>
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#doctor_advice"></div>
-        <textarea id="doctor_advice" name="doctor_advice" rows="3" class="w-full border rounded px-3 py-2" data-bullets>{{ old('doctor_advice') }}</textarea>
+  <label class="text-xl font-semibold">Doctor Advice</label>
 
+  <div class="flex items-center gap-2 relative">
+    <!-- NEW: Suggestions button + menu -->
+    <div class="relative">
+      <button type="button" id="btn_advice_suggestions"
+              class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">
+        Suggestions ▾
+      </button>
+      <div id="advice_sugg_menu"
+           class="hidden absolute right-0 z-30 mt-1 w-72 bg-white border rounded shadow p-2 max-h-64 overflow-auto">
+        <div class="text-xs text-gray-500 px-1 mb-1">Click to insert</div>
+        <div id="advice_sugg_list" class="flex flex-wrap gap-1"></div>
+      </div>
+    </div>
+
+    <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-toggle="#doctor_advice">• Bullets: OFF</button>
+    <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700" data-bullets-clear="#doctor_advice">Clear</button>
+  </div>
+</div>
+
+        {{-- <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#doctor_advice"></div> --}}
+        <textarea id="doctor_advice" name="doctor_advice" rows="5" class="w-full border rounded px-3 py-2" data-bullets>{{ old('doctor_advice') }}</textarea>
+
+        {{-- Return Date --}}
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Return Date</label>
+          <input type="date" name="return_date" value="{{ old('return_date', isset($prescription)? optional($prescription->return_date)->format('Y-m-d') : '') }}" class="w-full border rounded px-3 py-2">
+          <p class="text-xs text-gray-500">The patient should revisit on this date.</p>
+        </div>
 
         <section id="prev_rx_panel" class="hidden border rounded-lg p-5 sticky top-6">
           <div class="flex items-center justify-between mb-3">
@@ -972,6 +1004,63 @@ $(function () {
     </script>
 
 
+<script>
+/** Chief Complain (C/C) – Suggestions popover **/
+(function () {
+  const CC_LIST = (window.CHIP_SETS && window.CHIP_SETS['#problem_description']) || [
+    'Fever with sore throat','Cough, runny nose','Epigastric burning','Headache',
+    'Follow-up for HTN','Follow-up for DM','Dyspepsia','Dizziness'
+  ];
+
+  const BULLET = '• ';
+  const $btn  = document.getElementById('btn_cc_suggestions');
+  const $menu = document.getElementById('cc_sugg_menu');
+  const $list = document.getElementById('cc_sugg_list');
+  const $ta   = document.getElementById('problem_description');
+  if (!$btn || !$menu || !$list || !$ta) return;
+
+  function render() {
+    $list.innerHTML = '';
+    CC_LIST.forEach(text => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'px-2 py-1 text-xs border rounded hover:bg-gray-50';
+      b.textContent = text;
+      b.addEventListener('click', () => { insertLine(text); hide(); });
+      $list.appendChild(b);
+    });
+  }
+
+  function toggle(){ $menu.classList.toggle('hidden'); }
+  function hide(){ $menu.classList.add('hidden'); }
+
+  function outsideClick(e){
+    if ($menu.classList.contains('hidden')) return;
+    if (!$menu.contains(e.target) && !$btn.contains(e.target)) hide();
+  }
+
+  function insertLine(text){
+    // Ensure bullets are ON for this textarea
+    $ta.dataset.bulletsOn = '1';
+    const val = ($ta.value || '').trim();
+    const prefix = val ? '\n' : '';
+    const line = text.startsWith(BULLET) ? text : (BULLET + text);
+    $ta.value = val + prefix + line;
+
+    // caret + input event for listeners/draft saver
+    try { const L = $ta.value.length; $ta.setSelectionRange(L, L); } catch {}
+    $ta.dispatchEvent(new Event('input', { bubbles: true }));
+    $ta.focus();
+  }
+
+  render();
+  $btn.addEventListener('click', toggle);
+  document.addEventListener('click', outsideClick);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide(); });
+})();
+</script>
+
+
   {{-- ===== Select2: Test picker (AJAX) ===== --}}
   <script>
   $(function () {
@@ -1229,6 +1318,8 @@ $(function () {
       '#referred_to': ['ENT OPD','Medicine OPD','Cardiology','Endocrinology']
     };
 
+window.CHIP_SETS = CHIP_SETS;
+
     const TEMPLATES = {
       urti: {
         problem_description: '• Fever with sore throat\n• Runny nose\n• Dry cough',
@@ -1434,6 +1525,76 @@ $(function () {
   })();
   </script>
 
+  
+
+  <script>
+/** Doctor Advice – Suggestions popover **/
+(function () {
+  // Reuse the same list you already show as quick chips
+  const ADVICE_LIST = (window.CHIP_SETS && window.CHIP_SETS['#doctor_advice'])
+                      || [
+                        'বেশি করে পানি খাবেন','ঝাল, তেল-চর্বিযুক্ত খাবার এড়িয়ে চলুন','ধূমপান ও মাদক সম্পূর্ণভাবে পরিহার করুন','প্রতিদিন পর্যাপ্ত ঘুমান (৬–৮ ঘণ্টা)',
+                        'প্রেসক্রিপশনে দেওয়া ওষুধ নিয়মিত এবং সঠিক সময়ে গ্রহণ করুন','Home glucose monitoring','BP log daily','ER if red flags'
+                      ];
+
+  const BULLET = '• ';
+  const $btn   = document.getElementById('btn_advice_suggestions');
+  const $menu  = document.getElementById('advice_sugg_menu');
+  const $list  = document.getElementById('advice_sugg_list');
+  const $ta    = document.getElementById('doctor_advice');
+
+  if (!$btn || !$menu || !$list || !$ta) return;
+
+  // Render chips
+  function render() {
+    $list.innerHTML = '';
+    ADVICE_LIST.forEach(text => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'px-2 py-1 text-xs border rounded hover:bg-gray-50';
+      b.textContent = text;
+      b.addEventListener('click', () => {
+        insertAdvice(text);
+        hide();
+      });
+      $list.appendChild(b);
+    });
+  }
+
+  function toggle() { $menu.classList.toggle('hidden'); }
+  function show()   { $menu.classList.remove('hidden'); }
+  function hide()   { $menu.classList.add('hidden'); }
+
+  function outsideClick(e) {
+    if ($menu.classList.contains('hidden')) return;
+    if (!$menu.contains(e.target) && !$btn.contains(e.target)) hide();
+  }
+
+  function insertAdvice(text) {
+    // Ensure bullets are on for this textarea
+    $ta.dataset.bulletsOn = '1';
+
+    const val = ($ta.value || '').trim();
+    const prefix = val ? '\n' : '';
+    // Add a bullet if the line doesn't already start with one
+    const line = text.startsWith(BULLET) ? text : (BULLET + text);
+    $ta.value = val + prefix + line;
+
+    // Move caret to end and trigger input for any listeners
+    try { const L = $ta.value.length; $ta.setSelectionRange(L, L); } catch {}
+    $ta.dispatchEvent(new Event('input', { bubbles: true }));
+    $ta.focus();
+  }
+
+  // Wire up
+  render();
+  $btn.addEventListener('click', toggle);
+  document.addEventListener('click', outsideClick);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide(); });
+})();
+</script>
+
+
   {{-- ===== Segmented history tab switcher (activates O/E by default) ===== --}}
 <script>
   (function(){
@@ -1474,6 +1635,9 @@ $(function () {
     });
   })();
   </script>
+
+
+
 {{-- SUGGESTION SCROLL --}}
 <script>
 (function () {
@@ -1512,5 +1676,90 @@ $(function () {
 })();
 </script>
 
+<script>
+/** Suggestions button for all Segmented History panes: O/E, P/H, D/H, M/H, OH, P/A/E, DX, Previous Investigation, A/H, Special Note, Referred To */
+(function () {
+  const BULLET = '• ';
+  const CHIP_SETS = window.CHIP_SETS || {};
+
+  const has = v => Array.isArray(v) && v.length > 0;
+  const bullet = t => String(t).startsWith(BULLET) ? t : BULLET + t;
+
+  function insertLine(ta, text) {
+    ta.dataset.bulletsOn = '1';
+    const val = (ta.value || '').trim();
+    ta.value = (val ? val + '\n' : '') + bullet(text);
+    try { const L = ta.value.length; ta.setSelectionRange(L, L); } catch {}
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    ta.focus();
+  }
+
+  function addMenu(container, ta, list) {
+    if (!container || !ta || !has(list)) return;
+    if (container.querySelector('[data-sugg-for="'+ ta.id +'"]')) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'relative';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'px-2 py-1 text-xs rounded bg-gray-100 text-gray-700';
+    btn.textContent = 'Suggestions ▾';
+    btn.setAttribute('data-sugg-for', ta.id);
+
+    const menu = document.createElement('div');
+    menu.className = 'hidden absolute  z-30 mt-1 w-80 bg-white border rounded shadow p-2 max-h-68 overflow-auto';
+    menu.innerHTML = '<div class="text-xs text-gray-500 px-1 mb-1">Click to insert</div><div class="flex flex-wrap gap-1"></div>';
+
+    const listWrap = menu.querySelector('.flex');
+    list.forEach(text => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'px-2 py-1 text-xs border rounded hover:bg-gray-50';
+      chip.textContent = text;
+      chip.addEventListener('click', () => { insertLine(ta, text); hide(); });
+      listWrap.appendChild(chip);
+    });
+
+    const toggle = () => menu.classList.toggle('hidden');
+    const hide   = () => menu.classList.add('hidden');
+    const outside = (e) => {
+      if (menu.classList.contains('hidden')) return;
+      if (!menu.contains(e.target) && !btn.contains(e.target)) hide();
+    };
+
+    btn.addEventListener('click', toggle);
+    document.addEventListener('click', outside);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
+
+    wrap.appendChild(btn);
+    wrap.appendChild(menu);
+    container.prepend(wrap); // before Bullets/Clear
+  }
+
+  function attach(root = document) {
+    root.querySelectorAll('.hist-pane').forEach(pane => {
+      const ta = pane.querySelector('textarea');
+      if (!ta || !ta.id) return;
+
+      // header right-side control group (where Bullets/Clear live)
+      const header    = pane.querySelector('.flex.items-center.justify-between.mb-2');
+      const controls  = header?.querySelector('.flex.items-center.gap-2') || header;
+
+      const list = CHIP_SETS['#' + ta.id]; // e.g., '#oe', '#ph', ...
+      addMenu(controls, ta, list);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => attach());
+  } else {
+    attach();
+  }
+})();
+</script>
+
+
+@vite('resources/js/others/prescription/prescription-returnDate.js')
 
 </x-app-layout>
