@@ -21,7 +21,10 @@ use App\Http\Controllers\{
 };
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('frontend.welcome');
+});
+Route::get('/blog', function () {
+    return view('frontend.blog');
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
