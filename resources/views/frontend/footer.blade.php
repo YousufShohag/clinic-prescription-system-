@@ -5,7 +5,7 @@
             
             <!-- Clinic Info -->
             <div class="footer-about">
-            <h3 style="margin-bottom:12px;">Dr. Yousuf Patwari Clinic</h3>
+            <h3 style="margin-bottom:12px;">Dr. Shabuddin Hossain Pavel Clinic</h3>
             <p style="line-height:1.6;">
                 Providing compassionate healthcare and wellness services 
                 with a focus on family medicine, preventive care, and patient trust.

@@ -36,7 +36,7 @@ class Medicine extends Model
     public function prescriptions()
     {
         return $this->belongsToMany(Prescription::class, 'prescription_medicines')
-                    ->withPivot('duration', 'times_per_day')
+                    ->withPivot('duration', 'times_per_day','meal_time')
                     ->withTimestamps();
     }
 

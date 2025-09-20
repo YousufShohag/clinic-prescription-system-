@@ -92,16 +92,22 @@
           @if($showDocName)
             <div class="text-2xl font-bold leading-tight">{{ $doc->name }}</div>
           @endif
-          @if($showDegree)
-            <div class="text-sm text-gray-600">{{ $doc->degree }}</div>
-          @endif
-          @if($showSpec)
-            <div class="text-sm text-gray-600">{{ $doc->specialization }}</div>
+          @if($showDegree || $showSpec)
+            <div class="text-sm text-gray-600">
+              @if($showDegree && $showSpec)
+                {{ $doc->degree }} ({{ $doc->specialization }})
+              @elseif($showDegree)
+                ({{ $doc->degree }})
+              @elseif($showSpec)
+                ({{ $doc->specialization }})
+              @endif
+            </div>
           @endif
           @if($showBMDC)
             <div class="text-sm text-gray-600">BMDC Registration Number: {{ $doc->bma_registration_number }}</div>
           @endif
-          <div class="text-sm text-gray-600">Medical Officer: Chattagram Medical College Hospital</div>
+          <div class="text-sm text-gray-600">RMO in Hope Diagnostic Centre and Hospital, Brahmanbaria</div>
+          <div class="text-sm text-gray-600">EMO in Asia General Hospital, Tongi</div>
         </div>
 
         <div class="text-right">
@@ -308,6 +314,15 @@
             </div>
 
             {{-- Medicines --}}
+
+            
+
+            @if(!empty($parts))
+              <div class="text-sm text-gray-600">{{ implode(' — ', $parts) }}</div>
+            @endif
+
+
+
             @if($hasMeds)
               <div class="rounded-lg mb-4" style="padding-left: 25px;">
                 <div class="font-semibold mb-2">Medicines</div>
@@ -322,11 +337,23 @@
                             - <span class="text-sm text-gray-600">{{ $m->strength }}</span>
                           @endif
                         </div>
-                        @php
-                          $parts = [];
-                          if(filled($m->pivot->times_per_day ?? null)) $parts[] = ''.$m->pivot->times_per_day;
-                          if(filled($m->pivot->duration ?? null))     $parts[] = ' '.$m->pivot->duration;
-                        @endphp
+                       @php
+  $mealBn = [
+    'before_meal' => 'খাবারের আগে',
+    'after_meal'  => 'খাবারের পরে',
+    'with_meal'   => 'খাবারের সাথে',
+    'midday'      => 'দুপুরে',
+    'bedtime'     => 'রাতে শোবার আগে',
+  ];
+  $parts = [];
+  if(filled($m->pivot->times_per_day ?? null)) $parts[] = trim($m->pivot->times_per_day);
+
+// If DB already has Bangla, this line will just echo it; if old English key exists, translate.
+  if(filled($m->pivot->meal_time ?? null))     $parts[] = $mealBn[$m->pivot->meal_time] ?? $m->pivot->meal_time;
+
+  if(filled($m->pivot->duration ?? null))      $parts[] = trim($m->pivot->duration);
+@endphp
+
                         @if(!empty($parts))
                           <div class="text-sm text-gray-600">{{ implode(' — ', $parts) }}</div>
                         @endif

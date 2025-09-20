@@ -371,6 +371,8 @@ public function index(Request $request)
             'new_patient.guardian_name' => ['nullable','string','max:255'],
             'new_patient.images.*'  => ['nullable','image','mimes:jpg,jpeg,png,gif,webp'],
             'new_patient.documents.*' => ['nullable','file','mimes:pdf,jpg,jpeg,png,gif,doc,docx,webp'],
+
+            'medicines.*.meal_time' => ['nullable','in:খাবারের আগে,খাবারের পরে,খাবারের সাথে,midday,bedtime'],
         ]);
 
         return DB::transaction(function () use ($request, $prescription) {
@@ -542,20 +544,54 @@ public function index(Request $request)
     }
 
     /** Build [id => ['duration'=>..., 'times_per_day'=>...], ...] for attach/sync */
-    private function extractMedicinePivot(array $medicines): array
-    {
-        $out = [];
-        foreach ($medicines as $id => $row) {
-            if (!isset($row['selected']) || !$row['selected']) continue;
-            $out[(int) $id] = [
-                'duration'      => $row['duration']      ?? null,
-                'times_per_day' => $row['times_per_day'] ?? null,
-                'created_at'    => now(),
-                'updated_at'    => now(),
-            ];
-        }
-        return $out;
+    // private function extractMedicinePivot(array $medicines): array
+    // {
+    //     $out = [];
+    //     foreach ($medicines as $id => $row) {
+    //         if (!isset($row['selected']) || !$row['selected']) continue;
+    //         $out[(int) $id] = [
+    //             'duration'      => $row['duration']      ?? null,
+    //             'times_per_day' => $row['times_per_day'] ?? null,
+    //             'meal_time'     => $row['meal_time']     ?? null,
+    //             'created_at'    => now(),
+    //             'updated_at'    => now(),
+    //         ];
+    //     }
+    //     return $out;
+    // }
+
+    /** Build [id => ['duration'=>..., 'times_per_day'=>..., 'meal_time'=>...], ...] for attach/sync */
+private function extractMedicinePivot(array $medicines): array
+{
+    // English key → Bangla label map
+    $mealMap = [
+        'before_meal' => 'খাবারের আগে',
+        'after_meal'  => 'খাবারের পরে',
+        'with_meal'   => 'খাবারের সাথে',
+        'midday'      => 'দুপুরে',
+        'bedtime'     => 'রাতে শোবার আগে',
+    ];
+
+    $out = [];
+    foreach ($medicines as $id => $row) {
+        if (empty($row['selected'])) continue;
+
+        // Translate to Bangla if value is an English key, otherwise keep as-is
+        $mealTime = $row['meal_time'] ?? null;
+        $mealTimeBn = $mealTime
+            ? ($mealMap[$mealTime] ?? $mealTime)
+            : null;
+
+        $out[(int) $id] = [
+            'duration'      => $row['duration']      ?? null,
+            'times_per_day' => $row['times_per_day'] ?? null,
+            'meal_time'     => $mealTimeBn,   // ✅ store Bangla
+            'created_at'    => now(),
+            'updated_at'    => now(),
+        ];
     }
+    return $out;
+}
 
     /** Compute BMI; fallback to provided value if not computable. */
     private function computeBmi($weightKg, $heightCm, $fallback = null)

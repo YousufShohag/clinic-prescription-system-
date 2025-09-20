@@ -4,119 +4,19 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"/>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.full.min.js"></script>
-<style>
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-</style>
+  
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 
-<style>
-  /* Preview-only helpers (won't affect your show blade) */
-  #rx_preview_canvas .rx-card { border:1px solid #e5e7eb; border-radius: .5rem; }
-  #rx_preview_canvas .rx-left { border-right:1px solid #e5e7eb; }
-  #rx_preview_canvas .rx-section-title { font-weight:600; }
-  #rx_preview_canvas .rx-dot { display:inline-block; width:.4rem; }
-</style>
-
-
-
-{{-- <style>
-/* -------- Doctor-friendly theme (keeps your Tailwind utilities) -------- */
-:root{
-  --df-accent:#0ea5e9;       /* sky-500 */
-  --df-ink:#0f172a;          /* slate-900 */
-  --df-muted:#64748b;        /* slate-500 */
-  --df-border:#e5e7eb;       /* gray-200 */
-  --df-soft:#f8fafc;         /* slate-50 */
-}
-
-/* Card shells */
-section.border.rounded-lg{
-  border-color: var(--df-border) !important;
-  border-radius: 12px !important;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 1px 0 rgba(15,23,42,.03);
-}
-
-/* Header buttons */
-section.border.rounded-lg > button{
-  position: relative;
-  padding: .85rem 1rem;
-  background: var(--df-soft);
-  font-weight: 600;
-  color: var(--df-ink);
-  border-bottom: 1px solid var(--df-border);
-}
-
-/* Accent stripe on header */
-section.border.rounded-lg > button::before{
-  content:"";
-  position:absolute; inset:0 auto 0 0;
-  width:4px; background:var(--df-accent); opacity:.7;
-  border-top-left-radius:12px; border-bottom-left-radius:12px;
-}
-
-/* Chevron rotation on expand */
-section.border.rounded-lg > button[aria-expanded="true"] svg{
-  transform: rotate(180deg);
-}
-
-/* Count badges (auto via data-count attr set by JS) */
-#cf-toggle,#hist-toggle,#cc-toggle,#med-toggle,#test-toggle,#advice-toggle{ padding-right: 2.25rem; }
-#cf-toggle[data-count]::after,
-#hist-toggle[data-count]::after,
-#cc-toggle[data-count]::after,
-#med-toggle[data-count]::after,
-#test-toggle[data-count]::after,
-#advice-toggle[data-count]::after{
-  content: attr(data-count);
-  position:absolute; right:.8rem; top:50%; transform: translateY(-50%);
-  min-width: 1.25rem; height: 1.25rem; line-height: 1.25rem; text-align:center;
-  font-size: .75rem; color:#0b3b53; background:#e0f2fe; border:1px solid #bae6fd; border-radius:999px;
-}
-
-/* Section bodies */
-section.border.rounded-lg > .border-t{ border-color: var(--df-border) !important; }
-
-/* Inputs: friendlier focus ring & radius */
-input[type="text"], input[type="number"], input[type="date"], input[type="email"],
-select, textarea{
-  border-color: var(--df-border);
-  border-radius: 10px;
-}
-input:focus, select:focus, textarea:focus{
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(14,165,233,.25);
-  border-color:#7dd3fc;
-}
-
-/* Little refinements */
-label.block.text-sm{ color: #334155; } /* slate-700 */
-.text-sm.text-gray-600{ color: var(--df-muted) !important; }
-
-/* Medicine rows: sightline + active highlight is already added by your JS */
-#medicine_selected [data-id]{
-  border-color: var(--df-border);
-  border-radius: 10px;
-}
-#medicine_selected [data-id].ring{
-  box-shadow: 0 0 0 3px rgba(14,165,233,.25);
-}
-
-/* Live preview card tweaks */
-#rx_live_preview_card .bg-gray-50{ background: var(--df-soft) !important; }
-#rx_preview_canvas{ line-height: 1.65; }
-#rx_preview_canvas .font-semibold{ color: #111827; }
-
-/* Print: cleaner output (hides buttons/controls) */
-@media print{
-  #tpl_btn, #btn_normals, #btn_preview, #btn_save_draft, #btn_restore_draft, #btn_clear_draft,
-  #rx_preview_print, #rx_preview_toggle, .select2-container{ display:none !important; }
-  #rx_preview_canvas{ max-width: none !important; }
-}
-</style> --}}
-
-
+  <style>
+    /* Preview-only helpers (won't affect your show blade) */
+    #rx_preview_canvas .rx-card { border:1px solid #e5e7eb; border-radius: .5rem; }
+    #rx_preview_canvas .rx-left { border-right:1px solid #e5e7eb; }
+    #rx_preview_canvas .rx-section-title { font-weight:600; }
+    #rx_preview_canvas .rx-dot { display:inline-block; width:.4rem; }
+  </style>
   <div class="w-full min-h-screen bg-white p-6 md:p-8">
     <div class="flex items-start justify-between gap-2">
       <h2 class="text-3xl font-semibold">New Prescription</h2>
@@ -148,13 +48,6 @@ label.block.text-sm{ color: #334155; } /* slate-700 */
       </div>
     </div>
 
-    {{-- <p class="text-xs text-gray-500 mt-1">
-      Shortcuts: <kbd class="px-1 border rounded">Alt</kbd>+<kbd class="px-1 border rounded">1</kbd> CF Panel •
-      <kbd class="px-1 border rounded">Alt</kbd>+<kbd class="px-1 border rounded">N</kbd> Normal Vitals •
-      <kbd class="px-1 border rounded">Alt</kbd>+<kbd class="px-1 border rounded">B</kbd> Toggle bullets •
-      <kbd class="px-1 border rounded">Alt</kbd>+<kbd class="px-1 border rounded">S</kbd> Submit
-    </p> --}}
-
     @if($errors->any())
       <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
         <ul class="list-disc list-inside">
@@ -167,9 +60,216 @@ label.block.text-sm{ color: #334155; } /* slate-700 */
       @csrf
 
       {{-- LEFT --}}
-      <aside class="xl:col-span-3 space-y-6">
+      <aside class="xl:col-span-3 space-y-2">
+      {{-- ================= Chief Complain (collapsible) ================= --}}
+      <section id="cc-card" class="border rounded-lg mt-4">
+        <!-- Header -->
+        <button type="button"
+                id="cc-toggle"
+                class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
+                aria-controls="cc-body"
+                aria-expanded="true">
+          <span class="text-sm font-semibold">Chief Complain (C/C)</span>
+          <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z"
+                  clip-rule="evenodd" />
+          </svg>
+        </button>
+
+        <!-- Body -->
+        <div id="cc-body" class="p-4 border-t">
+          <div class="flex items-center justify-between mb-2">
+            {{-- <label for="problem_description" class="block text-sm font-medium text-gray-700">Chief Complain (C/C)</label> --}}
+            <div class="flex items-center gap-2 relative">
+              <!-- Suggestions button + menu (unchanged IDs) -->
+              <div class="relative">
+                <button type="button" id="btn_cc_suggestions"
+                        class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">
+                  Suggestions ▾
+                </button>
+                <div id="cc_sugg_menu"
+                    class="hidden absolute left-10 z-30 mt-1 w-80 bg-white border rounded shadow p-2 max-h-64 overflow-auto">
+                  <div class="text-xs text-gray-500 px-1 mb-1">Click to insert</div>
+                  <div id="cc_sugg_list" class="flex flex-wrap gap-1"></div>
+                </div>
+              </div>
+
+              <button type="button"
+                      class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                      data-bullets-toggle="#problem_description">• Bullets: OFF</button>
+              <button type="button"
+                      class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                      data-bullets-clear="#problem_description">Clear</button>
+            </div>
+          </div>
+
+          <textarea id="problem_description"
+                    name="problem_description"
+                    rows="3"
+                    class="w-full border rounded px-2 py-2"
+                    data-bullets>{{ old('problem_description') }}</textarea>
+        </div>
+      </section>
+
+        {{-- ===== Segmented History panel ===== --}}
+        @php
+          $histTabs = [
+            'oe' => 'O/E',
+            'ph' => 'P/H',
+            'dh' => 'D/H',
+            'mh' => 'M/H',
+            'oh' => 'OH',
+            'pae' => 'P/A/E',
+            'dx' => 'DX',
+            'previous_investigation' => 'Previous Investigation',
+            'ah' => 'A/H',
+            'special_note' => 'Special Note',
+            'referred_to' => 'Referred To',
+          ];
+        @endphp
+
+     <!-- ===== History (O/E, P/H, D/H, M/H, OH, P/A/E, DX, Previous Investigation, A/H, Special Note, Referred To) – Collapsible ===== -->
+    <section class="border rounded-lg" id="hist-card">
+      <button type="button"
+              class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
+              aria-controls="hist-body" aria-expanded="false" id="hist-toggle">
+        <span class="text-sm font-semibold">History (O/E, P/H, D/H, …)</span>
+        <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
+        </svg>
+      </button>
+
+      <div id="hist-body" class="p-0 border-t hidden">
+        <div id="hist-tabs" class="p-3 border-b flex flex-wrap gap-2">
+          @foreach($histTabs as $key => $label)
+            <button type="button"
+                    class="hist-tab px-3 py-1 text-sm rounded-full border hover:bg-gray-50"
+                    data-target="#hist_{{ $key }}">
+              <span class="tab-text">{{ $label }}</span>
+              <span class="ml-1 hidden tab-dot">•</span>
+            </button>
+          @endforeach
+        </div>
+
+        <div class="p-4">
+          @foreach($histTabs as $key => $label)
+            <div id="hist_{{ $key }}" class="hist-pane hidden">
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-medium text-gray-700">{{ $label }}</label>
+                <div class="flex items-center gap-2">
+                  <!-- (Optional) Suggestions menu is auto-added by your existing script -->
+                  <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                          data-bullets-toggle="#{{ $key }}">• Bullets: OFF</button>
+                  <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
+                          data-bullets-clear="#{{ $key }}">Clear</button>
+                </div>
+              </div>
+
+              {{-- <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#{{ $key }}"></div> --}}
+
+              <textarea id="{{ $key }}" name="{{ $key }}" rows="3"
+                        class="w-full border rounded px-3 py-2"
+                        data-bullets>{{ old($key) }}</textarea>
+            </div>
+          @endforeach
+        </div>
+      </div>
+    </section>
+    {{-- ================= Medicines  (collapsible) ================= --}}
+    <section id="med-card" class="border rounded-lg">
+      <!-- Header -->
+      <button type="button"
+              id="med-toggle"
+              class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
+              aria-controls="med-body"
+              aria-expanded="true">
+        <span class="text-sm font-semibold">Medicines</span>
+        <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z"
+                clip-rule="evenodd" />
+        </svg>
+      </button>
+
+      <!-- Body -->
+      <div id="med-body" class="p-4 border-t">
+        <!-- START: MED BODY (your original content) -->
+        <div class="space-y-3">
+          <div class="flex flex-col md:flex-row md:items-center gap-2">
+            {{-- <h3 class="text-sm font-semibold">Medicines</h3> --}}
+            <div class="flex-1"></div>
+            <select id="medicine_picker" multiple class="w-full md:w-96"></select>
+            <button type="button" id="medicine_clear" class="px-1 py-1 border rounded">Clear</button>
+          </div>
+
+          <!-- Central times/duration suggestions (applies to the active medicine row) -->
+          <div id="med_central_suggestions" class="hidden border rounded p-3">
+            <div class="mt-1">
+              <div class="relative">
+                <button type="button" id="med_sugg_prev"
+                        class="hidden md:flex items-center justify-center w-7 h-7 rounded-full border bg-white shadow absolute left-0 top-1/2 -translate-y-1/2 z-10 disabled:opacity-40"
+                        aria-label="Scroll left">‹</button>
+
+                <div id="med_sugg_scroller"
+                    class="flex items-center gap-2 flex-nowrap overflow-x-auto whitespace-nowrap no-scrollbar py-1 px-8">
+                  <div id="med_sugg_times" class="inline-flex gap-1 shrink-0"></div>
+                  <span class="text-gray-300 shrink-0">|</span>
+                  <div id="med_sugg_duration" class="inline-flex gap-1 shrink-0"></div>
+                </div>
+
+                <button type="button" id="med_sugg_next"
+                        class="hidden md:flex items-center justify-center w-7 h-7 rounded-full border bg-white shadow absolute right-0 top-1/2 -translate-y-1/2 z-10 disabled:opacity-40"
+                        aria-label="Scroll right">›</button>
+              </div>
+            </div>
+
+            <div id="medicine_selected_wrap" class="hidden">
+              <div class="text-sm text-gray-600 mb-1">Selected medicines</div>
+              <div id="medicine_selected" class="space-y-2"></div>
+            </div>
+          </div>
+        </div>
+        <!-- END: MED BODY -->
+      </div>
+    </section>
+{{-- ================= Inviestigations  (collapsible) ================= --}}
+    <section id="test-card" class="border rounded-lg">
+  <!-- Header -->
+    <button type="button"
+            id="test-toggle"
+            class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
+            aria-controls="test-body"
+            aria-expanded="true">
+      <span class="text-sm font-semibold">Investigations</span>
+      <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd"
+              d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z"
+              clip-rule="evenodd" />
+      </svg>
+    </button>
+
+    <!-- Body -->
+    <div id="test-body" class="p-4 border-t">
+      <!-- START: TEST BODY (your original content) -->
+      <div class="space-y-3">
+        <div class="flex flex-col md:flex-row md:items-center gap-2">
+          {{-- <h3 class="text-xl font-semibold">Tests</h3> --}}
+          <div class="flex-1"></div>
+          <select id="test_picker" multiple class="w-full md:w-96"></select>
+          <button type="button" id="test_clear" class="px-1 py-1 border rounded">Clear</button>
+        </div>
+
+        <div id="test_selected_wrap" class="hidden">
+          <div class="text-sm text-gray-600 mb-1">Selected tests</div>
+          <div id="test_selected" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+        </div>
+      </div>
+      <!-- END: TEST BODY -->
+    </div>
+  </section>
         {{-- ================= Clinical Findings (collapsible) ================= --}}
-        <section id="cf-card" class="border rounded-lg">
+        {{-- <section id="cf-card" class="border rounded-lg">
           <button type="button"
                   id="cf-toggle"
                   class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
@@ -222,216 +322,9 @@ label.block.text-sm{ color: #334155; } /* slate-700 */
               <button type="button" id="btn_clear_vitals" class="px-2 py-1 text-xs border rounded hover:bg-gray-50">Clear Vitals</button>
             </div>
           </div>
-        </section>
-
-        {{-- ===== Segmented History panel ===== --}}
-        @php
-          $histTabs = [
-            'oe' => 'O/E',
-            'ph' => 'P/H',
-            'dh' => 'D/H',
-            'mh' => 'M/H',
-            'oh' => 'OH',
-            'pae' => 'P/A/E',
-            'dx' => 'DX',
-            'previous_investigation' => 'Previous Investigation',
-            'ah' => 'A/H',
-            'special_note' => 'Special Note',
-            'referred_to' => 'Referred To',
-          ];
-        @endphp
-
-     <!-- ===== History (O/E, P/H, D/H, M/H, OH, P/A/E, DX, Previous Investigation, A/H, Special Note, Referred To) – Collapsible ===== -->
-<section class="border rounded-lg" id="hist-card">
-  <button type="button"
-          class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
-          aria-controls="hist-body" aria-expanded="false" id="hist-toggle">
-    <span class="text-sm font-semibold">History (O/E, P/H, D/H, …)</span>
-    <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
-    </svg>
-  </button>
-
-  <div id="hist-body" class="p-0 border-t hidden">
-    <div id="hist-tabs" class="p-3 border-b flex flex-wrap gap-2">
-      @foreach($histTabs as $key => $label)
-        <button type="button"
-                class="hist-tab px-3 py-1 text-sm rounded-full border hover:bg-gray-50"
-                data-target="#hist_{{ $key }}">
-          <span class="tab-text">{{ $label }}</span>
-          <span class="ml-1 hidden tab-dot">•</span>
-        </button>
-      @endforeach
-    </div>
-
-    <div class="p-4">
-      @foreach($histTabs as $key => $label)
-        <div id="hist_{{ $key }}" class="hist-pane hidden">
-          <div class="flex items-center justify-between mb-2">
-            <label class="block text-sm font-medium text-gray-700">{{ $label }}</label>
-            <div class="flex items-center gap-2">
-              <!-- (Optional) Suggestions menu is auto-added by your existing script -->
-              <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
-                      data-bullets-toggle="#{{ $key }}">• Bullets: OFF</button>
-              <button type="button" class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
-                      data-bullets-clear="#{{ $key }}">Clear</button>
-            </div>
-          </div>
-
-          {{-- <div class="flex flex-wrap gap-2 mb-2" data-chip-row data-target="#{{ $key }}"></div> --}}
-
-          <textarea id="{{ $key }}" name="{{ $key }}" rows="3"
-                    class="w-full border rounded px-3 py-2"
-                    data-bullets>{{ old($key) }}</textarea>
-        </div>
-      @endforeach
-    </div>
-  </div>
-</section>
-
-<section id="cc-card" class="border rounded-lg mt-4">
-  <!-- Header -->
-  <button type="button"
-          id="cc-toggle"
-          class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
-          aria-controls="cc-body"
-          aria-expanded="true">
-    <span class="text-sm font-semibold">Chief Complain (C/C)</span>
-    <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fill-rule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z"
-            clip-rule="evenodd" />
-    </svg>
-  </button>
-
-  <!-- Body -->
-  <div id="cc-body" class="p-4 border-t">
-    <div class="flex items-center justify-between mb-2">
-      <label for="problem_description" class="block text-sm font-medium text-gray-700">Chief Complain (C/C)</label>
-
-      <div class="flex items-center gap-2 relative">
-        <!-- Suggestions button + menu (unchanged IDs) -->
-        <div class="relative">
-          <button type="button" id="btn_cc_suggestions"
-                  class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">
-            Suggestions ▾
-          </button>
-          <div id="cc_sugg_menu"
-               class="hidden absolute right-0 z-30 mt-1 w-80 bg-white border rounded shadow p-2 max-h-64 overflow-auto">
-            <div class="text-xs text-gray-500 px-1 mb-1">Click to insert</div>
-            <div id="cc_sugg_list" class="flex flex-wrap gap-1"></div>
-          </div>
-        </div>
-
-        <button type="button"
-                class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
-                data-bullets-toggle="#problem_description">• Bullets: OFF</button>
-        <button type="button"
-                class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700"
-                data-bullets-clear="#problem_description">Clear</button>
-      </div>
-    </div>
-
-    <textarea id="problem_description"
-              name="problem_description"
-              rows="3"
-              class="w-full border rounded px-2 py-2"
-              data-bullets>{{ old('problem_description') }}</textarea>
-  </div>
-</section>
-
-<section id="med-card" class="border rounded-lg">
-  <!-- Header -->
-  <button type="button"
-          id="med-toggle"
-          class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
-          aria-controls="med-body"
-          aria-expanded="true">
-    <span class="text-sm font-semibold">Medicines</span>
-    <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fill-rule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z"
-            clip-rule="evenodd" />
-    </svg>
-  </button>
-
-  <!-- Body -->
-  <div id="med-body" class="p-4 border-t">
-    <!-- START: MED BODY (your original content) -->
-    <div class="space-y-3">
-      <div class="flex flex-col md:flex-row md:items-center gap-2">
-        {{-- <h3 class="text-sm font-semibold">Medicines</h3> --}}
-        <div class="flex-1"></div>
-        <select id="medicine_picker" multiple class="w-full md:w-96"></select>
-        <button type="button" id="medicine_clear" class="px-1 py-1 border rounded">Clear</button>
-      </div>
-
-      <!-- Central times/duration suggestions (applies to the active medicine row) -->
-      <div id="med_central_suggestions" class="hidden border rounded p-3">
-        <div class="mt-1">
-          <div class="relative">
-            <button type="button" id="med_sugg_prev"
-                    class="hidden md:flex items-center justify-center w-7 h-7 rounded-full border bg-white shadow absolute left-0 top-1/2 -translate-y-1/2 z-10 disabled:opacity-40"
-                    aria-label="Scroll left">‹</button>
-
-            <div id="med_sugg_scroller"
-                 class="flex items-center gap-2 flex-nowrap overflow-x-auto whitespace-nowrap no-scrollbar py-1 px-8">
-              <div id="med_sugg_times" class="inline-flex gap-1 shrink-0"></div>
-              <span class="text-gray-300 shrink-0">|</span>
-              <div id="med_sugg_duration" class="inline-flex gap-1 shrink-0"></div>
-            </div>
-
-            <button type="button" id="med_sugg_next"
-                    class="hidden md:flex items-center justify-center w-7 h-7 rounded-full border bg-white shadow absolute right-0 top-1/2 -translate-y-1/2 z-10 disabled:opacity-40"
-                    aria-label="Scroll right">›</button>
-          </div>
-        </div>
-
-        <div id="medicine_selected_wrap" class="hidden">
-          <div class="text-sm text-gray-600 mb-1">Selected medicines</div>
-          <div id="medicine_selected" class="space-y-2"></div>
-        </div>
-      </div>
-    </div>
-    <!-- END: MED BODY -->
-  </div>
-</section>
+        </section> --}}
 
 
-<section id="test-card" class="border rounded-lg">
-  <!-- Header -->
-  <button type="button"
-          id="test-toggle"
-          class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
-          aria-controls="test-body"
-          aria-expanded="true">
-    <span class="text-sm font-semibold">Investigations</span>
-    <svg class="w-5 h-5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fill-rule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 10.232l3.71-3.001a.75.75 0 11.94 1.17l-4.2 3.4a.75.75 0 01-.94 0l-4.2-3.4a.75.75 0 01-.02-1.06z"
-            clip-rule="evenodd" />
-    </svg>
-  </button>
-
-  <!-- Body -->
-  <div id="test-body" class="p-4 border-t">
-    <!-- START: TEST BODY (your original content) -->
-    <div class="space-y-3">
-      <div class="flex flex-col md:flex-row md:items-center gap-2">
-        {{-- <h3 class="text-xl font-semibold">Tests</h3> --}}
-        <div class="flex-1"></div>
-        <select id="test_picker" multiple class="w-full md:w-96"></select>
-        <button type="button" id="test_clear" class="px-1 py-1 border rounded">Clear</button>
-      </div>
-
-      <div id="test_selected_wrap" class="hidden">
-        <div class="text-sm text-gray-600 mb-1">Selected tests</div>
-        <div id="test_selected" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
-      </div>
-    </div>
-    <!-- END: TEST BODY -->
-  </div>
-</section>
       </aside>
 
 
@@ -461,15 +354,6 @@ label.block.text-sm{ color: #334155; } /* slate-700 */
 
           <div class="">
             <label class="block text-sm font-medium text-gray-700">Patient</label>
-            {{-- <select
-              name="patient_id"
-              id="patient_select"
-              class="w-full border rounded px-3 py-2"
-              data-search-url="{{ route('patients.search') }}"
-              data-history-url-template="{{ route('patients.history', ['patient' => '__ID__']) }}">
-              <option value="">-- Select existing patient --</option>
-              <option value="__new">+ Add new patient</option>
-            </select> --}}
             <select
               name="patient_id"
               id="patient_select"
@@ -599,7 +483,7 @@ label.block.text-sm{ color: #334155; } /* slate-700 */
             Suggestions ▾
           </button>
           <div id="advice_sugg_menu"
-               class="hidden absolute right-0 z-30 mt-1 w-72 bg-white border rounded shadow p-2 max-h-64 overflow-auto">
+               class="hidden absolute left-0 z-30 mt-1 w-72 bg-white border rounded shadow p-2 max-h-64 overflow-auto">
             <div class="text-xs text-gray-500 px-1 mb-1">Click to insert</div>
             <div id="advice_sugg_list" class="flex flex-wrap gap-1"></div>
           </div>
@@ -750,16 +634,35 @@ $(function () {
       },
 
       // ✅ Surface AJAX errors instead of silently failing
+      // transport: function (params, success, failure) {
+      //   const req = $.ajax(params);
+      //   req.then(success);
+      //   req.fail(function (xhr) {
+      //     console.error('Patient search AJAX error:', xhr.status, xhr.responseText);
+      //     alert('Patient search failed (' + xhr.status + '). Check console for details.');
+      //     failure(xhr);
+      //   });
+      //   return req;
+      // }
+
       transport: function (params, success, failure) {
         const req = $.ajax(params);
         req.then(success);
-        req.fail(function (xhr) {
+        req.fail(function (xhr, statusText) {
+          // Select2 aborts in-flight requests while typing; jQuery reports those as status 0 / "abort".
+          if (statusText === 'abort' || xhr.status === 0) return;
+
           console.error('Patient search AJAX error:', xhr.status, xhr.responseText);
-          alert('Patient search failed (' + xhr.status + '). Check console for details.');
+          const msg =
+            (xhr.responseJSON && xhr.responseJSON.message) ||
+            xhr.statusText ||
+            'Unknown error';
+          alert('Patient search failed (' + xhr.status + '): ' + msg);
           failure(xhr);
         });
         return req;
       }
+
     },
 
     templateResult: item => {
@@ -1069,6 +972,7 @@ $(function () {
         const id       = item.id;
         const timesKey = `medicines[${id}][times_per_day]`;
         const durKey   = `medicines[${id}][duration]`;
+        const mealKey  = `medicines[${id}][meal_time]`;
         const key      = keyFromItem(item);
         // put near the top of the file (once)
         const TYPE_MAP = {
@@ -1101,26 +1005,55 @@ $(function () {
           item.strength ? ` (${item.strength})` : ''
         }`;
 
+        // const $row = $(`
+        //   <div class="border rounded p-2" data-id="${id}" data-key="${key}" data-display="${$('<div>').text(display).html()}">
+        //     <div class="flex items-center justify-between gap-2">
+        //       <div class="text-sm">
+        //         <div class="font-medium">${display}</div>
+        //         ${'' /* manufacturer (disabled):
+        // <div class="text-xs text-gray-500">${item.manufacturer ?? ''}</div>
+        // */ }
+        //       </div>
+        //       <button type="button" class="text-red-600 text-sm remove-btn">Remove</button>
+        //     </div>
+
+        //     <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+        //       <input type="hidden" name="medicines[${id}][selected]" value="1">
+        //       <input type="text" class="border rounded px-2 py-1" name="${durKey}"   placeholder="Duration (e.g., ৫ দিন)" data-med-dur>
+        //       <input type="text" class="border rounded px-2 py-1" name="${timesKey}" placeholder="Times/day (e.g., BD)" data-med-times>
+        //     </div>
+        //   </div>
+        // `);
+
         const $row = $(`
-          <div class="border rounded p-2" data-id="${id}" data-key="${key}" data-display="${$('<div>').text(display).html()}">
-            <div class="flex items-center justify-between gap-2">
-              <div class="text-sm">
-                <div class="font-medium">${display}</div>
-                ${'' /* manufacturer (disabled):
-        <div class="text-xs text-gray-500">${item.manufacturer ?? ''}</div>
-        */ }
-              </div>
-              <button type="button" class="text-red-600 text-sm remove-btn">Remove</button>
-            </div>
+  <div class="border rounded p-2" data-id="${id}" data-key="${key}" data-display="${$('<div>').text(display).html()}">
+    <div class="flex items-center justify-between gap-2">
+      <div class="text-sm">
+        <div class="font-medium">${display}</div>
+      </div>
+      <button type="button" class="text-red-600 text-sm remove-btn">Remove</button>
+    </div>
 
-            <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-              <input type="hidden" name="medicines[${id}][selected]" value="1">
-              <input type="text" class="border rounded px-2 py-1" name="${durKey}"   placeholder="Duration (e.g., ৫ দিন)" data-med-dur>
-              <input type="text" class="border rounded px-2 py-1" name="${timesKey}" placeholder="Times/day (e.g., BD)" data-med-times>
-            </div>
-          </div>
-        `);
+    <div class="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2">
+      <input type="hidden" name="medicines[${id}][selected]" value="1">
 
+      <input type="text" class="border rounded px-2 py-1"
+             name="${timesKey}" placeholder="Times/day (e.g., ১+০+১)" data-med-times>
+
+      <select name="${mealKey}" class="border rounded px-2 py-1" data-med-meal>
+        <option value="">— Meal timing —</option>
+        <option value="before_meal">খাবারের আগে</option>
+        <option value="after_meal">খাবারের পরে</option>
+        <option value="with_meal">খাবারের সাথে</option>
+        <option value="midday">দুপুরে</option>
+        <option value="bedtime">রাতে শোবার আগে</option>
+      </select>
+
+      <input type="text" class="border rounded px-2 py-1"
+             name="${durKey}" placeholder="Duration (e.g., ৫ দিন)" data-med-dur>
+    </div>
+  </div>
+`);
         // make this the active row when clicked or focused
         $row.on('click', () => setActiveRow(id));
         $row.find('[data-med-times]').on('focus', () => setActiveRow(id));
@@ -1162,10 +1095,17 @@ $(function () {
           delay: 200,
           headers: { 'X-Requested-With': 'XMLHttpRequest' },
           data: params => ({ term: params.term, page: params.page || 1 }),
+          // processResults: (data, params) => {
+          //   params.page = params.page || 1;
+          //   const results = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
+          //   const more    = Array.isArray(data) ? false : !!(data?.pagination && data.pagination.more);
+          //   return { results, pagination: { more } };
+          // },
           processResults: (data, params) => {
             params.page = params.page || 1;
             const results = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
-            const more    = Array.isArray(data) ? false : !!(data?.pagination && data.pagination.more);
+            results.forEach(r => { r.id = String(r.id); });   // <— add this line
+            const more = Array.isArray(data) ? false : !!(data?.pagination && data.pagination.more);
             return { results, pagination: { more } };
           },
           cache: true,
@@ -1996,16 +1936,17 @@ window.CHIP_SETS = CHIP_SETS;
   const clean = s => (String(s||'').trim());
   const bulletize = s => nl2br(s); // you already store with "• " bullets; keep as-is
 
-  // Collect medicines from the center selection list
+
   function collectMedicines() {
-    const rows = $$('#medicine_selected [data-id]');
-    return rows.map(r => {
-      const display = r.getAttribute('data-display') || '';
-      const times = $('[data-med-times]', r)?.value || '';
-      const dur   = $('[data-med-dur]', r)?.value || '';
-      return { display, times, dur };
-    });
-  }
+  const rows = $$('#medicine_selected [data-id]');
+  return rows.map(r => {
+    const display = r.getAttribute('data-display') || '';
+    const times   = $('[data-med-times]', r)?.value || '';
+    const dur     = $('[data-med-dur]', r)?.value || '';
+    const meal    = $('[data-med-meal]', r)?.value || '';
+    return { display, times, dur, meal_time: meal };
+  });
+}
 
   // Collect tests from the right grid
   function collectTests() {
@@ -2025,6 +1966,9 @@ window.CHIP_SETS = CHIP_SETS;
     if (!txt || txt.includes('+ Add new patient') || txt.includes('-- Select')) return '';
     return txt;
   }
+
+  
+
 
   function doctorLabel() {
     const el = $('#doctor_id');
@@ -2091,6 +2035,11 @@ window.CHIP_SETS = CHIP_SETS;
     vitals.bmi && `BMI: <b>${vitals.bmi}</b>`
   ].filter(Boolean).join(' • ');
 
+
+  
+
+
+
   const hist = m.hist || {};
   const histBlock = (label, val) => fmt(val) ? `
     <div class="mb-2">
@@ -2098,14 +2047,27 @@ window.CHIP_SETS = CHIP_SETS;
       <div class="text-sm whitespace-pre-wrap">${lines(val)}</div>
     </div>` : '';
 
+const labelMeal = mt => ({
+  before_meal: 'খাবারের আগে',
+  after_meal:  'খাবারের পরে ',
+  with_meal:   'খাবারের সাথে ',
+  midday:      'দুপুরে',
+  bedtime:     'রাতে শোবার আগে'
+}[mt] || '');
+
+
   const medsHTML = (m.medicines || []).map(md => {
-    const info = [fmt(md.times), fmt(md.dur)].filter(Boolean).join(' — ');
+    const info = [fmt(md.times), fmt(labelMeal(md.meal_time)), fmt(md.dur)]
+                .filter(Boolean).join(' — ');
     return `
-      <li class="pl-1">
-        <div class="font-medium">${md.display}</div>
-        ${info ? `<div class="text-sm text-gray-600">${info}</div>` : ''}
-      </li>`;
-  }).join('');
+    <li class="pl-1">
+      <div class="font-medium">${md.display}</div>
+      ${info ? `<div class="text-sm text-gray-600">${info}</div>` : ''}
+    </li>`;
+}).join('');
+
+
+  
 
   const testsHTML = (m.tests || []).map(t => `<li>${t}</li>`).join('');
 // Get just the doctor's name (strip any specialization in parentheses)
@@ -2121,7 +2083,13 @@ const docName = docNameRaw.replace(/\s*\([^)]*\)\s*$/, '');
          
         ${docName ? `<div class="text-2xl font-bold leading-tight">${docName}</div>` : ''}
 
-        <div class="text-sm text-gray-600">Medical Officer: Chattagram Medical College Hospital</div>
+        <div class="text-left">
+        <div class="text-xs text-gray-500 leading-4">
+          MBBS (FMCH)<br>
+          RMO in Hope Diagnostic Centre and Hospital, Brahmanbaria<br>
+          EMO in Asia General Hospital, Tongi
+        </div>
+      </div>
       </div>
       <div class="text-right">
         <div class="text-sm font-semibold">Chamber: Epic International Hospital</div>
@@ -2215,16 +2183,11 @@ const docName = docNameRaw.replace(/\s*\([^)]*\)\s*$/, '');
           <div class="text-right">
             <div class="h-12"></div>
             <div class="border-t border-gray-400 pt-1 text-sm">
-              ${m.doctor || ''}<br>
+              ${docName ? `<div class="text-xs">${docName}</div>` : ''}<br>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="mt-4 text-center text-[11px] text-gray-500">
-      Thank you for visiting. For emergencies, please contact the clinic immediately
     </div>
   </div>`;
 }
@@ -2233,6 +2196,8 @@ const docName = docNameRaw.replace(/\s*\([^)]*\)\s*$/, '');
     const m = model();
     $('#rx_preview_canvas').innerHTML = renderHTML(m);
   }
+
+  
 
   // Wire events for live updates
   function wirePreview() {
@@ -2262,6 +2227,9 @@ const docName = docNameRaw.replace(/\s*\([^)]*\)\s*$/, '');
       jq(document).on('select2:select select2:unselect', '#patient_select, #medicine_picker, #test_picker', updatePreview);
     }
 
+
+
+    
     // Mutations in medicine/tests lists (add/remove rows)
     const mo = new MutationObserver(updatePreview);
     const medList = document.getElementById('medicine_selected');

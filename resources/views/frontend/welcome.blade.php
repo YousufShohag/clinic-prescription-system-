@@ -10,7 +10,7 @@
         <!-- Left text card -->
         <div class="card">
             <h1 class="headline">
-            Welcome to <span class="accent-gradient">Dr. Yousuf Patwari’s Clinic</span>
+            Welcome to <span class="accent-gradient">Dr.Shabuddin Hossain Pavel's Clinic</span>
             </h1>
             <p class="sub">
             Providing compassionate healthcare, timely consultation, and reliable treatment for you and your family.
@@ -31,7 +31,7 @@
 
         <!-- Right image card -->
         <div class="card tilt" style="text-align:center">
-            <img class="avatar" src="{{ asset('doctor.png') }}" alt="Doctor profile photo"/>
+            <img class="avatar" src="{{ asset('doctor4.jpg') }}" alt="Doctor profile photo"/>
             <p class="sub" style="margin-top:10px">
             Caring for your health, one appointment at a time
             </p>
@@ -44,12 +44,12 @@
             
             <!-- Doctor Image -->
             <div class="about-image" style="text-align:center;">
-            <img src="{{ asset('doctor.png') }}" alt="Dr. Yousuf Patwari" style="width:100%;max-width:350px;border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,0.1);" />
+            <img src="{{ asset('doctor2.jpg') }}" alt="Dr. Yousuf Patwari" style="width:100%;max-width:350px;border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,0.1);" />
             </div>
 
             <!-- Doctor Bio -->
             <div class="about-content">
-            <h2>About Dr. Yousuf Patwari</h2>
+            <h2>About Dr. Shabuddin Hossain Pavel</h2>
             <p>
                 With a deep passion for patient care, I specialize in providing
                 <strong>comprehensive family medicine</strong> and preventive health solutions.

@@ -8,7 +8,7 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.full.min.js"></script>
 
-  <div class="container mx-auto py-8">
+  <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-2xl font-semibold">Appointments</h2>
       <button id="openCreateBtn" type="button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">

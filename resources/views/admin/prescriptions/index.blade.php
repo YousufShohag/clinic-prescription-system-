@@ -1,6 +1,6 @@
 {{-- resources/views/admin/prescriptions/index.blade.php --}}
 <x-app-layout>
-  <div class="container mx-auto py-8">
+  <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
       <h2 class="text-2xl font-semibold">All Prescriptions</h2>
       <a href="{{ route('prescriptions.create') }}"
@@ -11,7 +11,7 @@
 
     {{-- Filter bar --}}
    <form method="GET" class="bg-white shadow rounded p-4 mb-4">
-  <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
 
     {{-- Search --}}
     <div class="md:col-span-3">
@@ -76,8 +76,8 @@
       <a href="{{ route('prescriptions.index') }}" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-50">Reset</a>
     </div>
 
-  </div>
-</form>
+    </div>
+    </form>
 
 
     <div class="bg-white shadow rounded overflow-hidden">

@@ -43,7 +43,7 @@ class Prescription extends Model
             'prescription_medicines',     // table name in DB
             'prescription_id',
             'medicine_id'
-        )->withPivot(['duration','times_per_day'])
+        )->withPivot(['duration','times_per_day','meal_time'])
          ->withTimestamps();
     }
 

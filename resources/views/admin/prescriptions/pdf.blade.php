@@ -406,13 +406,36 @@
 
             <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;" >
               @foreach($prescription->medicines as $m)
-                @php
+                {{-- @php
                   // Build meta (times/duration) and convert any digits to Bangla
                   $metaParts = [];
                   if (filled($m->pivot->times_per_day ?? null)) $metaParts[] = $m->pivot->times_per_day;
                   if (filled($m->pivot->duration ?? null))     $metaParts[] = ' ' . $m->pivot->duration;
                   $meta = $toBn(implode(' — ', $metaParts));
-                @endphp
+                @endphp --}}
+
+ @php
+    // Map stored keys (if any) to Bangla; pass through if already Bangla
+    $mealMap = [
+      'before_meal' => 'খাবারের আগে',
+      'after_meal'  => 'খাবারের পরে',
+      'with_meal'   => 'খাবারের সাথে',
+      'midday'      => 'দুপুরে',
+      'bedtime'     => 'রাতে শোবার আগে',
+    ];
+    $mealRaw = $m->pivot->meal_time ?? null;
+    $mealBn  = $mealRaw ? ($mealMap[$mealRaw] ?? $mealRaw) : null;
+
+    // Build meta: times/day — meal_time — duration
+    $metaParts = [];
+    if (filled($m->pivot->times_per_day ?? null)) $metaParts[] = $m->pivot->times_per_day;
+    if (filled($mealBn))                           $metaParts[] = $mealBn;          // << here
+    if (filled($m->pivot->duration ?? null))       $metaParts[] = $m->pivot->duration;
+
+    // Convert any digits to Bangla
+    $meta = $toBn(implode(' — ', $metaParts));
+  @endphp
+
                 <tr>
                   <!-- Number gutter (Bangla numerals) -->
                   <td style="width:10mm; text-align:right; vertical-align:top; padding-right:4mm; font-size:17px; line-height:1.6;">
