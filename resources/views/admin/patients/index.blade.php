@@ -1,316 +1,388 @@
 {{-- resources/views/patients/index.blade.php --}}
 <x-app-layout>
-  {{-- ===== AG Grid (Community) CDN ===== --}}
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css" />
-  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+    <div class="container mx-auto py-8">
+        {{-- Header --}}
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold">Patients</h2>
+            <a href="{{ route('patients.create') }}"
+               class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+ Add Patient</a>
+        </div>
 
-  {{-- ===== Theme tweaks (Quartz) ===== --}}
-  <style>
-    .ag-theme-quartz.custom {
-      --ag-font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans",
-                        "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
-      --ag-font-size: 13px;
-      --ag-grid-size: 4px;
-      --ag-border-radius: 8px;
+        {{-- Table --}}
+        <div class="overflow-x-auto bg-white rounded shadow">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#ID</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Group</th>
+                          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guardian</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Date</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presc.</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
 
-      --ag-background-color: #ffffff;
-      --ag-foreground-color: #111827;        /* gray-900 */
-      --ag-border-color: #e5e7eb;            /* gray-200 */
-      --ag-header-background-color: #f3f4f6; /* gray-100 */
-      --ag-header-foreground-color: #374151; /* gray-700 */
-      --ag-odd-row-background-color: #fafafa;/* gray-50 */
-      --ag-row-hover-color: #f5f5f5;         /* gray-100 */
-      --ag-selected-row-background-color: #e0f2fe; /* sky-100 */
-      --ag-checkbox-checked-color: #2563eb;  /* blue-600 */
-      --ag-range-selection-border-color: #60a5fa; /* blue-400 */
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse($patients as $patient)
+                        @php
+                            $count = $patient->prescriptions_count ?? 0;
 
-      --ag-header-column-separator-display: block;
-      --ag-header-column-separator-color: #e5e7eb;
-      --ag-header-column-separator-height: 60%;
-    }
-    .ag-theme-quartz.custom .ag-root-wrapper { border-radius: .5rem; }
-    .ag-theme-quartz.custom .ag-header-cell-label {
-      font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: .02em;
-    }
-    .ag-theme-quartz.custom .ag-row.tint-overdue  .ag-cell { background-color: #FEF2F2 !important; } /* red-50 */
-    .ag-theme-quartz.custom .ag-row.tint-today    .ag-cell { background-color: #FFFBEB !important; } /* amber-50 */
-    .ag-theme-quartz.custom .ag-row.tint-upcoming .ag-cell { background-color: #F0FDF4 !important; } /* green-50 */
-    .ag-theme-quartz.custom.striped-off { --ag-odd-row-background-color: transparent; }
+                            // Images (JSON array); get first one for avatar & pass all to popup
+                            $imgArr  = is_array($patient->images ?? null) ? $patient->images : [];
+                            $imgPath = count($imgArr) ? $imgArr[0] : null;
 
-    /* Tiny dropdown menu for column chooser */
-    .menu {
-      position: relative;
-    }
-    .menu > button {
-      border: 1px solid #e5e7eb; border-radius: .375rem; padding: .5rem .75rem; background: #fff;
-    }
-    .menu .menu-panel {
-      position: absolute; right: 0; top: calc(100% + .25rem);
-      width: 220px; max-height: 260px; overflow: auto;
-      background: #fff; border: 1px solid #e5e7eb; border-radius: .5rem; padding: .5rem;
-      box-shadow: 0 10px 20px rgba(0,0,0,.08);
-      display: none; z-index: 30;
-    }
-    .menu.open .menu-panel { display: block; }
-    .menu .menu-row { display: flex; align-items: center; gap: .5rem; padding: .25rem .25rem; }
-  </style>
+                            // Build URL for the table/avatar without Storage facade
+                            $imgUrl = $imgPath
+                                ? (preg_match('/^(https?:\/\/|\/)/i', $imgPath) ? $imgPath : '/storage/' . ltrim($imgPath, '/'))
+                                : null;
 
-  <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    {{-- Header --}}
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-semibold">Patients</h2>
-      <a href="{{ route('patients.create') }}"
-         class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+ Add Patient</a>
+                            $returnDisplay  = $patient->next_return_date
+                                ? \Carbon\Carbon::parse($patient->next_return_date)->format('d/m/Y')
+                                : '-';
+                            $createdDisplay = optional($patient->created_at)?->timezone(config('app.timezone', 'UTC'))?->format('d/m/Y H:i');
+                            $updatedDisplay = optional($patient->updated_at)?->timezone(config('app.timezone', 'UTC'))?->format('d/m/Y H:i');
+                        @endphp
+
+                        <tr class="hover:bg-gray-50 transition">
+                          <td class="px-4 py-2">{{''. $patient->id }}</td>
+                            <td class="px-4 py-2">
+                                @if($imgUrl)
+                                    <img src="{{ $imgUrl }}" alt="{{ $patient->name }}"
+                                         class="w-10 h-10 rounded-full object-cover ring-1 ring-gray-200">
+                                @else
+                                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center ring-1 ring-gray-200">
+                                        <span class="text-gray-600 text-sm font-semibold">
+                                            {{ strtoupper(substr($patient->name, 0, 1)) }}
+                                        </span>
+                                    </div>
+                                @endif
+                            </td>
+                            <td class="px-4 py-2">{{ $patient->name }}</td>
+                            <td class="px-4 py-2">{{ $patient->age ?? '-' }}</td>
+                            <td class="px-4 py-2">{{ $patient->sex ?? '-' }}</td>
+                            <td class="px-4 py-2">{{ $patient->blood_group ?? '-' }}</td>
+                              <td class="px-4 py-2">{{ $patient->guardian_name ?? '-' }}</td>
+                            <td class="px-4 py-2">{{ $patient->phone ?? '-' }}</td>
+                            <td class="px-4 py-2 max-w-[240px] truncate" title="{{ $returnDisplay !== '-' ? $returnDisplay : '' }}">
+                                {{ $returnDisplay }}
+                            </td>
+
+                            {{-- Prescriptions badge --}}
+                            <td class="px-4 py-2">
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                           {{ $count > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700' }}
+                                           hover:opacity-80 transition"
+                                    data-url="{{ route('patients.prescriptions', $patient) }}"
+                                    data-patient-name="{{ $patient->name }}"
+                                    onclick="showPatientPrescriptions(this)"
+                                    {{ $count === 0 ? 'disabled' : '' }}
+                                    title="{{ $count === 0 ? 'No prescriptions' : 'View prescriptions' }}"
+                                >
+                                    {{ $count }}
+                                </button>
+                            </td>
+
+                            <td class="px-4 py-2 flex flex-wrap gap-2">
+                                {{-- View details (with patient images + documents) --}}
+                                <button
+                                    type="button"
+                                    class="bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700 text-sm"
+                                    onclick="showPatientInfo(this)"
+                                    data-id="{{ $patient->id }}"
+                                    data-avatar="{{ $imgUrl }}"
+                                    data-images='@json($imgArr)'
+                                    data-name="{{ $patient->name }}"
+                                    data-age="{{ $patient->age ?? '-' }}"
+                                    data-sex="{{ $patient->sex ?? '-' }}"
+                                    data-dob="{{ $patient->dob ?? '-' }}"
+                                    data-blood_group="{{ $patient->	blood_group ?? '-' }}"
+                                    data-guardian_name="{{ $patient->	guardian_name ?? '-' }}"
+                                    data-address="{{ $patient->address ?? '-' }}"
+                                    data-doctor="{{ $patient->doctor->name ?? '-' }}"
+                                    data-phone="{{ $patient->phone ?? '-' }}"
+                                    data-email="{{ $patient->email ?? '-' }}"
+                                    data-status="{{ ucfirst($patient->status ?? '-') }}"
+                                    data-notes="{{ $patient->notes ?? '' }}"
+                                    data-return-date="{{ $returnDisplay }}"
+                                    data-created="{{ $createdDisplay ?? '-' }}"
+                                    data-updated="{{ $updatedDisplay ?? '-' }}"
+                                    data-rx-count="{{ $count }}"
+                                    data-rx-url="{{ route('patients.prescriptions', $patient) }}"
+                                    data-docs-url="{{ route('patients.documents', $patient) }}"
+                                >
+                                   {{-- Heroicon "eye" for "View" --}}
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                      stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                      <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 
+                                              4.5c4.638 0 8.574 3.01 9.963 7.183.07.207.07.431 
+                                              0 .639C20.577 16.49 16.64 19.5 12 
+                                              19.5c-4.638 0-8.574-3.01-9.963-7.183z" />
+                                      <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  </svg>
+                                </button>
+
+                                <a href="{{ route('patients.edit', $patient->id) }}"class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 text-sm"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 
+                                            16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 
+                                            0 011.13-1.897l8.932-8.931z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M19.5 7.125L17.25 4.875" />
+                                </svg></a>
+
+                                <form action="{{ route('patients.destroy', $patient->id) }}" method="POST"
+                                      onsubmit="return confirm('Are you sure?');">
+                                    @csrf @method('DELETE')
+                                    <button type="submit"
+                                            class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M6 7h12M9 7v10m6-10v10M4 7h16l-1 12a2 2 0 01-2 2H7a2 2 0 01-2-2L4 7zM9 4h6v2H9V4z" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="9" class="px-4 py-10 text-center text-gray-500">No patients found.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+            @if(method_exists($patients,'links'))
+                <div class="p-3 border-t bg-gray-50">
+                    {{ $patients->links() }}
+                </div>
+            @endif
+        </div>
     </div>
 
-    {{-- Toolbar --}}
-    <div class="bg-white rounded shadow mb-3 px-3 py-2 flex flex-wrap items-center gap-2">
-      <div class="relative">
-        <input id="quickFilter" type="text" placeholder="Search patients…"
-               class="pl-9 pr-3 py-2 border rounded w-72 focus:outline-none focus:ring-2 focus:ring-blue-500/40" />
-        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" viewBox="0 0 24 24" fill="none">
-          <path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-      </div>
+    {{-- SweetAlert2 (load if not already in your layout) --}}
+    <script>
+      if (typeof window.Swal === 'undefined') {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+        document.head.appendChild(s);
+      }
+    </script>
 
-      <select id="pageSize" class="px-2 py-2 border rounded focus:outline-none">
-        <option value="10">10 / page</option>
-        <option value="25" selected>25 / page</option>
-        <option value="50">50 / page</option>
-        <option value="100">100 / page</option>
-      </select>
-
-      <button id="btnExport" class="px-3 py-2 border rounded hover:bg-gray-50">Export CSV</button>
-      <button id="btnExportSel" class="px-3 py-2 border rounded hover:bg-gray-50" disabled>Export Selected</button>
-      <button id="btnDeleteSel" class="px-3 py-2 border rounded text-red-700 hover:bg-red-50" disabled>Delete Selected</button>
-
-      <div class="menu" id="colMenu">
-        <button type="button" id="btnCols">Columns ▾</button>
-        <div class="menu-panel" id="colPanel"></div>
-      </div>
-
-      <button id="btnFit"  class="px-3 py-2 border rounded hover:bg-gray-50">Fit Columns</button>
-      <button id="btnAuto" class="px-3 py-2 border rounded hover:bg-gray-50">Auto-size</button>
-
-      <div class="ml-2 flex gap-2">
-        <button id="btnSaveView" class="px-3 py-2 border rounded hover:bg-gray-50">Save View</button>
-        <button id="btnLoadView" class="px-3 py-2 border rounded hover:bg-gray-50">Load View</button>
-        <button id="btnResetView" class="px-3 py-2 border rounded hover:bg-gray-50">Reset View</button>
-      </div>
-
-      <span class="ml-auto text-sm text-gray-600">
-        Selected: <strong id="selCount">0</strong>
-      </span>
-
-      <label class="inline-flex items-center gap-2 ml-3">
-        <input id="dense" type="checkbox" class="rounded border-gray-300">
-        <span class="text-sm text-gray-700">Dense</span>
-      </label>
-
-      <label class="inline-flex items-center gap-2">
-        <input id="striped" type="checkbox" class="rounded border-gray-300" checked>
-        <span class="text-sm text-gray-700">Striped rows</span>
-      </label>
-    </div>
-
-    {{-- Grid --}}
-    <div class="overflow-hidden bg-white rounded shadow">
-      <div id="patientsGrid" class="ag-theme-quartz custom" style="height: 680px;"></div>
-    </div>
-  </div>
-
-  {{-- SweetAlert2 (load only if not in layout) --}}
-  <script>
-    if (typeof window.Swal === 'undefined') {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
-      document.head.appendChild(s);
-    }
-  </script>
-
-  {{-- ===== PHP → JS: Build safe row data ===== --}}
-  @php
-    $items = $patients instanceof \Illuminate\Pagination\AbstractPaginator
-      ? $patients->getCollection()
-      : collect($patients);
-
-    $gridRows = $items->map(function ($p) {
-        if (is_int($p) || is_string($p)) {
-            return ['id' => (int) $p];
-        }
-
-        $id           = $p->id            ?? null;
-        $name         = $p->name          ?? null;
-        $age          = $p->age           ?? null;
-        $sex          = $p->sex           ?? null;
-        $blood        = $p->blood_group   ?? null;
-        $guardian     = $p->guardian_name ?? null;
-        $phone        = $p->phone         ?? null;
-        $email        = $p->email         ?? null;
-        $status       = $p->status        ?? '-';
-        $address      = $p->address       ?? null;
-        $notes        = $p->notes         ?? null;
-
-        $doctorName   = isset($p->doctor) && is_object($p->doctor) ? ($p->doctor->name ?? null) : null;
-
-        $imagesRaw = $p->images ?? [];
-        if (is_string($imagesRaw)) {
-            $decoded = json_decode($imagesRaw, true);
-            $images  = is_array($decoded) ? $decoded : [];
-        } else {
-            $images  = is_array($imagesRaw) ? $imagesRaw : [];
-        }
-        $first  = count($images) ? $images[0] : null;
-        $avatar = $first ? (preg_match('/^(https?:\/\/|\/)/i', $first) ? $first : '/storage/' . ltrim($first, '/')) : null;
-
-        $nextReturn = $p->next_return_date ?? null;
-        $returnDisp = $nextReturn ? \Carbon\Carbon::parse($nextReturn)->format('d/m/Y') : '-';
-        $created    = isset($p->created_at) ? \Carbon\Carbon::parse($p->created_at)->timezone(config('app.timezone','UTC'))->format('d/m/Y H:i') : null;
-        $updated    = isset($p->updated_at) ? \Carbon\Carbon::parse($p->updated_at)->timezone(config('app.timezone','UTC'))->format('d/m/Y H:i') : null;
-
-        $rxCount = $p->prescriptions_count ?? 0;
-
-        $rxUrl     = $id ? route('patients.prescriptions', ['patient' => $id]) : '#';
-        $docsUrl   = $id ? route('patients.documents',     ['patient' => $id]) : '#';
-        $editUrl   = $id ? route('patients.edit',          ['patient' => $id]) : '#';
-        $showUrl   = $id ? route('patients.show',          ['patient' => $id]) : '#';
-        $deleteUrl = $id ? route('patients.destroy',       ['patient' => $id]) : '#';
-
-        return [
-          'id'        => $id,
-          'avatar'    => $avatar,
-          'images'    => $images,
-
-          'name'      => $name,
-          'age'       => $age,
-          'sex'       => $sex,
-          'blood'     => $blood,
-          'guardian'  => $guardian,
-          'phone'     => $phone,
-          'email'     => $email,
-          'status'    => ucfirst($status ?? '-'),
-          'address'   => $address,
-          'notes'     => $notes,
-
-          'return'    => $returnDisp,
-          'rx_count'  => $rxCount,
-          'doctor'    => $doctorName,
-
-          'created'   => $created,
-          'updated'   => $updated,
-
-          'rx_url'    => $rxUrl,
-          'docs_url'  => $docsUrl,
-          'edit_url'  => $editUrl,
-          'show_url'  => $showUrl,
-          'delete_url'=> $deleteUrl,
-        ];
-    })->values();
-  @endphp
-
-  <script>
-    /* ===================== Data & helpers ===================== */
-    const ROWS = @json($gridRows, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-    const CSRF = '{{ csrf_token() }}';
-    const STORAGE_KEY = 'patientsGrid:view';
-
-    const esc = s => (s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
-    const nl2br = s => esc(s).replace(/\n/g,'<br>');
-
-    function dueTone(dateStr){
-      if(!dateStr || dateStr==='-') return { cls:'bg-gray-100 text-gray-800', text:'No Return' };
-      const [d,m,y] = (dateStr||'').split(/[\/\-\.]/).map(Number);
-      const dt = (y&&m&&d) ? new Date(y, m-1, d) : new Date(dateStr);
-      if(isNaN(dt)) return { cls:'bg-gray-100 text-gray-800', text: dateStr };
-      const today = new Date(); today.setHours(0,0,0,0);
-      const cmp = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
-      if (cmp < today)  return { cls:'bg-red-100 text-red-800',   text:`Overdue ${dateStr}` };
-      if (cmp.getTime() === today.getTime()) return { cls:'bg-amber-100 text-amber-800', text:`Due Today ${dateStr}` };
-      return { cls:'bg-green-100 text-green-800', text:`Due ${dateStr}` };
-    }
-
-    function deletePatient(url){
-      if(!url || url==='#') return;
-      if(!confirm('Delete this patient?')) return;
-      const f = document.createElement('form');
-      f.method = 'POST'; f.action = url;
-      const t = document.createElement('input'); t.type='hidden'; t.name='_token';  t.value=CSRF; f.appendChild(t);
-      const m = document.createElement('input'); m.type='hidden'; m.name='_method'; m.value='DELETE'; f.appendChild(m);
-      document.body.appendChild(f); f.submit();
-    }
-
-    // Files & images helpers (for modal Docs/Images)
-    const isAbs = u => /^https?:\/\//i.test(u||'') || (u||'').startsWith('/');
-    const toUrl = p => !p ? '' : (isAbs(p) ? p : ('/storage/' + String(p).replace(/^\/+/,'')));
-    const base = p => { try { const q=(p||'').split('?')[0].split('#')[0]; const a=q.split('/'); return a[a.length-1]||q; } catch { return p||'document'; } };
-    const mimeGuess = p => {
-      const e=(p||'').toLowerCase().split('.').pop();
-      return {png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif',svg:'image/svg+xml',pdf:'application/pdf'}[e]||'application/octet-stream';
-    };
+    <script>
+    /* ========= helpers ========= */
+    function esc(s){ if(s==null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+    function nl2br(s){ return esc(s).replace(/\n/g,'<br>'); }
+    function isAbs(u){ return /^https?:\/\//i.test(u) || (u||'').startsWith('/'); }
+    function toUrl(p){ if(!p) return ''; return isAbs(p) ? p : ('/storage/' + String(p).replace(/^\/+/,'')); }
+    function base(p){ try{ const q=(p||'').split('?')[0].split('#')[0]; const a=q.split('/'); return a[a.length-1]||q; }catch{ return p||'document'; } }
+    function mimeGuess(p){ const e=(p||'').toLowerCase().split('.').pop(); return {png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif',svg:'image/svg+xml',pdf:'application/pdf'}[e]||'application/octet-stream'; }
     const isImg=(u,m)=> (m||'').toLowerCase().startsWith('image/') || /\.(png|jpe?g|webp|gif|svg)$/i.test((u||'').toLowerCase());
     const isPdf=(u,m)=> (m||'').toLowerCase()==='application/pdf' || /\.pdf$/i.test((u||'').toLowerCase());
 
+    /* ========= View (details + patient images + documents) ========= */
+    async function showPatientInfo(btn) {
+      // pull data-* attrs
+      let imgsRaw = [];
+      try { imgsRaw = JSON.parse(btn.getAttribute('data-images') || '[]'); } catch (_){}
+      const data = {
+        id: btn.getAttribute('data-id'),
+        avatar: btn.getAttribute('data-avatar') || '',
+        images: Array.isArray(imgsRaw) ? imgsRaw : [],
+        name: btn.getAttribute('data-name') || '-',
+        age: btn.getAttribute('data-age') || '-',
+        sex: btn.getAttribute('data-sex') || '-',
+        address: btn.getAttribute('data-address') || '-',
+        doctor: btn.getAttribute('data-doctor') || '-',
+        phone: btn.getAttribute('data-phone') || '-',
+        blood_group: btn.getAttribute('data-blood-group') || '-',
+        guardian: btn.getAttribute('data-guardian') || '-',
+        email: btn.getAttribute('data-email') || '-',
+        status: btn.getAttribute('data-status') || '-',
+        notes: btn.getAttribute('data-notes') || '-',
+        return_date: btn.getAttribute('data-return-date') || '-',
+        created_at: btn.getAttribute('data-created') || '-',
+        updated_at: btn.getAttribute('data-updated') || '-',
+        prescriptions_count: parseInt(btn.getAttribute('data-rx-count') || '0', 10),
+        prescriptions_url: btn.getAttribute('data-rx-url') || null,
+        docs_url: btn.getAttribute('data-docs-url') || null,
+      };
+      const hasRx = data.prescriptions_count > 0;
+
+      // header with avatar
+      const header = `
+        <div class="flex items-center gap-4 mb-4">
+          ${data.avatar
+            ? `<img src="${esc(data.avatar)}" alt="${esc(data.name)}" class="w-16 h-16 rounded-full object-cover ring-1 ring-gray-200">`
+            : `<div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center ring-1 ring-gray-200">
+                 <span class="text-gray-600 text-lg font-semibold">${esc((data.name||'P').charAt(0).toUpperCase())}</span>
+               </div>`}
+          <div>
+            <div class="text-lg font-semibold">${esc(data.name)}</div>
+            <div class="text-xs text-gray-500">ID #${esc(data.id)}</div>
+          </div>
+        </div>
+      `;
+
+      // info grid
+      const infoGrid = `
+        <div class="text-sm">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div><div class="text-gray-500 text-xs uppercase">Doctor</div><div class="font-medium">${esc(data.doctor)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Status</div><div class="font-medium">${esc(data.status)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Age</div><div class="font-medium">${esc(data.age)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Sex</div><div class="font-medium">${esc(data.sex)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Phone</div><div class="font-medium">${esc(data.phone)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Blood Group</div><div class="font-medium">${esc(data.blood_group)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Guardian</div><div class="font-medium">${esc(data.guardian)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Email</div><div class="font-medium">${esc(data.email)}</div></div>
+            <div class="md:col-span-2"><div class="text-gray-500 text-xs uppercase">Address</div><div class="font-medium">${esc(data.address)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Return Date</div><div class="font-medium">${esc(data.return_date)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Created</div><div class="font-medium">${esc(data.created_at)}</div></div>
+            <div><div class="text-gray-500 text-xs uppercase">Updated</div><div class="font-medium">${esc(data.updated_at)}</div></div>
+            <div class="md:col-span-2">
+              <div class="text-gray-500 text-xs uppercase">Notes</div>
+              <div class="font-medium leading-relaxed">${nl2br(data.notes)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // render popup immediately, then fetch docs in didOpen
+      Swal.fire({
+        title: `Patient — ${esc(data.name)}`,
+        html: `
+          <div class="text-left">
+            ${header}
+            ${infoGrid}
+            ${renderPatientImages(data.images)}
+            <div id="docsSection" class="mt-6 text-sm text-gray-600">Loading documents…</div>
+          </div>
+        `,
+        width: '64rem',
+        showCloseButton: true,
+        showCancelButton: true,
+        cancelButtonText: 'Close',
+        showConfirmButton: hasRx,
+        confirmButtonText: hasRx ? `View Prescriptions (${data.prescriptions_count})` : undefined,
+        didOpen: () => fetchAndRenderDocuments(data.docs_url)
+      }).then((res) => {
+        if (res.isConfirmed && hasRx && data.prescriptions_url) {
+          const fakeBtn = {
+            getAttribute: (k) => {
+              if (k === 'data-url') return data.prescriptions_url;
+              if (k === 'data-patient-name') return data.name || '';
+              return null;
+            }
+          };
+          showPatientPrescriptions(fakeBtn);
+        }
+      });
+    }
+
     function renderPatientImages(rawList){
-      const imgs = (Array.isArray(rawList)?rawList:[]).map(toUrl).filter(Boolean);
-      if(!imgs.length) return '';
-      const grid = imgs.map((u,i)=>`
-        <a href="${esc(u)}" target="_blank" rel="noopener" class="block border rounded overflow-hidden hover:opacity-90 transition" title="${esc(base(u))}">
+      // raw paths from DB; convert to URLs
+      const imgs = (Array.isArray(rawList) ? rawList : [])
+        .map(p => toUrl(p))
+        .filter(Boolean);
+
+      if (!imgs.length) return '';
+
+      const grid = imgs.map((u, i) => `
+        <a href="${esc(u)}" target="_blank" rel="noopener"
+           class="block border rounded overflow-hidden hover:opacity-90 transition"
+           title="${esc(base(u))}">
           <img src="${esc(u)}" alt="image-${i}" class="w-full h-40 object-cover" loading="lazy">
           <div class="p-2 text-xs text-gray-700 truncate">${esc(base(u))}</div>
-        </a>`).join('');
+        </a>
+      `).join('');
+
       return `
         <div class="mt-6">
           <div class="text-gray-800 font-semibold mb-2">Patient Images (${imgs.length})</div>
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" style="max-height:40vh;overflow:auto">
             ${grid}
           </div>
-        </div>`;
+        </div>
+      `;
     }
 
     async function fetchAndRenderDocuments(url){
       const holder = document.getElementById('docsSection');
-      if(!holder) return;
+      if (!holder) return;
+
       try{
-        if(!url){ holder.innerHTML = `<div class="text-gray-600">No documents endpoint configured.</div>`; return; }
-        const res = await fetch(url, { headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}, credentials:'same-origin' });
-        if(!res.ok){ holder.innerHTML = `<div class="text-red-600">Failed to load documents (HTTP ${res.status}).</div>`; return; }
+        if (!url) {
+          holder.innerHTML = `<div class="text-gray-600">No documents endpoint configured.</div>`;
+          return;
+        }
+        const res = await fetch(url, {
+          headers: { 'X-Requested-With':'XMLHttpRequest','Accept':'application/json' },
+          credentials: 'same-origin'
+        });
+        if (!res.ok) {
+          const t = await res.text();
+          console.error('Docs error:', res.status, t);
+          holder.innerHTML = `<div class="text-red-600">Failed to load documents (HTTP ${res.status}).</div>`;
+          return;
+        }
+
         const json = await res.json();
         let raw = Array.isArray(json) ? json : (json.data ?? json.documents ?? []);
-        if(!Array.isArray(raw)) raw = [];
-        const docs = raw.map((item,i)=>{
-          if(typeof item==='string'){
-            const url = toUrl(item); const m = mimeGuess(item);
-            return { id:String(i), name:base(item), url, mime:m, thumb:isImg(url,m)?url:null };
+        if (!Array.isArray(raw)) raw = [];
+
+        const docs = raw.map((item, i) => {
+          if (typeof item === 'string') {
+            const url = toUrl(item);
+            const m = mimeGuess(item);
+            return { id: String(i), name: base(item), url, mime: m, thumb: isImg(url, m) ? url : null };
           } else {
             const rawPath = item.url || item.path || item.link || '';
             const url = toUrl(rawPath);
             const m = (item.mime || item.mimetype || item.type || mimeGuess(url)).toLowerCase();
-            return { id:item.id ?? String(i), name:item.name || item.filename || base(url), url, mime:m, thumb:item.thumb_url || item.thumbnail || (isImg(url,m)?url:null) };
+            return {
+              id: item.id ?? String(i),
+              name: item.name || item.filename || base(url),
+              url,
+              mime: m,
+              thumb: item.thumb_url || item.thumbnail || (isImg(url, m) ? url : null),
+            };
           }
-        }).filter(x=>x.url);
+        }).filter(x => x.url);
 
-        const images = docs.filter(d=>isImg(d.url,d.mime));
-        const others = docs.filter(d=>!isImg(d.url,d.mime));
+        const images = docs.filter(d => isImg(d.url, d.mime));
+        const others = docs.filter(d => !isImg(d.url, d.mime));
 
-        const imagesGrid = images.map(it=>`
-          <a href="${esc(it.url)}" target="_blank" rel="noopener" class="block border rounded overflow-hidden hover:opacity-90 transition" title="${esc(it.name)}">
-            <img src="${esc(it.thumb||it.url)}" alt="${esc(it.name)}" class="w-full h-40 object-cover" loading="lazy">
+        const imagesGrid = images.map(it => `
+          <a href="${esc(it.url)}" target="_blank" rel="noopener"
+             class="block border rounded overflow-hidden hover:opacity-90 transition"
+             title="${esc(it.name)}">
+            <img src="${esc(it.thumb || it.url)}" alt="${esc(it.name)}"
+                 class="w-full h-40 object-cover" loading="lazy">
             <div class="p-2 text-xs text-gray-700 truncate">${esc(it.name)}</div>
-          </a>`).join('');
+          </a>
+        `).join('');
 
-        const filesList = others.map(it=>`
+        const filesList = others.map(it => `
           <div class="flex items-center justify-between border rounded p-2">
             <div class="pr-3">
               <div class="text-sm font-medium">${esc(it.name)}</div>
-              <div class="text-xs text-gray-500">${esc(it.mime || (isPdf(it.url,it.mime)?'application/pdf':'file'))}</div>
+              <div class="text-xs text-gray-500">${esc(it.mime || (isPdf(it.url, it.mime) ? 'application/pdf' : 'file'))}</div>
             </div>
             <div class="flex items-center gap-2">
               <a href="${esc(it.url)}" target="_blank" rel="noopener" class="text-blue-600 hover:underline text-sm">Open</a>
-              ${isPdf(it.url,it.mime)?`<a href="${esc(it.url)}#toolbar=0" target="_blank" rel="noopener" class="text-blue-600 hover:underline text-sm">Preview</a>`:''}
+              ${isPdf(it.url, it.mime) ? `<a href="${esc(it.url)}#toolbar=0" target="_blank" rel="noopener" class="text-blue-600 hover:underline text-sm">Preview</a>` : ''}
             </div>
-          </div>`).join('');
+          </div>
+        `).join('');
 
         holder.innerHTML = `
           <div class="mt-6 space-y-4">
@@ -330,453 +402,221 @@
                 </div>
               </div>` : ``}
             ${(!images.length && !others.length) ? `<div class="text-gray-600 text-sm">No documents available.</div>` : ``}
-          </div>`;
+          </div>
+        `;
       } catch(e){
         console.error('Docs fetch exception:', e);
         holder.innerHTML = `<div class="text-red-600">Error loading documents.</div>`;
       }
     }
 
-    async function showPatientPrescriptions(btn){
+    /* ========= Prescriptions popup ========= */
+    async function showPatientPrescriptions(btn) {
       const url  = btn.getAttribute('data-url');
-      const name = btn.getAttribute('data-patient-name') || '';
-      try{
-        const res = await fetch(url, { headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}, credentials:'same-origin' });
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const name = btn.getAttribute('data-patient-name');
+
+      try {
+        const res = await fetch(url, {
+          headers: { 'X-Requested-With':'XMLHttpRequest','Accept':'application/json' },
+          credentials: 'same-origin'
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const payload = await res.json();
         const items = payload.data || [];
-        if(!items.length){
+
+        if (!items.length) {
           return Swal.fire({ icon:'info', title:'No prescriptions', text:`No prescriptions found for ${name}.` });
         }
-        const rows = items.map(p=>`
+
+        const rows = items.map(p => `
           <tr class="border-t">
             <td class="py-2 pr-2">#${esc(p.id)}</td>
             <td class="py-2 pr-2">${esc(p.date ?? '-')}</td>
             <td class="py-2 pr-2">${esc(p.doctor ?? '—')}</td>
             <td class="py-2 text-right"><a href="${esc(p.show_url)}" class="text-blue-600 hover:underline" target="_blank" rel="noopener">View</a></td>
-          </tr>`).join('');
+          </tr>
+        `).join('');
+
         Swal.fire({
           title: `Prescriptions — ${esc(name)} (${items.length})`,
-          html: `<div class="text-left"><div style="max-height:60vh;overflow:auto">
-                  <table class="w-full text-sm">
-                    <thead><tr>
-                      <th class="py-2 pr-2 text-gray-500 font-semibold text-xs uppercase">ID</th>
-                      <th class="py-2 pr-2 text-gray-500 font-semibold text-xs uppercase">Date</th>
-                      <th class="py-2 pr-2 text-gray-500 font-semibold text-xs uppercase">Doctor</th>
-                      <th class="py-2 text-gray-500 font-semibold text-xs uppercase text-right">Open</th>
-                    </tr></thead>
-                    <tbody>${rows}</tbody>
-                  </table>
-                </div></div>`,
-          width:'48rem', showCloseButton:true, focusConfirm:false, confirmButtonText:'Close',
+          html: `
+            <div class="text-left">
+              <div style="max-height:60vh;overflow:auto">
+                <table class="w-full text-sm">
+                  <thead><tr>
+                    <th class="py-2 pr-2 text-gray-500 font-semibold text-xs uppercase">ID</th>
+                    <th class="py-2 pr-2 text-gray-500 font-semibold text-xs uppercase">Date</th>
+                    <th class="py-2 pr-2 text-gray-500 font-semibold text-xs uppercase">Doctor</th>
+                    <th class="py-2 text-gray-500 font-semibold text-xs uppercase text-right">Open</th>
+                  </tr></thead>
+                  <tbody>${rows}</tbody>
+                </table>
+              </div>
+            </div>`,
+          width:'48rem',
+          showCloseButton:true,
+          focusConfirm:false,
+          confirmButtonText:'Close',
         });
-      } catch(e){
+      } catch (e) {
         console.error('Rx fetch error:', e);
         Swal.fire({ icon:'error', title:'Error', text:'Could not load prescriptions.' });
       }
     }
+    </script>
 
-    function modalForRow(d){
-      const hasRx = (d.rx_count || 0) > 0;
-      const header = `
-        <div class="flex items-center gap-4 mb-4">
-          ${d.avatar
-            ? `<img src="${esc(d.avatar)}" alt="${esc(d.name||'-')}" class="w-16 h-16 rounded-full object-cover ring-1 ring-gray-200">`
-            : `<div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center ring-1 ring-gray-200">
-                <span class="text-gray-600 text-lg font-semibold">${esc((d.name||'P').charAt(0).toUpperCase())}</span>
-               </div>`}
-          <div>
-            <div class="text-lg font-semibold">${esc(d.name||'-')}</div>
-            <div class="text-xs text-gray-500">ID #${esc(d.id||'')}</div>
-          </div>
-        </div>`;
-      const infoGrid = `
-        <div class="text-sm">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div><div class="text-gray-500 text-xs uppercase">Doctor</div><div class="font-medium">${esc(d.doctor||'-')}</div></div>
-            <div><div class="text-gray-500 text-xs uppercase">Status</div><div class="font-medium">${esc(d.status||'-')}</div></div>
-            <div><div class="text-gray-500 text-xs uppercase">Age</div><div class="font-medium">${esc(d.age ?? '-')}</div></div>
-            <div><div class="text-gray-500 text-xs uppercase">Sex</div><div class="font-medium">${esc(d.sex||'-')}</div></div>
-            <div><div class="text-gray-500 text-xs uppercase">Phone</div><div class="font-medium">${esc(d.phone||'-')}</div></div>
-            <div><div class="text-gray-500 text-xs uppercase">Blood Group</div><div class="font-medium">${esc(d.blood||'-')}</div></div>
-            <div><div class="text-gray-500 text-xs uppercase">Guardian</div><div class="font-medium">${esc(d.guardian||'-')}</div></div>
-            <div><div class="text-gray-500 text-xs uppercase">Email</div><div class="font-medium">${esc(d.email||'-')}</div></div>
-            <div class="md:col-span-2"><div class="text-gray-500 text-xs uppercase">Address</div><div class="font-medium">${esc(d.address||'-')}</div></div>
-            <div><div class="text-gray-500 text-xs uppercase">Return Date</div><div class="font-medium">${esc(d.return||'-')}</div></div>
-            <div><div class="text-gray-500 text-xs uppercase">Created</div><div class="font-medium">${esc(d.created||'-')}</div></div>
-            <div><div class="text-gray-500 text-xs uppercase">Updated</div><div class="font-medium">${esc(d.updated||'-')}</div></div>
-            <div class="md:col-span-2">
-              <div class="text-gray-500 text-xs uppercase">Notes</div>
-              <div class="font-medium leading-relaxed">${nl2br(d.notes||'-')}</div>
-            </div>
-          </div>
-        </div>`;
-      Swal.fire({
-        title: `Patient — ${esc(d.name||'-')}`,
-        html: `<div class="text-left">
-                ${header}
-                ${infoGrid}
-                ${renderPatientImages(d.images)}
-                <div id="docsSection" class="mt-6 text-sm text-gray-600">Loading documents…</div>
-              </div>`,
-        width: '64rem',
-        showCloseButton: true,
-        showCancelButton: true,
-        cancelButtonText: 'Close',
-        showConfirmButton: hasRx,
-        confirmButtonText: hasRx ? `View Prescriptions (${d.rx_count})` : undefined,
-        didOpen: () => fetchAndRenderDocuments(d.docs_url)
-      }).then((res)=>{
-        if(res.isConfirmed && hasRx && d.rx_url){
-          const fakeBtn = { getAttribute: (k)=> k==='data-url' ? d.rx_url : (k==='data-patient-name' ? (d.name||'') : null) };
-          showPatientPrescriptions(fakeBtn);
-        }
-      });
-    }
+<script>
+  /* ---- tiny helpers (keep or merge with yours) ---- */
+  const svg = {
+    user:  '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.5 19.5a7.5 7.5 0 0115 0"/></svg>',
+    phone: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 4.5l4.5-2.25L9 6.75 6.75 9l7.5 7.5 2.25-2.25 4.5 2.25-2.25 4.5a3 3 0 01-3 1.5c-7.456 0-13.5-6.044-13.5-13.5a3 3 0 011.5-3z"/></svg>',
+    mail:  '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21.75 7.5v9a2.25 2.25 0 01-2.25 2.25H4.5A2.25 2.25 0 012.25 16.5v-9"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21.75 7.5L12 13.5 2.25 7.5"/></svg>',
+    home:  '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 12l9.75-7.5L21.75 12v7.5A1.5 1.5 0 0120.25 21H3.75A1.5 1.5 0 012.25 19.5V12z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 21V12h6v9"/></svg>',
+    id:    '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7.5A2.25 2.25 0 015.25 5.25h13.5A2.25 2.25 0 0121 7.5V16.5A2.25 2.25 0 0118.75 18.75H5.25A2.25 2.25 0 013 16.5V7.5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7.5 9h4.5M7.5 12h6.75M7.5 15h3"/></svg>',
+    doctor:'<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7a4 4 0 118 0v2a4 4 0 11-8 0V7z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 21v-3a4 4 0 014-4h4a4 4 0 014 4v3"/></svg>',
+    status:'<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+    calendar:'<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 3v3M16 3v3M3 8h18M4.5 21h15A1.5 1.5 0 0021 19.5V7.5A1.5 1.5 0 0019.5 6h-15A1.5 1.5 0 003 7.5v12A1.5 1.5 0 004.5 21z"/></svg>',
+    file:  '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 3H6a1.5 1.5 0 00-1.5 1.5v15A1.5 1.5 0 006 21h12a1.5 1.5 0 001.5-1.5V8.25L15.75 3z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 3V8.25H21"/></svg>',
+    pills: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3h6a3 3 0 013 3v12a3 3 0 01-3 3H9a3 3 0 01-3-3V6a3 3 0 013-3z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 9h6"/></svg>'
+  };
 
-    /* ===================== AG Grid ===================== */
-    let gridApi, gridColumnApi;
-    const colDefs = [
-      { colId:'id', headerName: '#ID', field: 'id', width: 90, pinned: 'left',
-        checkboxSelection: true, headerCheckboxSelection: true,
-        sortable: true, filter: 'agNumberColumnFilter', floatingFilter: true },
+  const badge = (text, tone='gray') => {
+    const tones = {
+      gray:  'bg-gray-100 text-gray-800',
+      green: 'bg-green-100 text-green-800',
+      red:   'bg-red-100 text-red-800',
+      amber: 'bg-amber-100 text-amber-800',
+      blue:  'bg-blue-100 text-blue-800',
+    };
+    return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${tones[tone]||tones.gray}">${text}</span>`;
+  };
 
-      { colId:'avatar', headerName: 'Image', field: 'avatar', width: 96, floatingFilter: false,
-        filter: false, sortable: false,
-        cellRenderer: p => {
-          const url = p.value, name = p.data.name || '';
-          if (url) return `<img src="${esc(url)}" alt="${esc(name)}" class="w-10 h-10 rounded-full object-cover ring-1 ring-gray-200" />`;
-          const initial = (name||'P').charAt(0).toUpperCase();
-          return `<div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center ring-1 ring-gray-200">
-                    <span class="text-gray-600 text-sm font-semibold">${esc(initial)}</span>
-                  </div>`;
-        }
-      },
+  function dueTone(dateStr){ // returns {text, tone}
+    if(!dateStr || dateStr==='-') return { text:'No Return', tone:'gray' };
+    // expect format d/m/Y; fallback safe parsing
+    const [d,m,y] = (dateStr||'').split(/[\/\-\.]/).map(Number);
+    const dt = (y && m && d) ? new Date(y, m-1, d) : new Date(dateStr);
+    if(isNaN(dt)) return { text: dateStr, tone:'gray' };
+    const today = new Date(); today.setHours(0,0,0,0);
+    const cmp = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+    if (cmp < today)  return { text:`Overdue ${dateStr}`, tone:'red' };
+    if (cmp.getTime() === today.getTime()) return { text:`Due Today ${dateStr}`, tone:'amber' };
+    return { text:`Due ${dateStr}`, tone:'green' };
+  }
 
-      { colId:'name', headerName: 'Name', field: 'name', flex: 1, minWidth: 160,
-        sortable: true, filter: 'agTextColumnFilter', floatingFilter: true,
-        filterParams: { debounceMs: 300, trimInput: true } },
-
-      { colId:'age', headerName: 'Age', field: 'age', width: 90,
-        sortable: true, filter: 'agNumberColumnFilter', floatingFilter: true },
-
-      { colId:'sex', headerName: 'Gender', field: 'sex', width: 110,
-        sortable: true, filter: 'agTextColumnFilter', floatingFilter: true,
-        filterParams: { debounceMs: 300 } },
-
-      { colId:'blood', headerName: 'Blood Group', field: 'blood', width: 130,
-        sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-
-      { colId:'guardian', headerName: 'Guardian', field: 'guardian', minWidth: 140, flex: 1,
-        sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, filterParams: { debounceMs: 300 } },
-
-      { colId:'phone', headerName: 'Phone', field: 'phone', minWidth: 130,
-        sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, filterParams: { debounceMs: 300 } },
-
-      { colId:'return', headerName: 'Return Date', field: 'return', width: 170,
-        sortable: true, filter: 'agDateColumnFilter', floatingFilter: true,
-        filterParams: {
-          debounceMs: 200,
-          comparator: (filterDate, cellValue) => {
-            // cellValue format: dd/mm/yyyy or '-'
-            if (!cellValue || cellValue === '-') return -1;
-            const [d,m,y] = cellValue.split(/[\/\-\.]/).map(Number);
-            if (!(y&&m&&d)) return -1;
-            const cell = new Date(y, m-1, d);
-            // Return 0 if equal, negative if cell < filter, positive if cell > filter
-            const diff = cell.setHours(0,0,0,0) - filterDate.setHours(0,0,0,0);
-            return diff === 0 ? 0 : (diff < 0 ? -1 : 1);
-          }
-        },
-        cellRenderer: p => {
-          const info = dueTone(p.value);
-          return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs ${info.cls}">${esc(info.text)}</span>`;
-        }
-      },
-
-      { colId:'rx_count', headerName: 'Presc.', field: 'rx_count', width: 110,
-        sortable: true, filter: 'agNumberColumnFilter', floatingFilter: true,
-        cellRenderer: p => {
-          const d = p.data, count = Number(d.rx_count || 0);
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.textContent = String(count);
-          btn.title = count === 0 ? 'No prescriptions' : 'View prescriptions';
-          btn.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${count>0?'bg-blue-100 text-blue-800':'bg-gray-100 text-gray-700'}`;
-          if (count > 0) {
-            btn.setAttribute('data-url', d.rx_url || '');
-            btn.setAttribute('data-patient-name', d.name || '');
-            btn.addEventListener('click', () => showPatientPrescriptions(btn));
-          } else {
-            btn.disabled = true; btn.setAttribute('aria-disabled','true');
-          }
-          return btn;
-        }
-      },
-
-      { colId:'actions', headerName: 'Actions', width: 280, pinned: 'right',
-        sortable: false, filter: false, floatingFilter: false,
-        cellRenderer: p => {
-          const d = p.data;
-          const wrap = document.createElement('div');
-          wrap.className = 'flex flex-wrap items-center gap-2';
-
-          const view = document.createElement('button');
-          view.type = 'button';
-          view.className = 'bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700 text-sm';
-          view.textContent = 'View';
-          view.addEventListener('click', () => modalForRow(d));
-
-          const edit = document.createElement('a');
-          edit.href = d.edit_url || '#';
-          edit.className = 'bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 text-sm';
-          edit.textContent = 'Edit';
-
-          const del = document.createElement('button');
-          del.type = 'button';
-          del.className = 'bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-sm';
-          del.textContent = 'Delete';
-          del.addEventListener('click', () => deletePatient(d.delete_url || '#'));
-
-          wrap.appendChild(view);
-          wrap.appendChild(edit);
-          wrap.appendChild(del);
-          return wrap;
-        }
-      },
-    ];
-
-    const gridOptions = {
-      rowData: ROWS,
-      columnDefs: colDefs,
-      defaultColDef: {
-        resizable: true,
-        sortable: true,
-        filter: true,
-        floatingFilter: true,
-        tooltipValueGetter: p => (p && p.value != null ? String(p.value) : ''),
-        filterParams: { debounceMs: 250 },
-      },
-      rowSelection: 'multiple',
-      pagination: true,
-      paginationPageSize: 25,
-      animateRows: true,
-      suppressCellFocus: true,
-      headerHeight: 44,
-      rowHeight: 46,
-      enableBrowserTooltips: true,
-
-      rowClassRules: {
-        'tint-overdue':  p => p.data && dueTone(p.data.return).cls.includes('red-'),
-        'tint-today':    p => p.data && dueTone(p.data.return).cls.includes('amber-'),
-        'tint-upcoming': p => p.data && dueTone(p.data.return).cls.includes('green-'),
-      },
-
-      // Selection counter & toggle bulk actions
-      onSelectionChanged: () => {
-        const sel = gridApi ? gridApi.getSelectedRows() : [];
-        const n = (sel || []).length;
-        document.getElementById('selCount').textContent = n;
-        document.getElementById('btnExportSel').disabled = n === 0;
-        document.getElementById('btnDeleteSel').disabled = n === 0;
-      },
+  /* ========= Friendlier profile popup ========= */
+  async function showPatientInfo(btn) {
+    // data pull
+    let imgsRaw = [];
+    try { imgsRaw = JSON.parse(btn.getAttribute('data-images') || '[]'); } catch(_){}
+    const data = {
+      id: btn.getAttribute('data-id'),
+      avatar: btn.getAttribute('data-avatar') || '',
+      images: Array.isArray(imgsRaw) ? imgsRaw : [],
+      name: btn.getAttribute('data-name') || '-',
+      age: btn.getAttribute('data-age') || '-',
+      sex: btn.getAttribute('data-sex') || '-',
+      dob: btn.getAttribute('data-dob') || '-',
+      blood_group: btn.getAttribute('data-blood_group') || '-',
+      guardian_name: btn.getAttribute('data-guardian_name') || '-',
+      address: btn.getAttribute('data-address') || '-',
+      doctor: btn.getAttribute('data-doctor') || '-',
+      phone: btn.getAttribute('data-phone') || '-',
+      email: btn.getAttribute('data-email') || '-',
+      status: btn.getAttribute('data-status') || '-',
+      notes: btn.getAttribute('data-notes') || '-',
+      return_date: btn.getAttribute('data-return-date') || '-',
+      created_at: btn.getAttribute('data-created') || '-',
+      updated_at: btn.getAttribute('data-updated') || '-',
+      rxCount: parseInt(btn.getAttribute('data-rx-count') || '0', 10),
+      rxUrl: btn.getAttribute('data-rx-url') || null,
+      docsUrl: btn.getAttribute('data-docs-url') || null,
     };
 
-    // Mount grid
-    function mountGrid() {
-      const el = document.getElementById('patientsGrid');
-      if (!el) return;
-      if (window.agGrid && typeof agGrid.createGrid === 'function') {
-        gridApi = agGrid.createGrid(el, gridOptions);
-        gridColumnApi = gridApi.getColumnApi ? gridApi.getColumnApi() : (gridOptions.columnApi || null);
-      } else if (window.agGrid && typeof agGrid.Grid === 'function') {
-        new agGrid.Grid(el, gridOptions);
-        gridApi = gridOptions.api;
-        gridColumnApi = gridOptions.columnApi;
-      } else {
-        console.error('AG Grid not loaded.');
-      }
-    }
+    const due = dueTone(data.return_date);
+    const hasRx = data.rxCount > 0;
 
-    /* ===================== Toolbar wiring ===================== */
-    function setQuickFilter(val){
-      if (!gridApi) return;
-      if (gridApi.setGridOption) gridApi.setGridOption('quickFilterText', val);
-      else if (gridApi.setQuickFilter) gridApi.setQuickFilter(val);
-    }
-    function setPageSize(n){
-      if (!gridApi) return;
-      n = Number(n)||25;
-      if (gridApi.setGridOption) gridApi.setGridOption('paginationPageSize', n);
-      else if (gridApi.paginationSetPageSize) gridApi.paginationSetPageSize(n);
-    }
-    function resetAll(){
-      if (!gridApi) return;
-      if (gridApi.setFilterModel) gridApi.setFilterModel(null);
-      if (gridApi.setSortModel) gridApi.setSortModel(null);
-      if (gridColumnApi && gridColumnApi.resetColumnState) gridColumnApi.resetColumnState();
-      setQuickFilter('');
-      const q = document.getElementById('quickFilter'); if (q) q.value = '';
-      const ps = document.getElementById('pageSize'); if (ps) ps.value = '25';
-      setPageSize(25);
-      if (gridApi.paginationGoToFirstPage) gridApi.paginationGoToFirstPage();
-    }
-    function exportCsv(opts = {}) {
-      if (!gridApi || !gridApi.exportDataAsCsv) return;
-      gridApi.exportDataAsCsv({ fileName: 'patients.csv', ...opts });
-    }
-    function autoSizeAll() {
-      if (!gridColumnApi) return;
-      const all = [];
-      gridColumnApi.getAllDisplayedColumns().forEach(c => all.push(c.getColId ? c.getColId() : c.colId));
-      if (all.length) gridColumnApi.autoSizeColumns(all, false);
-    }
-    function fitColumns() {
-      if (!gridApi || !gridApi.sizeColumnsToFit) return;
-      gridApi.sizeColumnsToFit();
-    }
+    // header card (avatar + core)
+    const header = `
+      <div class="flex items-center gap-4">
+        ${data.avatar
+          ? `<img src="${esc(data.avatar)}" class="w-16 h-16 rounded-full object-cover ring-1 ring-gray-200" alt="${esc(data.name)}">`
+          : `<div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center ring-1 ring-indigo-200">
+               <span class="text-lg font-bold">${esc((data.name||'P').charAt(0).toUpperCase())}</span>
+             </div>`}
+        <div class="flex-1 min-w-0">
+          <div class="text-lg font-semibold truncate">${esc(data.name)}</div>
+          <div class="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+            <span class="inline-flex items-center gap-1">${svg.id}<span>#${esc(data.id)}</span></span>
+            <span>•</span>
+            <span class="inline-flex items-center gap-1">${svg.doctor}<span>${esc(data.doctor)}</span></span>
+          </div>
+          <div class="mt-1 flex flex-wrap items-center gap-2">
+            ${badge(`${svg.user} ${esc(data.age)} / ${esc(data.sex)}`, 'blue')}
+            ${badge(`${svg.calendar} ${esc(due.text)}`, due.tone)}
+            ${badge(`${svg.status} ${esc(data.status)}`, 'gray')}
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          ${hasRx ? `<button class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+                     onclick="(function(){ const fake={getAttribute:(k)=>k==='data-url'?'${esc(data.rxUrl)}':(k==='data-patient-name'?'${esc(data.name)}':null)}; showPatientPrescriptions(fake); })()">
+                     ${svg.pills} <span class="ml-1">Prescriptions (${data.rxCount})</span></button>` : ''}
+          <a href="/patients/${encodeURIComponent(data.id)}/edit"
+             class="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-sm text-center">
+             Edit</a>
+        </div>
+      </div>
+    `;
 
-    // Save / Load View state
-    function saveView() {
-      if (!gridApi || !gridColumnApi) return;
-      const state = {
-        sort: gridApi.getSortModel ? gridApi.getSortModel() : null,
-        filter: gridApi.getFilterModel ? gridApi.getFilterModel() : null,
-        colState: gridColumnApi.getColumnState ? gridColumnApi.getColumnState() : null,
-        pageSize: (gridApi.paginationGetPageSize && gridApi.paginationGetPageSize()) || 25,
-        quick: document.getElementById('quickFilter')?.value || '',
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      alert('View saved');
-    }
-    function loadView() {
-      if (!gridApi || !gridColumnApi) return;
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) { alert('No saved view'); return; }
-      try {
-        const s = JSON.parse(raw);
-        if (s.colState && gridColumnApi.applyColumnState) {
-          gridColumnApi.applyColumnState({ state: s.colState, applyOrder: true });
-        }
-        if (s.filter && gridApi.setFilterModel) gridApi.setFilterModel(s.filter);
-        if (s.sort && gridApi.setSortModel) gridApi.setSortModel(s.sort);
-        if (s.pageSize) {
-          const ps = document.getElementById('pageSize'); if (ps) ps.value = String(s.pageSize);
-          setPageSize(s.pageSize);
-        }
-        if (s.quick != null) {
-          const q = document.getElementById('quickFilter'); if (q) q.value = s.quick;
-          setQuickFilter(s.quick);
-        }
-      } catch {}
-    }
-    function resetView() {
-      localStorage.removeItem(STORAGE_KEY);
-      resetAll();
-    }
+    // info cards
+    const info = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="border rounded-lg p-3">
+          <div class="text-[11px] uppercase text-gray-500 mb-1">Contact</div>
+          <div class="text-sm flex flex-col gap-1">
+            <div><span class="text-gray-500">Gurdian Name:</span> <span class="font-medium">${esc(data.guardian_name)}</span></div>
+            <div><span class="text-gray-500">Address:</span> <span class="font-medium">${esc(data.address)}</span></div>
+            <div class="inline-flex items-center gap-2">Phone: 
+              ${data.phone && data.phone !== '-' ? `<a href="tel:${esc(data.phone)}" class="text-blue-600 hover:underline">${esc(data.phone)}</a>` : '<span>-</span>'}
+            </div>
+          
+          </div>
+        </div>
+        <div class="border rounded-lg p-3">
+          <div class="text-[11px] uppercase text-gray-500 mb-1">Meta</div>
+          <div class="text-sm grid grid-cols-2 gap-x-3 gap-y-1">
+            <div><span class="text-gray-500">Created:</span> <span class="font-medium">${esc(data.created_at)}</span></div>
+            <div><span class="text-gray-500">Updated:</span> <span class="font-medium">${esc(data.updated_at)}</span></div>
+            <div><span class="text-gray-500">Return:</span> <span class="font-medium">${esc(data.return_date)}</span></div>
+            <div><span class="text-gray-500">Status:</span> <span class="font-medium">${esc(data.status)}</span></div>
+          </div>
+        </div>
+        <div class="md:col-span-2 border rounded-lg p-3">
+          <div class="text-[11px] uppercase text-gray-500 mb-1">Notes</div>
+          <div class="text-sm leading-relaxed">${nl2br(data.notes)}</div>
+        </div>
+      </div>
+    `;
 
-    // Column chooser
-    function buildColumnMenu() {
-      const panel = document.getElementById('colPanel');
-      if (!panel || !gridColumnApi) return;
-      panel.innerHTML = '';
-      (gridColumnApi.getAllGridColumns ? gridColumnApi.getAllGridColumns() : []).forEach(col => {
-        const id = col.getColId ? col.getColId() : col.colId;
-        if (id === 'actions') return; // keep actions visible
-        const visible = col.isVisible ? col.isVisible() : true;
-        const row = document.createElement('label');
-        row.className = 'menu-row';
-        const cb = document.createElement('input');
-        cb.type = 'checkbox'; cb.checked = visible;
-        cb.addEventListener('change', () => gridColumnApi.setColumnVisible(id, cb.checked));
-        const name = document.createElement('span');
-        name.textContent = col.getColDef ? (col.getColDef().headerName || id) : id;
-        row.appendChild(cb); row.appendChild(name);
-        panel.appendChild(row);
-      });
-    }
-    function toggleMenu(el) {
-      const menu = document.getElementById('colMenu');
-      if (!menu) return;
-      menu.classList.toggle('open');
-      if (menu.classList.contains('open')) buildColumnMenu();
-    }
+    // images (your existing renderer works — keeping style consistent)
+    const imgsHtml = renderPatientImages(data.images);
 
-    // Bulk actions
-    function exportSelected() {
-      exportCsv({ onlySelected: true, fileName: 'patients-selected.csv' });
-    }
-    function deleteSelected() {
-      if (!gridApi) return;
-      const sel = gridApi.getSelectedRows() || [];
-      if (!sel.length) return;
-      if (!confirm(`Delete ${sel.length} selected patient(s)?`)) return;
-      // Submit one-by-one (simple & safe)
-      sel.forEach(r => r.delete_url && deletePatient(r.delete_url));
-    }
+    // documents holder (loaded async)
+    const docsHolder = `<div id="docsSection" class="mt-6 text-sm text-gray-600">Loading documents…</div>`;
 
-    // Density & stripes
-    function toggleDensity(dense) {
-      if (!gridApi) return;
-      const rh = dense ? 38 : 46;
-      const hh = dense ? 38 : 44;
-      if (gridApi.setGridOption) {
-        gridApi.setGridOption('rowHeight', rh);
-        gridApi.setGridOption('headerHeight', hh);
-      }
-      if (gridApi.resetRowHeights) gridApi.resetRowHeights();
-      if (gridApi.refreshHeader) gridApi.refreshHeader();
-    }
-    function toggleStriped(on){
-      const gridEl = document.getElementById('patientsGrid');
-      if (!gridEl) return;
-      gridEl.classList.toggle('striped-off', !on);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      mountGrid();
-
-      // toolbar wiring
-      const q   = document.getElementById('quickFilter');
-      const ps  = document.getElementById('pageSize');
-      const rs  = document.getElementById('btnReset');     // Reset filters (kept if you want)
-      const ex  = document.getElementById('btnExport');
-      const exs = document.getElementById('btnExportSel');
-      const dels= document.getElementById('btnDeleteSel');
-      const dn  = document.getElementById('dense');
-      const st  = document.getElementById('striped');
-      const fit = document.getElementById('btnFit');
-      const autos = document.getElementById('btnAuto');
-      const saveV = document.getElementById('btnSaveView');
-      const loadV = document.getElementById('btnLoadView');
-      const resetV= document.getElementById('btnResetView');
-      const menuB = document.getElementById('btnCols');
-      const menu  = document.getElementById('colMenu');
-
-      if (q)   q.addEventListener('input', e => setQuickFilter(e.target.value));
-      if (ps)  ps.addEventListener('change', e => setPageSize(e.target.value));
-      if (rs)  rs.addEventListener('click', resetAll);
-      if (ex)  ex.addEventListener('click', () => exportCsv());
-      if (exs) exs.addEventListener('click', exportSelected);
-      if (dels)dels.addEventListener('click', deleteSelected);
-      if (dn)  dn.addEventListener('change', e => toggleDensity(e.target.checked));
-      if (st)  st.addEventListener('change', e => toggleStriped(e.target.checked));
-      if (fit) fit.addEventListener('click', fitColumns);
-      if (autos) autos.addEventListener('click', autoSizeAll);
-      if (saveV) saveV.addEventListener('click', saveView);
-      if (loadV) loadV.addEventListener('click', loadView);
-      if (resetV)resetV.addEventListener('click', resetView);
-      if (menuB) menuB.addEventListener('click', () => toggleMenu(menu));
-
-      // close column menu when clicking outside
-      document.addEventListener('click', (e) => {
-        const cm = document.getElementById('colMenu');
-        if (!cm) return;
-        if (!cm.contains(e.target)) cm.classList.remove('open');
-      });
-
-      // initial stripes checked
-      toggleStriped(true);
+    Swal.fire({
+      title: `Patient`,
+      html: `<div class="text-left space-y-4">${header}${info}${imgsHtml}${docsHolder}</div>`,
+      width: '64rem',
+      showCloseButton: true,
+      showCancelButton: true,
+      cancelButtonText: 'Close',
+      showConfirmButton: false,
+      didOpen: () => fetchAndRenderDocuments(data.docsUrl)
     });
-  </script>
+  }
+</script>
+
+
+
 </x-app-layout>

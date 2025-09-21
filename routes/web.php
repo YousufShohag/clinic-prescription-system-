@@ -17,12 +17,31 @@ use App\Http\Controllers\{
     AppointmentController,
     CalenderController,
     PrescriptionPdfController,
+    PublicAppointmentController,
 
 };
+Route::get('/patients/check', [PublicAppointmentController::class, 'checkPatient'])
+    ->name('public.patients.check');
+Route::get('/', [PublicAppointmentController::class, 'showForm']);
 
-Route::get('/', function () {
-    return view('frontend.welcome');
-});
+
+
+
+Route::get('/appointment', [PublicAppointmentController::class, 'showForm'])->name('public.appointment');
+
+// Existing patient booking
+Route::post('/appointment/existing', [PublicAppointmentController::class, 'bookExisting'])
+    ->name('public.appointment.existing');
+
+// New patient booking
+Route::post('/appointment/new', [PublicAppointmentController::class, 'bookNew'])
+    ->name('public.appointment.new');
+
+// Small helper to check if a phone exists (optional AJAX)
+Route::get('/patients/check-phone', [PublicAppointmentController::class, 'checkPhone'])
+    ->name('public.patients.checkPhone');
+
+
 Route::get('/blog', function () {
     return view('frontend.blog');
 });
@@ -30,6 +49,9 @@ Route::get('/blog', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+
+
 
 /* Profile (auth) */
 Route::middleware('auth')->group(function () {

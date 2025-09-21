@@ -1,91 +1,60 @@
+{{-- resources/views/public/doctor.blade.php --}}
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dr. Shabuddin Hossain Pavel — Portfolio</title>
-  <meta name="description" content="Dr. Shabuddin Hossain Pavel is a board-certified physician specializing in internal medicine. Explore services, experience, testimonials, and book an appointment." />
+  <title>{{ $title ?? 'Dr. Shabuddin Hossain Pavel — Portfolio' }}</title>
+  <meta name="description" content="{{ $metaDescription ?? 'Dr. Shabuddin Hossain Pavel is a board-certified physician specializing in internal medicine. Explore services, experience, testimonials, and book an appointment.' }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Tailwind config (optional brand colors)
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui"] },
           colors: {
             brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              200: '#bfdbfe',
-              300: '#93c5fd',
-              400: '#60a5fa',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-              800: '#1e40af',
-              900: '#1e3a8a'
+              50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc',
+              400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1',
+              800: '#075985', 900: '#0c4a6e'
             }
           },
-          boxShadow: {
-            soft: '0 10px 25px -10px rgba(0,0,0,0.15)'
-          }
+          boxShadow: { soft: '0 15px 30px -10px rgba(0,0,0,0.2)' }
         }
       }
     }
   </script>
-  <style>
-    /* Fallback smooth-scroll */
-    html { scroll-behavior: smooth; }
-  </style>
 </head>
-<body class="bg-white text-slate-800 antialiased">
-  <!-- Top Bar -->
-  <div class="hidden md:flex items-center justify-between px-4 md:px-8 py-2 text-sm bg-slate-50 border-b border-slate-200">
-    <p class="flex items-center gap-2"><span aria-hidden="true">📍</span> 12 Lakeview Rd, Dhaka</p>
-    <a href="tel:+8801000000000" class="flex items-center gap-2 hover:text-brand-600 transition"><span aria-hidden="true">📞</span> +880 10-0000-0000</a>
-  </div>
+<body class="bg-gradient-to-b from-brand-50 to-white text-slate-800 antialiased">
 
-  <!-- Header / Nav -->
-  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-slate-200">
+  {{-- Header --}}
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200 shadow-soft">
     <div class="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
       <a href="#home" class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-xl bg-brand-600 text-white grid place-content-center font-semibold">SHP</div>
+        <div class="h-12 w-12 rounded-full bg-brand-500 text-white grid place-content-center font-bold text-lg">SHP</div>
         <div>
-          <h1 class="text-lg font-semibold leading-tight">Dr. Shabuddin Hossain Pavel</h1>
+          <h1 class="text-lg font-bold leading-tight">Dr. Shabuddin Hossain Pavel</h1>
           <p class="text-xs text-slate-500">MBBS, FMCH — Internal Medicine</p>
         </div>
       </a>
       <nav class="hidden md:flex gap-6 text-sm">
-        <a class="hover:text-brand-600" href="#home">Home</a>
         <a class="hover:text-brand-600" href="#about">About</a>
         <a class="hover:text-brand-600" href="#services">Services</a>
         <a class="hover:text-brand-600" href="#experience">Experience</a>
         <a class="hover:text-brand-600" href="#testimonials">Testimonials</a>
         <a class="hover:text-brand-600" href="#contact">Contact</a>
       </nav>
-      <a href="#contact" class="hidden md:inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-xl shadow-soft transition">
-        Book Appointment
+      <a href="#contact" class="hidden md:inline-flex bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full shadow-soft transition">
+        Book Now
       </a>
-      <button id="menuBtn" class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-lg border border-slate-300">
-        <span class="sr-only">Open menu</span>☰
-      </button>
-    </div>
-    <div id="mobileMenu" class="md:hidden hidden border-t border-slate-200">
-      <nav class="px-4 py-3 grid gap-2 text-sm">
-        <a class="py-2" href="#home">Home</a>
-        <a class="py-2" href="#about">About</a>
-        <a class="py-2" href="#services">Services</a>
-        <a class="py-2" href="#experience">Experience</a>
-        <a class="py-2" href="#testimonials">Testimonials</a>
-        <a class="py-2" href="#contact">Contact</a>
-      </nav>
+      <button id="menuBtn" class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-full border border-slate-300">☰</button>
     </div>
   </header>
 
-   {{-- Hero --}}
+  {{-- Hero --}}
   <section id="home" class="relative overflow-hidden">
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-50 via-white to-slate-50"></div>
     <div class="max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center relative">
@@ -108,12 +77,12 @@
       </div>
       <div class="relative">
         <div class="relative mx-auto max-w-sm">
-          <img src="{{ asset('doctor2.jpg') }}" alt="Dr. Yousuf Patwari" style="width:100%;max-width:350px;border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,0.1);" />
+          <div class="aspect-[4/5] rounded-[32px] bg-[url('https://images.unsplash.com/photo-1579154204601-01588f351e85?q=80&w=1460&auto=format&fit=crop')] bg-cover bg-center shadow-soft ring-8 ring-white"></div>
           <div class="absolute -bottom-6 -left-6 hidden md:block p-4 rounded-2xl bg-white border border-slate-200 shadow-soft">
             <p class="text-sm font-semibold">Clinic Hours</p>
             <p class="text-xs text-slate-600 mt-1">Sun–Thu: 10:00–18:00</p>
             <p class="text-xs text-slate-600">Fri–Sat: Closed</p>
-            </div>
+          </div>
           <div class="absolute -top-4 -right-4 hidden md:flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-600 text-white shadow-soft">
             <span>⭐️⭐️⭐️⭐️⭐️</span><span class="text-sm font-medium">200+ reviews</span>
           </div>
@@ -122,131 +91,17 @@
     </div>
   </section>
 
-  <!-- About -->
-  <section id="about" class="py-16 md:py-24 bg-slate-50 border-y border-slate-200">
-    <div class="max-w-5xl mx-auto px-4 md:px-8 grid md:grid-cols-3 gap-10 items-start">
-      <div class="md:col-span-1">
-        <h3 class="text-2xl font-bold">About</h3>
-        <p class="mt-2 text-slate-600">Credentials & approach</p>
-      </div>
-      <div class="md:col-span-2 space-y-6">
-        <p>I completed my MBBS at ABC Medical College and MRCP (UK). My practice focuses on preventative care, diabetes, hypertension, thyroid disorders, and comprehensive adult health checks.</p>
-        <ul class="grid sm:grid-cols-2 gap-3 text-sm">
-          <li class="flex items-start gap-3"><span aria-hidden="true">✅</span> Board‑certified in Internal Medicine</li>
-          <li class="flex items-start gap-3"><span aria-hidden="true">✅</span> Member, Bangladesh Medical Association</li>
-          <li class="flex items-start gap-3"><span aria-hidden="true">✅</span> Evidence‑based, patient‑first care</li>
-          <li class="flex items-start gap-3"><span aria-hidden="true">✅</span> Multilingual: English, Bangla</li>
-        </ul>
-      </div>
-    </div>
-  </section>
+  {{-- Services (shortened for brevity; keep yours) --}}
+  @includeWhen(false, 'partials.services')
 
-  <!-- Services -->
-  <section id="services" class="py-16 md:py-24">
-    <div class="max-w-7xl mx-auto px-4 md:px-8">
-      <div class="max-w-2xl">
-        <h3 class="text-2xl font-bold">Services</h3>
-        <p class="mt-2 text-slate-600">Comprehensive internal medicine & preventive care</p>
-      </div>
-      <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Card -->
-        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
-          <div class="text-3xl" aria-hidden="true">🩺</div>
-          <h4 class="mt-3 font-semibold">General Consultation</h4>
-          <p class="mt-1 text-sm text-slate-600">Diagnosis & treatment for acute and chronic conditions.</p>
-        </div>
-        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
-          <div class="text-3xl" aria-hidden="true">🧪</div>
-          <h4 class="mt-3 font-semibold">Health Check‑ups</h4>
-          <p class="mt-1 text-sm text-slate-600">Annual exams, labs, and lifestyle counseling.</p>
-        </div>
-        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
-          <div class="text-3xl" aria-hidden="true">💓</div>
-          <h4 class="mt-3 font-semibold">Chronic Care</h4>
-          <p class="mt-1 text-sm text-slate-600">Diabetes, hypertension, lipids, thyroid disorders.</p>
-        </div>
-        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
-          <div class="text-3xl" aria-hidden="true">👩‍⚕️</div>
-          <h4 class="mt-3 font-semibold">Women’s Health</h4>
-          <p class="mt-1 text-sm text-slate-600">Preventive screening, anemia, thyroid, PCOS support.</p>
-        </div>
-        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
-          <div class="text-3xl" aria-hidden="true">🧘</div>
-          <h4 class="mt-3 font-semibold">Lifestyle Medicine</h4>
-          <p class="mt-1 text-sm text-slate-600">Sleep, nutrition, movement & stress management.</p>
-        </div>
-        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
-          <div class="text-3xl" aria-hidden="true">💻</div>
-          <h4 class="mt-3 font-semibold">Telemedicine</h4>
-          <p class="mt-1 text-sm text-slate-600">Secure video consultations for follow‑ups and care.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+  {{-- Testimonials (keep yours) --}}
+  @includeWhen(false, 'partials.testimonials')
 
-  <!-- Experience / Qualifications -->
-  <section id="experience" class="py-16 md:py-24 bg-slate-50 border-y border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 md:px-8">
-      <div class="max-w-2xl">
-        <h3 class="text-2xl font-bold">Experience</h3>
-        <p class="mt-2 text-slate-600">Training, affiliations & publications</p>
-      </div>
-      <div class="mt-10 grid lg:grid-cols-2 gap-6">
-        <div class="p-6 rounded-2xl bg-white border border-slate-200">
-          <h4 class="font-semibold">Education & Training</h4>
-          <ul class="mt-3 text-sm space-y-2">
-            <li><strong>RMO </strong>— Hope Diagnostic Centre and Hospital, Brahmanbaria</li>
-            <li><strong>MBBS</strong>, ABC Medical College — 2013</li>
-            <li>Residency, Internal Medicine — City Hospital, 2014–2018</li>
-          </ul>
-        </div>
-        <div class="p-6 rounded-2xl bg-white border border-slate-200">
-          <h4 class="font-semibold">Affiliations & Awards</h4>
-          <ul class="mt-3 text-sm space-y-2">
-            <li>Bangladesh Medical Association — Member</li>
-            <li>Dhaka Medical Society — Committee Member</li>
-            <li>Patient Choice Award — 2022</li>
-          </ul>
-        </div>
-        <div class="p-6 rounded-2xl bg-white border border-slate-200 lg:col-span-2">
-          <h4 class="font-semibold">Publications</h4>
-          <ul class="mt-3 text-sm space-y-2 list-disc pl-5">
-            <li>Doe J, et al. “Hypertension management in South Asia.” <em>Journal of IM</em>, 2021.</li>
-            <li>Doe J. “Integrated diabetes care in primary practice.” <em>Clin Med</em>, 2020.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
+  {{-- Contact / Appointment --}}
+  <section id="contact" class="py-20 bg-gradient-to-br from-brand-50 to-white border-t border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-12 items-start">
 
-  <!-- Testimonials -->
-  <section id="testimonials" class="py-16 md:py-24">
-    <div class="max-w-6xl mx-auto px-4 md:px-8">
-      <div class="max-w-2xl">
-        <h3 class="text-2xl font-bold">What patients say</h3>
-        <p class="mt-2 text-slate-600">Real experiences from real patients</p>
-      </div>
-      <div class="mt-10 grid md:grid-cols-3 gap-6">
-        <figure class="p-6 rounded-2xl border border-slate-200 bg-white">
-          <blockquote class="text-slate-700">“Dr. Doe truly listens. My BP is finally under control.”</blockquote>
-          <figcaption class="mt-3 text-sm text-slate-500">— R. Ahmed</figcaption>
-        </figure>
-        <figure class="p-6 rounded-2xl border border-slate-200 bg-white">
-          <blockquote class="text-slate-700">“Clear guidance and kind support throughout my diabetes journey.”</blockquote>
-          <figcaption class="mt-3 text-sm text-slate-500">— S. Chowdhury</figcaption>
-        </figure>
-        <figure class="p-6 rounded-2xl border border-slate-200 bg-white">
-          <blockquote class="text-slate-700">“Modern clinic, minimal wait times, excellent care.”</blockquote>
-          <figcaption class="mt-3 text-sm text-slate-500">— N. Islam</figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- Contact / Appointment -->
-  <section id="contact" class="py-16 md:py-24 bg-slate-50 border-y border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-10 items-start">
-       {{-- LEFT: Forms --}}
+      {{-- LEFT: Forms --}}
       <div>
         <h3 class="text-3xl font-bold text-brand-700">Book Your Appointment</h3>
         <p class="mt-3 text-slate-600">Quick and simple booking — we’ll confirm within 24 hours.</p>
@@ -434,125 +289,80 @@
         <p class="mt-3 text-xs text-slate-500">Emergency? Call 999 or visit the nearest emergency department.</p>
       </div>
 
-      <div class="space-y-6">
-        <div class="p-6 rounded-2xl bg-white border border-slate-200">
-          <h4 class="font-semibold">Clinic Hours</h4>
-          <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
-            <div class="flex justify-between border-b py-2"><dt>Sun</dt><dd>10:00–18:00</dd></div>
-            <div class="flex justify-between border-b py-2"><dt>Mon</dt><dd>10:00–18:00</dd></div>
-            <div class="flex justify-between border-b py-2"><dt>Tue</dt><dd>10:00–18:00</dd></div>
-            <div class="flex justify-between border-b py-2"><dt>Wed</dt><dd>10:00–18:00</dd></div>
-            <div class="flex justify-between border-b py-2"><dt>Thu</dt><dd>10:00–18:00</dd></div>
-            <div class="flex justify-between border-b py-2"><dt>Fri</dt><dd>Closed</dd></div>
-            <div class="flex justify-between py-2"><dt>Sat</dt><dd>Closed</dd></div>
-          </dl>
-        </div>
-        <div class="p-6 rounded-2xl bg-white border border-slate-200">
-          <h4 class="font-semibold">Location</h4>
-          <p class="text-sm text-slate-600 mt-1">12 Lakeview Rd, Gulshan, Dhaka 1212</p>
-          <div class="mt-4 aspect-[16/9] w-full overflow-hidden rounded-xl border border-slate-200">
-            <!-- Embed map (replace src with your own Google Maps embed link) -->
-            <iframe title="Clinic map" class="w-full h-full" style="border:0" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=Dhaka%20Gulshan&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>
-          </div>
-          <div class="mt-4 flex flex-wrap gap-3 text-sm">
-            <a href="tel:+8801000000000" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50">📞 Call</a>
-            <a href="mailto:clinic@example.com" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50">✉️ Email</a>
-            <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white">🧭 Get Directions</a>
-          </div>
+      {{-- RIGHT: Location --}}
+      <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-200 space-y-4">
+        <h4 class="font-semibold text-lg text-brand-700">Visit Us</h4>
+        <p class="text-sm text-slate-600">12 Lakeview Rd, Gulshan, Dhaka 1212</p>
+        <iframe class="w-full h-60 rounded-xl border" style="border:0" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=Dhaka%20Gulshan&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>
+        <div class="flex gap-3">
+          <a href="tel:+8801000000000" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50">📞 Call</a>
+          <a href="mailto:clinic@example.com" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50">✉️ Email</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="py-10">
-    <div class="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
-      <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-xl bg-brand-600 text-white grid place-content-center font-semibold">JD</div>
-        <div>
-          <p class="font-semibold">Dr. Shabuddin Hossain Pavel</p>
-          <p class="text-sm text-slate-500">MBBS, FMCH — Internal Medicine</p>
-        </div>
-      </div>
-      <div class="text-sm text-slate-600">
-        <p>© <span id="year"></span> Dr. Shabuddin Hossain Pavel. All rights reserved.</p>
-      </div>
-      <div class="text-sm">
-        <a class="hover:text-brand-600" href="#privacy">Privacy</a>
-        <span class="mx-2 text-slate-400">•</span>
-        <a class="hover:text-brand-600" href="#terms">Terms</a>
-      </div>
-    </div>
+  {{-- FAQs (keep yours) --}}
+
+  <footer class="py-8 bg-brand-700 text-center text-white">
+    <p>© <span id="year"></span> Dr. Shabuddin Hossain Pavel. All rights reserved.</p>
   </footer>
 
+  {{-- Scripts --}}
   <script>
-    // Mobile nav
-    const btn = document.getElementById('menuBtn');
-    const menu = document.getElementById('mobileMenu');
-    btn?.addEventListener('click', () => menu.classList.toggle('hidden'));
-    // Year
     document.getElementById('year').textContent = new Date().getFullYear();
-    // Fake form handler (replace with real endpoint)
-    document.querySelector('form')?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      alert('Thanks! We\'ll contact you shortly to confirm your appointment.');
-      e.target.reset();
+
+    // Toggle forms
+    document.querySelectorAll('input[name="mode"]').forEach(r => {
+      r.addEventListener('change', () => {
+        const isExisting = document.querySelector('input[name="mode"]:checked').value === 'existing';
+        document.getElementById('form-existing').style.display = isExisting ? '' : 'none';
+        document.getElementById('form-new').style.display      = isExisting ? 'none' : '';
+      });
     });
+
+    // Optional: live phone check for existing patients
+    const exPhone = document.getElementById('ex_phone');
+    const exDob   = document.getElementById('ex_dob');
+    const exPid   = document.getElementById('ex_patient_id');
+    const hint    = document.getElementById('phone-hint');
+    let t;
+
+    function checkPatient() {
+      clearTimeout(t);
+      const phone = exPhone?.value.trim();
+      const dob   = exDob?.value;
+      const pid   = exPid?.value;
+      if (!phone || phone.length < 6) { if(hint) hint.textContent=''; return; }
+
+      t = setTimeout(async () => {
+        try {
+          const u = new URL(@json(route('public.patients.check')), window.location.origin);
+          u.searchParams.set('phone', phone);
+          if (dob) u.searchParams.set('dob', dob);
+          if (pid) u.searchParams.set('patient_id', pid);
+
+          const r = await fetch(u, {credentials: 'same-origin'});
+          if (!r.ok) return;
+          const data = await r.json();
+          if (hint) hint.textContent = data.exists ? `✅ Found: ${data.patient?.name ?? 'match'}` : '⚠️ No matching patient found.';
+        } catch {}
+      }, 400);
+    }
+    exPhone?.addEventListener('input', checkPatient);
+    exDob?.addEventListener('change', checkPatient);
+    exPid?.addEventListener('input', checkPatient);
   </script>
 
+  {{-- Sticky mobile actions --}}
+  <div class="fixed bottom-4 inset-x-4 z-50 md:hidden">
+    <div class="flex gap-3 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl p-2 shadow-soft">
+      <a href="tel:+8801000000000" class="flex-1 inline-flex justify-center items-center px-4 py-3 rounded-xl border border-slate-300 font-semibold">Call</a>
+      <a href="#contact" class="flex-1 inline-flex justify-center items-center px-4 py-3 rounded-xl bg-brand-600 text-white font-semibold">Book</a>
+    </div>
+  </div>
 
-<script>
-  // Toggle forms
-  document.querySelectorAll('input[name="mode"]').forEach(r => {
-    r.addEventListener('change', () => {
-      const isExisting = document.querySelector('input[name="mode"]:checked').value === 'existing';
-      document.getElementById('form-existing').style.display = isExisting ? '' : 'none';
-      document.getElementById('form-new').style.display      = isExisting ? 'none' : '';
-    });
-  });
-
-  // Optional: live phone check for existing patients
-  const exPhone = document.getElementById('ex_phone');
-const exDob   = document.getElementById('ex_dob');
-const exPid   = document.getElementById('ex_patient_id');
-const hint    = document.getElementById('phone-hint');
-let t;
-
-function checkPatient() {
-  clearTimeout(t);
-  const phone = exPhone.value.trim();
-  const dob   = exDob.value;
-  const pid   = exPid.value;
-
-  if (phone.length < 6) {
-    hint.textContent = '';
-    return;
-  }
-
-  t = setTimeout(async () => {
-    try {
-      const u = new URL('{{ route('public.patients.check') }}', window.location.origin);
-      u.searchParams.set('phone', phone);
-      if (dob) u.searchParams.set('dob', dob);
-      if (pid) u.searchParams.set('patient_id', pid);
-
-      const r = await fetch(u, {credentials:'same-origin'});
-      if (!r.ok) return;
-      const data = await r.json();
-
-      hint.textContent = data.exists
-        ? `✅ Found: ${data.patient?.name}`
-        : '⚠️ No matching patient found.';
-    } catch {}
-  }, 400);
-}
-
-exPhone?.addEventListener('input', checkPatient);
-exDob?.addEventListener('change', checkPatient);
-exPid?.addEventListener('input', checkPatient);
-
-</script>
-
-
+  {{-- WhatsApp --}}
+  <a href="https://wa.me/8801000000000" class="fixed hidden md:flex right-5 bottom-5 h-12 w-12 rounded-full bg-emerald-500 text-white items-center justify-center shadow-soft" aria-label="Chat on WhatsApp">💬</a>
 </body>
 </html>

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,6 +22,13 @@ class Appointment extends Model
         'scheduled_at' => 'datetime',
     ];
 
+    // If you still want old-style fields available to views:
+    protected $appends = [
+        'date',        // virtual (from scheduled_at)
+        'start_time',  // virtual (from scheduled_at)
+        // 'end_at',    // optional virtual end datetime
+    ];
+
     public function patient()
     {
         return $this->belongsTo(Patient::class);
@@ -31,23 +39,31 @@ class Appointment extends Model
         return $this->belongsTo(Doctor::class);
     }
 
+    /* ----------------- Virtual accessors (do NOT override scheduled_at) ----------------- */
 
-   protected $appends = ['scheduled_at'];
-
-public function getScheduledAtAttribute()
-{
-    // If DB already has scheduled_at column, use it.
-    if (array_key_exists('scheduled_at', $this->attributes) && !is_null($this->attributes['scheduled_at'])) {
-        return Carbon::parse($this->attributes['scheduled_at']);
+    public function getDateAttribute(): ?string
+    {
+        return $this->scheduled_at?->format('Y-m-d');
     }
 
-    // Otherwise synthesize from date + start_time (if present)
-    $d = $this->date ? ($this->date instanceof Carbon ? $this->date->toDateString() : (string)$this->date) : null;
-    $t = $this->start_time ?? null;
+    public function getStartTimeAttribute(): ?string
+    {
+        return $this->scheduled_at?->format('H:i');
+    }
 
-    if ($d && $t) return Carbon::parse("$d $t");
-    if ($d) return Carbon::parse("$d 00:00:00");
+    // Optional helper: computed end datetime based on duration_min (defaults to 30)
+    public function getEndAtAttribute(): ?Carbon
+    {
+        if (!$this->scheduled_at) return null;
+        $minutes = (int) ($this->duration_min ?? 30);
+        return (clone $this->scheduled_at)->addMinutes($minutes);
+    }
 
-    return null;
+    public function getAppointmentCodeAttribute(): ?string
+{
+    if (!$this->appointment_number || !$this->scheduled_at) return null;
+    return 'APT-' . $this->scheduled_at->format('Ymd') . '-' .
+           str_pad((string)$this->appointment_number, 3, '0', STR_PAD_LEFT);
 }
+
 }
