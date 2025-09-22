@@ -1,400 +1,558 @@
-{{-- resources/frontend/wellcome.blade.php --}}
-@extends('frontend.app')
-
-@section('title', 'Welcome')
-
-@section('content')
- 
-    <!-- HERO -->
-    <section class="hero section reveal in" id="top">
-        <!-- Left text card -->
-        <div class="card">
-            <h1 class="headline">
-            Welcome to <span class="accent-gradient">Dr.Shabuddin Hossain Pavel's Clinic</span>
-            </h1>
-            <p class="sub">
-            Providing compassionate healthcare, timely consultation, and reliable treatment for you and your family.
-            </p>
-
-            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
-            <a class="btn" href="#appointment">Book an Appointment</a>
-            <a class="pill">📞 +880 123 456 789</a>
-            </div>
-
-            <div class="pills" style="margin-top:14px">
-            <span class="pill">General Medicine</span>
-            <span class="pill">Health Checkups</span>
-            <span class="pill">Chronic Care</span>
-            <span class="pill">Family Wellness</span>
-            </div>
-        </div>
-
-        <!-- Right image card -->
-        <div class="card tilt" style="text-align:center">
-            <img class="avatar" src="{{ asset('doctor4.jpg') }}" alt="Doctor profile photo"/>
-            <p class="sub" style="margin-top:10px">
-            Caring for your health, one appointment at a time
-            </p>
-        </div>
-    </section>
-
-    <!-- ABOUT -->
-    <section id="about" class="section about reveal">
-        <div class="about-container" style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;">
-            
-            <!-- Doctor Image -->
-            <div class="about-image" style="text-align:center;">
-            <img src="{{ asset('doctor2.jpg') }}" alt="Dr. Yousuf Patwari" style="width:100%;max-width:350px;border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,0.1);" />
-            </div>
-
-            <!-- Doctor Bio -->
-            <div class="about-content">
-            <h2>About Dr. Shabuddin Hossain Pavel</h2>
-            <p>
-                With a deep passion for patient care, I specialize in providing
-                <strong>comprehensive family medicine</strong> and preventive health solutions.
-                My focus is on building long-term wellness plans that help patients
-                live healthier, happier lives.
-            </p>
-            <p>
-                From routine checkups to chronic disease management, I combine
-                modern medical practices with a compassionate approach
-                to ensure every patient feels heard and cared for.
-            </p>
-
-            <!-- Highlighted Stats -->
-            <div class="stats" style="display:flex;gap:20px;margin-top:20px;flex-wrap:wrap;">
-                <div class="stat" style="flex:1;min-width:120px;text-align:center;">
-                <h3 style="font-size:1.5rem;color:black;">10+</h3>
-                <p>Years Experience</p>
-                </div>
-                <div class="stat" style="flex:1;min-width:120px;text-align:center;">
-                <h3 style="font-size:1.5rem;color:black;">5k+</h3>
-                <p>Patients Treated</p>
-                </div>
-                <div class="stat" style="flex:1;min-width:120px;text-align:center;">
-                <h3 style="font-size:1.5rem;color:black;">100%</h3>
-                <p>Patient Care</p>
-                </div>
-            </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SERVICES -->
-    <section id="services" class="section reveal">
-    <div class="section-header" style="text-align:center;margin-bottom:40px;">
-        <h2>Start Feeling Your Best</h2>
-        <p class="sub">Explore Our Wellness & Medical Services</p>
-        <a href="#appointment" class="btn" style="margin-top:12px;">Make An Appointment</a>
-    </div>
-
-    <div class="grid">
-        <!-- Service 1 -->
-        <article class="card service tilt">
-        <span class="shine"></span>
-        <img src="{{ asset('angioplasty.jpg') }}" alt="Angioplasty Service" />
-        <h3>Angioplasty</h3>
-        <p>Minimally invasive treatment to restore blood flow.</p>
-        <div class="meta">25+ Doctors</div>
-        </article>
-
-        <!-- Service 2 -->
-        <article class="card service tilt">
-        <span class="shine"></span>
-        <img src="{{ asset('cardiology.jpg') }}" alt="Cardiology Service" />
-        <h3>Cardiology</h3>
-        <p>Comprehensive heart care for all ages.</p>
-        <div class="meta">25+ Doctors</div>
-        </article>
-
-        <!-- Service 3 -->
-        <article class="card service tilt">
-        <span class="shine"></span>
-        <img src="{{ asset('dental.jpg') }}" alt="Dental Service" />
-        <h3>Dental Care</h3>
-        <p>Quality dental treatments with modern equipment.</p>
-        <div class="meta">25+ Doctors</div>
-        </article>
-
-        <!-- Service 4 -->
-        <article class="card service tilt">
-        <span class="shine"></span>
-        <img src="{{ asset('endocrinology.jpg') }}" alt="Endocrinology Service" />
-        <h3>Endocrinology</h3>
-        <p>Diagnosis and treatment of hormone-related conditions.</p>
-        <div class="meta">25+ Doctors</div>
-        </article>
-
-        <!-- Service 5 -->
-        <article class="card service tilt">
-        <span class="shine"></span>
-        <img src="{{ asset('eye-care.jpg') }}" alt="Eye Care Service" />
-        <h3>Eye Care</h3>
-        <p>From regular check-ups to advanced eye surgeries.</p>
-        <div class="meta">25+ Doctors</div>
-        </article>
-
-        <!-- Service 6 -->
-        <article class="card service tilt">
-        <span class="shine"></span>
-        <img src="{{ asset('neurology.jpg') }}" alt="Neurology Service" />
-        <h3>Neurology</h3>
-        <p>Specialized care for brain, nerves, and spine.</p>
-        <div class="meta">25+ Doctors</div>
-        </article>
-
-        <!-- Service 7 -->
-        <article class="card service tilt">
-        <span class="shine"></span>
-        <img src="{{ asset('orthopedics.jpg') }}" alt="Orthopedics Service" />
-        <h3>Orthopedics</h3>
-        <p>Advanced bone, joint, and muscle care.</p>
-        <div class="meta">25+ Doctors</div>
-        </article>
-
-        <!-- Service 8 -->
-        <article class="card service tilt">
-        <span class="shine"></span>
-        <img src="{{ asset('rmi.jpg') }}" alt="RMI Service" />
-        <h3>RMI</h3>
-        <p>Modern diagnostic imaging and medical analysis.</p>
-        <div class="meta">25+ Doctors</div>
-        </article>
-    </div>
-    </section>
-
-
-    <!-- CONTACT / APPOINTMENT -->
-    <section id="appointment" class="section contact reveal">
-    <h2>Book an Appointment</h2>
-    <div class="contact-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start;">
-
-        <!-- Doctor Availability -->
-        <div class="card availability" style="background:var(--primary);color:#fff;position:relative;border-radius:20px;padding:30px;">
-        <div style="position:absolute;right:-25px;top:-25px;width:70px;height:70px;border-radius:50%;background:var(--secondary);display:flex;align-items:center;justify-content:center;border:3px solid #fff;">
-            <img src="{{ asset('clock.svg') }}" alt="clock" width="36" height="36" />
-        </div>
-        <h3 style="margin-bottom:16px;">Open Hours</h3>
-        <ul style="list-style:none;padding:0;margin:0;">
-            <li style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.3);">
-            <span>Monday</span><strong>09:30 - 07:30</strong>
-            </li>
-            <li style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.3);">
-            <span>Tuesday</span><strong>09:30 - 07:30</strong>
-            </li>
-            <li style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.3);">
-            <span>Wednesday</span><strong>09:30 - 07:30</strong>
-            </li>
-            <li style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.3);">
-            <span>Thursday</span><strong>09:30 - 07:30</strong>
-            </li>
-            <li style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.3);">
-            <span>Friday</span><strong>09:30 - 07:30</strong>
-            </li>
-            <li style="display:flex;justify-content:space-between;padding:6px 0;">
-            <span>Saturday</span><strong>09:30 - 07:30</strong>
-            </li>
-        </ul>
-        <p class="text-white text-xs mt-4 italic opacity-80">
-        * Hours may vary on government/public holidays.  
-        Please call before visiting to confirm availability.
-        </p>
-        </div>
-
-        <!-- Appointment Form -->
-        <div class="card appointment-form">
-           @if ($errors->any())
-            <div style="padding:10px;border:1px solid var(--border);border-radius:10px;background:#7f1d1d22;margin-bottom:12px">
-              <ul style="margin:0;padding-left:16px">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
-            </div>
-          @endif
-
-        <div class="card" style="margin-bottom:16px">
-          <label style="display:flex;gap:16px;align-items:center">
-            <input type="radio" name="mode" value="existing" checked> Existing Patient
-            <input type="radio" name="mode" value="new"> New Patient
-          </label>
-        </div>
-
-        <form id="form-existing" class="contact-form" method="POST" action="{{ route('public.appointment.existing') }}">
-      @csrf
-      <h3>Existing Patient</h3>
-
-    <p id="phone-hint" class="sub" style="margin-top:8px"></p>
-
-      <div class="form-group">
-        <label for="ex_phone">Phone <span style="color:#ef4444">*</span></label>
-        <input id="ex_phone" name="phone" type="text" value="{{ old('phone') }}" required>
-      </div>
-
-      <div class="form-group">
-        <label for="ex_dob">Date of Birth (or provide Patient ID)</label>
-        <input id="ex_dob" name="dob" type="date" value="{{ old('dob') }}">
-      </div>
-
-    <div class="form-group">
-      <label for="ex_patient_id">Patient ID (optional)</label>
-      <input id="ex_patient_id" name="patient_id" type="number" value="{{ old('patient_id') }}">
-    </div>
-
-      <div class="form-group">
-        <label for="ex_doctor">Doctor</label>
-        <select id="ex_doctor" name="doctor_id" required>
-          <option value="">-- choose --</option>
-          @foreach($doctors as $d)
-            <option value="{{ $d->id }}" @selected(old('doctor_id') == $d->id)>{{ $d->name }}</option>
-          @endforeach
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="ex_date">Date</label>
-        <input id="ex_date" name="date" type="date" value="{{ old('date') }}" required>
-      </div>
-
-      <div class="form-group">
-        <label for="ex_time">Time</label>
-        <input id="ex_time" name="start_time" type="time" value="{{ old('start_time') }}" required>
-      </div>
-
-      <div class="form-group">
-        <label for="ex_notes">Notes (optional)</label>
-        <textarea id="ex_notes" name="notes" rows="3">{{ old('notes') }}</textarea>
-      </div>
-
-      <button class="btn" type="submit">Book as Existing Patient</button>
-      <p class="sub" style="margin-top:8px">
-        Tip: Enter your phone, then either your DOB or your Patient ID to verify.
-      </p>
-</form>
-<form id="form-new" class="card" method="POST" action="{{ route('public.appointment.new') }}" style="display:none">
-      @csrf
-      <h3>New Patient</h3>
-      <div class="form-group">
-        <label for="np_name">Full Name</label>
-        <input id="np_name" name="name" type="text" value="{{ old('name') }}" required>
-      </div>
-      <div class="form-group">
-        <label for="np_phone">Phone</label>
-        <input id="np_phone" name="phone" type="text" value="{{ old('phone') }}" required>
-      </div>
-      <div class="form-group">
-        <label for="np_email">Email (optional)</label>
-        <input id="np_email" name="email" type="email" value="{{ old('email') }}">
-      </div>
-      <div class="form-group">
-        <label for="np_dob">Date of Birth (optional)</label>
-        <input id="np_dob" name="dob" type="date" value="{{ old('dob') }}">
-      </div>
-      <div class="form-group">
-        <label for="np_gender">Gender (optional)</label>
-        <select id="np_gender" name="gender">
-          <option value="">-- choose --</option>
-          <option value="male" @selected(old('gender')=='male')>Male</option>
-          <option value="female" @selected(old('gender')=='female')>Female</option>
-          <option value="other" @selected(old('gender')=='other')>Other</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="np_doctor">Doctor</label>
-        <select id="np_doctor" name="doctor_id" required>
-          <option value="">-- choose --</option>
-          @foreach($doctors as $d)
-            <option value="{{ $d->id }}" @selected(old('doctor_id')==$d->id)>{{ $d->name }}</option>
-          @endforeach
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="np_date">Date</label>
-        <input id="np_date" name="date" type="date" value="{{ old('date') }}" required>
-      </div>
-      <div class="form-group">
-        <label for="np_time">Time</label>
-        <input id="np_time" name="start_time" type="time" value="{{ old('start_time') }}" required>
-      </div>
-      
-      <div class="form-group">
-        <label for="np_notes">Notes (optional)</label>
-        <textarea id="np_notes" name="notes" rows="3">{{ old('notes') }}</textarea>
-      </div>
-      <button class="btn" type="submit">Create & Book</button>
-    </form>
-        </div>
-    </div>
-    </section>
-@endsection
-
-@push('scripts')
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr. Shabuddin Hossain Pavel — Portfolio</title>
+  <meta name="description" content="Dr. Shabuddin Hossain Pavel is a board-certified physician specializing in internal medicine. Explore services, experience, testimonials, and book an appointment." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Mobile menu toggle
-    const toggle = document.querySelector('.menu-toggle');
-    const menu = document.getElementById('menu');
-    if (toggle && menu) {
-      toggle.addEventListener('click', () => {
-        const open = menu.classList.toggle('open');
-        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      });
-      menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-        menu.classList.remove('open'); toggle.setAttribute('aria-expanded','false');
-      }));
-    }
-
-    // Active nav on scroll
-    const sections = [...document.querySelectorAll('section[id]')];
-    const menuLinks = [...document.querySelectorAll('#menu a')];
-    const byId = id => document.querySelector('#menu a[href="#'+id+'"]');
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          menuLinks.forEach(a=>a.classList.remove('active'));
-          const link = byId(e.target.id); if(link) link.classList.add('active');
+    // Tailwind config (optional brand colors)
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui"] },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a'
+            }
+          },
+          boxShadow: {
+            soft: '0 10px 25px -10px rgba(0,0,0,0.15)'
+          }
         }
-      });
-    },{rootMargin:"-40% 0px -50% 0px", threshold:0});
-    sections.forEach(s=>obs.observe(s));
-
-    // Scroll reveal
-    const rev = new IntersectionObserver(es=>es.forEach(({target,isIntersecting})=>{
-      if(isIntersecting){target.classList.add('in');rev.unobserve(target)}
-    }),{threshold:.12});
-    document.querySelectorAll('.reveal').forEach(n=>rev.observe(n));
-
-    // Typewriter loop
-    const roles = ['Laravel developer','Full-stack engineer','API & dashboard builder'];
-    const el = document.getElementById('type');
-    let i=0, j=roles[0].length, erasing=false;
-    function type(){
-      const t = roles[i];
-      el.textContent = t.slice(0,j);
-      if(!erasing && j===t.length){ setTimeout(()=>erasing=true, 1200); }
-      else if(erasing && j===0){ erasing=false; i=(i+1)%roles.length; }
-      j += erasing? -1 : 1;
-      setTimeout(type, erasing? 40 : 70);
+      }
     }
-    setTimeout(type, 900);
+  </script>
+  <style>
+    /* Fallback smooth-scroll */
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-white text-slate-800 antialiased">
+  <!-- Top Bar -->
+  <div class="hidden md:flex items-center justify-between px-4 md:px-8 py-2 text-sm bg-slate-50 border-b border-slate-200">
+    <p class="flex items-center gap-2"><span aria-hidden="true">📍</span> 12 Lakeview Rd, Dhaka</p>
+    <a href="tel:+8801000000000" class="flex items-center gap-2 hover:text-brand-600 transition"><span aria-hidden="true">📞</span> +880 10-0000-0000</a>
+  </div>
 
-    // Tilt effect on mouse move
-    document.querySelectorAll('.tilt').forEach(card=>{
-      card.addEventListener('mousemove', e=>{
-        const r = card.getBoundingClientRect();
-        const x = e.clientX - r.left, y = e.clientY - r.top;
-        const rx = ((y/r.height)-.5)*-6; // tilt X
-        const ry = ((x/r.width)-.5)*6;   // tilt Y
-        card.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-      });
-      card.addEventListener('mouseleave', ()=>{ card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)'; });
+  <!-- Header / Nav -->
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
+      <a href="#home" class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-brand-600 text-white grid place-content-center font-semibold">SHP</div>
+        <div>
+          <h1 class="text-lg font-semibold leading-tight">Dr. Shabuddin Hossain Pavel</h1>
+          <p class="text-xs text-slate-500">MBBS, FMCH — Internal Medicine</p>
+        </div>
+      </a>
+      <nav class="hidden md:flex gap-6 text-sm">
+        <a class="hover:text-brand-600" href="#home">Home</a>
+        <a class="hover:text-brand-600" href="#about">About</a>
+        <a class="hover:text-brand-600" href="#services">Services</a>
+        <a class="hover:text-brand-600" href="#experience">Experience</a>
+        <a class="hover:text-brand-600" href="#testimonials">Testimonials</a>
+        <a class="hover:text-brand-600" href="#contact">Contact</a>
+      </nav>
+      <a href="#contact" class="hidden md:inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-xl shadow-soft transition">
+        Book Appointment
+      </a>
+      <button id="menuBtn" class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-lg border border-slate-300">
+        <span class="sr-only">Open menu</span>☰
+      </button>
+    </div>
+    <div id="mobileMenu" class="md:hidden hidden border-t border-slate-200">
+      <nav class="px-4 py-3 grid gap-2 text-sm">
+        <a class="py-2" href="#home">Home</a>
+        <a class="py-2" href="#about">About</a>
+        <a class="py-2" href="#services">Services</a>
+        <a class="py-2" href="#experience">Experience</a>
+        <a class="py-2" href="#testimonials">Testimonials</a>
+        <a class="py-2" href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+   {{-- Hero --}}
+  <section id="home" class="relative overflow-hidden">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-50 via-white to-slate-50"></div>
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center relative">
+      <div>
+        <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-700 bg-brand-50 border border-brand-100 px-3 py-1 rounded-full">Trusted Care • 4.9★ Rating</span>
+        <h2 class="text-4xl md:text-5xl font-extrabold leading-tight mt-4">
+          Feel heard. Get a clear plan. <span class="text-brand-700">Start feeling better</span> today.
+        </h2>
+        <p class="mt-5 text-slate-600 max-w-prose">I’m Dr. Shabuddin Hossain Pavel, a board-certified internist helping adults manage diabetes, blood pressure, thyroid issues and more—with gentle, step-by-step care tailored to you.</p>
+        <div class="mt-8 flex flex-col sm:flex-row gap-3">
+          <a href="#contact" class="inline-flex justify-center items-center px-6 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-semibold shadow-soft focus:outline-none focus:ring-4 focus:ring-brand-200">Book an appointment</a>
+          <a href="#services" class="inline-flex justify-center items-center px-6 py-3 rounded-2xl border border-slate-300 hover:bg-slate-50 font-semibold">See services & fees</a>
+        </div>
+        <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="p-4 rounded-xl bg-white border border-slate-200"><p class="text-2xl">⏱️</p><p class="text-xs text-slate-500">Average wait <strong>10 min</strong></p></div>
+          <div class="p-4 rounded-xl bg-white border border-slate-200"><p class="text-2xl">🧑‍⚕️</p><p class="text-xs text-slate-500">Female-friendly clinic</p></div>
+          <div class="p-4 rounded-xl bg-white border border-slate-200"><p class="text-2xl">🌐</p><p class="text-xs text-slate-500">Bangla • English</p></div>
+          <div class="p-4 rounded-xl bg-white border border-slate-200"><p class="text-2xl">🔒</p><p class="text-xs text-slate-500">Private & confidential</p></div>
+        </div>
+      </div>
+      <div class="relative">
+        <div class="relative mx-auto max-w-sm">
+          <img src="{{ asset('doctor2.jpg') }}" alt="Dr. Yousuf Patwari" style="width:100%;max-width:350px;border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,0.1);" />
+          <div class="absolute -bottom-6 -left-6 hidden md:block p-4 rounded-2xl bg-white border border-slate-200 shadow-soft">
+            <p class="text-sm font-semibold">Clinic Hours</p>
+            <p class="text-xs text-slate-600 mt-1">Sun–Thu: 10:00–18:00</p>
+            <p class="text-xs text-slate-600">Fri–Sat: Closed</p>
+            </div>
+          <div class="absolute -top-4 -right-4 hidden md:flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-600 text-white shadow-soft">
+            <span>⭐️⭐️⭐️⭐️⭐️</span><span class="text-sm font-medium">200+ reviews</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="py-16 md:py-24 bg-slate-50 border-y border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 md:px-8 grid md:grid-cols-3 gap-10 items-start">
+      <div class="md:col-span-1">
+        <h3 class="text-2xl font-bold">About</h3>
+        <p class="mt-2 text-slate-600">Credentials & approach</p>
+      </div>
+      <div class="md:col-span-2 space-y-6">
+        <p>I completed my MBBS at ABC Medical College and MRCP (UK). My practice focuses on preventative care, diabetes, hypertension, thyroid disorders, and comprehensive adult health checks.</p>
+        <ul class="grid sm:grid-cols-2 gap-3 text-sm">
+          <li class="flex items-start gap-3"><span aria-hidden="true">✅</span> Board‑certified in Internal Medicine</li>
+          <li class="flex items-start gap-3"><span aria-hidden="true">✅</span> Member, Bangladesh Medical Association</li>
+          <li class="flex items-start gap-3"><span aria-hidden="true">✅</span> Evidence‑based, patient‑first care</li>
+          <li class="flex items-start gap-3"><span aria-hidden="true">✅</span> Multilingual: English, Bangla</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section id="services" class="py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+      <div class="max-w-2xl">
+        <h3 class="text-2xl font-bold">Services</h3>
+        <p class="mt-2 text-slate-600">Comprehensive internal medicine & preventive care</p>
+      </div>
+      <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Card -->
+        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
+          <div class="text-3xl" aria-hidden="true">🩺</div>
+          <h4 class="mt-3 font-semibold">General Consultation</h4>
+          <p class="mt-1 text-sm text-slate-600">Diagnosis & treatment for acute and chronic conditions.</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
+          <div class="text-3xl" aria-hidden="true">🧪</div>
+          <h4 class="mt-3 font-semibold">Health Check‑ups</h4>
+          <p class="mt-1 text-sm text-slate-600">Annual exams, labs, and lifestyle counseling.</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
+          <div class="text-3xl" aria-hidden="true">💓</div>
+          <h4 class="mt-3 font-semibold">Chronic Care</h4>
+          <p class="mt-1 text-sm text-slate-600">Diabetes, hypertension, lipids, thyroid disorders.</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
+          <div class="text-3xl" aria-hidden="true">👩‍⚕️</div>
+          <h4 class="mt-3 font-semibold">Women’s Health</h4>
+          <p class="mt-1 text-sm text-slate-600">Preventive screening, anemia, thyroid, PCOS support.</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
+          <div class="text-3xl" aria-hidden="true">🧘</div>
+          <h4 class="mt-3 font-semibold">Lifestyle Medicine</h4>
+          <p class="mt-1 text-sm text-slate-600">Sleep, nutrition, movement & stress management.</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
+          <div class="text-3xl" aria-hidden="true">💻</div>
+          <h4 class="mt-3 font-semibold">Telemedicine</h4>
+          <p class="mt-1 text-sm text-slate-600">Secure video consultations for follow‑ups and care.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience / Qualifications -->
+  <section id="experience" class="py-16 md:py-24 bg-slate-50 border-y border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+      <div class="max-w-2xl">
+        <h3 class="text-2xl font-bold">Experience</h3>
+        <p class="mt-2 text-slate-600">Training, affiliations & publications</p>
+      </div>
+      <div class="mt-10 grid lg:grid-cols-2 gap-6">
+        <div class="p-6 rounded-2xl bg-white border border-slate-200">
+          <h4 class="font-semibold">Education & Training</h4>
+          <ul class="mt-3 text-sm space-y-2">
+            <li><strong>RMO </strong>— Hope Diagnostic Centre and Hospital, Brahmanbaria</li>
+            <li><strong>MBBS</strong>, ABC Medical College — 2013</li>
+            <li>Residency, Internal Medicine — City Hospital, 2014–2018</li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-2xl bg-white border border-slate-200">
+          <h4 class="font-semibold">Affiliations & Awards</h4>
+          <ul class="mt-3 text-sm space-y-2">
+            <li>Bangladesh Medical Association — Member</li>
+            <li>Dhaka Medical Society — Committee Member</li>
+            <li>Patient Choice Award — 2022</li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-2xl bg-white border border-slate-200 lg:col-span-2">
+          <h4 class="font-semibold">Publications</h4>
+          <ul class="mt-3 text-sm space-y-2 list-disc pl-5">
+            <li>Doe J, et al. “Hypertension management in South Asia.” <em>Journal of IM</em>, 2021.</li>
+            <li>Doe J. “Integrated diabetes care in primary practice.” <em>Clin Med</em>, 2020.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section id="testimonials" class="py-16 md:py-24">
+    <div class="max-w-6xl mx-auto px-4 md:px-8">
+      <div class="max-w-2xl">
+        <h3 class="text-2xl font-bold">What patients say</h3>
+        <p class="mt-2 text-slate-600">Real experiences from real patients</p>
+      </div>
+      <div class="mt-10 grid md:grid-cols-3 gap-6">
+        <figure class="p-6 rounded-2xl border border-slate-200 bg-white">
+          <blockquote class="text-slate-700">“Dr. Doe truly listens. My BP is finally under control.”</blockquote>
+          <figcaption class="mt-3 text-sm text-slate-500">— R. Ahmed</figcaption>
+        </figure>
+        <figure class="p-6 rounded-2xl border border-slate-200 bg-white">
+          <blockquote class="text-slate-700">“Clear guidance and kind support throughout my diabetes journey.”</blockquote>
+          <figcaption class="mt-3 text-sm text-slate-500">— S. Chowdhury</figcaption>
+        </figure>
+        <figure class="p-6 rounded-2xl border border-slate-200 bg-white">
+          <blockquote class="text-slate-700">“Modern clinic, minimal wait times, excellent care.”</blockquote>
+          <figcaption class="mt-3 text-sm text-slate-500">— N. Islam</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact / Appointment -->
+  <section id="contact" class="py-16 md:py-24 bg-slate-50 border-y border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-10 items-start">
+       {{-- !LEFT: Forms --}}
+      <div>
+        <h3 class="text-3xl font-bold text-brand-700">Book Your Appointment</h3>
+        <p class="mt-3 text-slate-600">Quick and simple booking — we’ll confirm within 24 hours.</p>
+
+        {{-- Flash success --}}
+        @if (session('status'))
+          <div class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900">
+            {{ session('status') }}
+          </div>
+        @endif
+
+        {{-- Validation errors --}}
+        @if ($errors->any())
+          <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-900">
+            <p class="font-semibold">Please fix the following:</p>
+            <ul class="mt-2 list-disc pl-6 text-sm">
+              @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+
+        {{-- Mode switch --}}
+        <div class="mt-6">
+          <div class="inline-flex rounded-2xl border border-slate-200 bg-white p-1">
+            <label class="flex items-center gap-2 px-4 py-2 text-sm font-medium">
+              <input class="accent-brand-600" type="radio" name="mode" value="existing" checked>
+              Follow Up Patient
+            </label>
+            <label class="flex items-center gap-2 px-4 py-2 text-sm font-medium">
+              <input class="accent-brand-600" type="radio" name="mode" value="new">
+              New Patient
+            </label>
+          </div>
+          <p id="phone-hint" class="mt-2 text-xs text-slate-500"></p>
+        </div>
+
+        {{-- Existing patient form --}}
+        <form id="form-existing" class="mt-8 grid gap-4 bg-white p-6 rounded-2xl shadow-soft border border-slate-200"
+              method="POST" action="{{ route('public.appointment.existing') }}" novalidate>
+          @csrf
+          <h4 class="text-lg font-semibold">Follow Up Patient</h4>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="ex_phone">Phone <span class="text-rose-600">*</span></label>
+              <input id="ex_phone" name="phone" type="tel" inputmode="tel" autocomplete="tel"
+                     value="{{ old('phone') }}" required
+                     class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="e.g. 01XXXXXXXXX">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="ex_dob">Date of birth</label>
+              <input id="ex_dob" name="dob" type="date" value="{{ old('dob') }}"
+                     class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="ex_patient_id">Patient ID</label>
+              <input id="ex_patient_id" name="patient_id" type="number" inputmode="numeric" value="{{ old('patient_id') }}"
+                     class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="Optional">
+            </div>
+            {{-- TODO: This is for Show for all doctors --- Start Here--}}
+            {{-- <div>
+              <label for="ex_doctor" class="block text-sm font-medium text-slate-700 mb-1">
+                Doctor <span class="text-rose-600">*</span>
+              </label>
+              <div class="relative">
+                <select id="ex_doctor" name="doctor_id" required
+                        class="w-full appearance-none rounded-xl border border-slate-300 bg-white py-2 px-3 pr-10 text-sm shadow-sm
+                              focus:border-brand-500 focus:ring-brand-500 focus:outline-none">
+                  <option value="">-- Please choose your doctor --</option>
+                  @foreach($doctors as $d)
+                    <option value="{{ $d->id }}" @selected(old('doctor_id') == $d->id)>
+                      {{ $d->name }}
+                    </option>
+                  @endforeach
+                </select>
+                <!-- Custom dropdown arrow -->
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                      viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </div>
+              </div>
+              @error('doctor_id')
+                <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
+              @enderror
+            </div> --}}
+          {{-- TODO: This is for Show for One doctors --- Start  Here--}}
+            {{-- <div>
+              <label for="ex_doctor" class="block text-sm font-medium text-slate-700 mb-1">
+                Doctor <span class="text-rose-600">*</span>
+              </label>
+              <div class="relative">
+                <select id="ex_doctor" name="doctor_id" required disabled
+                        class="w-full appearance-none rounded-xl border border-slate-300 bg-white py-2 px-3 pr-10 text-sm shadow-sm
+                              focus:border-brand-500 focus:ring-brand-500 focus:outline-none">
+                  <option value="">-- Please choose your doctor --</option>
+                  @foreach($doctors as $d)
+                    <option value="{{ $d->id }}"
+                            @if(old('doctor_id', 3) == $d->id) selected @endif>
+                      {{ $d->name }}
+                    </option>
+                  @endforeach
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </div>
+              </div>
+              @error('doctor_id')
+                <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
+              @enderror
+            </div> --}}
+          {{-- TODO: This is for Show for One Doctor doctors --- End Here--}}
+            
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Doctor</label>
+            <p class="w-full rounded-xl border border-slate-200 bg-gray-50 py-2 px-3 text-sm shadow-sm">
+              {{ $doctors->firstWhere('id', 3)->name }}
+            </p>
+            <input type="hidden" name="doctor_id" value="3">
+          </div>
+
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="ex_date">Preferred date <span class="text-rose-600">*</span></label>
+              <input id="ex_date" name="date" type="date" value="{{ old('date') }}" required
+                     class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="ex_time">Preferred time <span class="text-rose-600">*</span></label>
+              <input id="ex_time" name="start_time" type="time" value="{{ old('start_time') }}" required
+                     class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1" for="ex_notes">Notes</label>
+            <textarea id="ex_notes" name="notes" rows="4"
+                      class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500"
+                      placeholder="Reason for visit, symptoms, etc.">{{ old('notes') }}</textarea>
+          </div>
+
+          <button type="submit"
+                  class="inline-flex justify-center items-center px-5 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-semibold shadow-soft">
+            Book as Follow up Patient
+          </button>
+          <p class="text-xs text-slate-500">Tip: Enter your phone, then either your DOB or your Patient ID to verify.</p>
+        </form>
+
+        {{-- New patient form --}}
+        <form id="form-new" class="mt-8 grid gap-4 bg-white p-6 rounded-2xl shadow-soft border border-slate-200"
+              method="POST" action="{{ route('public.appointment.new') }}" style="display:none" novalidate>
+          @csrf
+          <h4 class="text-lg font-semibold">New Patient</h4>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="np_name">Full name <span class="text-rose-600">*</span></label>
+              <input id="np_name" name="name" type="text" value="{{ old('name') }}" required
+                     class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="Your name">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="np_phone">Phone <span class="text-rose-600">*</span></label>
+              <input id="np_phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" value="{{ old('phone') }}" required
+                     class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="e.g. 01XXXXXXXXX">
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="np_email">Email</label>
+              <input id="np_email" name="email" type="email" value="{{ old('email') }}"
+                     class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="you@example.com">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="np_dob">Date of birth</label>
+              <input id="np_dob" name="dob" type="date" value="{{ old('dob') }}"
+                     class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="np_gender">Gender</label>
+              <select id="np_gender" name="gender"
+                      class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
+                <option value="">-- choose --</option>
+                <option value="male" @selected(old('gender')=='male')>Male</option>
+                <option value="female" @selected(old('gender')=='female')>Female</option>
+                <option value="other" @selected(old('gender')=='other')>Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="np_doctor">Doctor <span class="text-rose-600">*</span></label>
+              <select id="np_doctor" name="doctor_id" required
+                      class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
+                <option value="">-- choose --</option>
+                @foreach($doctors as $d)
+                  <option value="{{ $d->id }}" @selected(old('doctor_id')==$d->id)>{{ $d->name }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="np_date">Preferred date <span class="text-rose-600">*</span></label>
+              <input id="np_date" name="date" type="date" value="{{ old('date') }}" required
+                     class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="np_time">Preferred time <span class="text-rose-600">*</span></label>
+              <input id="np_time" name="start_time" type="time" value="{{ old('start_time') }}" required
+                     class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1" for="np_notes">Notes</label>
+            <textarea id="np_notes" name="notes" rows="4"
+                      class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500"
+                      placeholder="Reason for visit, symptoms, etc.">{{ old('notes') }}</textarea>
+          </div>
+
+          <button type="submit"
+                  class="inline-flex justify-center items-center px-5 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-semibold shadow-soft">
+            Book as New Patient
+          </button>
+        </form>
+
+        <p class="mt-3 text-xs text-slate-500">Emergency? Call 999 or visit the nearest emergency department.</p>
+      </div>
+
+      <div class="space-y-6">
+        <div class="p-6 rounded-2xl bg-white border border-slate-200">
+          <h4 class="font-semibold">Clinic Hours</h4>
+          <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+            <div class="flex justify-between border-b py-2"><dt>Sun</dt><dd>10:00–18:00</dd></div>
+            <div class="flex justify-between border-b py-2"><dt>Mon</dt><dd>10:00–18:00</dd></div>
+            <div class="flex justify-between border-b py-2"><dt>Tue</dt><dd>10:00–18:00</dd></div>
+            <div class="flex justify-between border-b py-2"><dt>Wed</dt><dd>10:00–18:00</dd></div>
+            <div class="flex justify-between border-b py-2"><dt>Thu</dt><dd>10:00–18:00</dd></div>
+            <div class="flex justify-between border-b py-2"><dt>Fri</dt><dd>Closed</dd></div>
+            <div class="flex justify-between py-2"><dt>Sat</dt><dd>Closed</dd></div>
+          </dl>
+        </div>
+        <div class="p-6 rounded-2xl bg-white border border-slate-200">
+          <h4 class="font-semibold">Location</h4>
+          <p class="text-sm text-slate-600 mt-1">12 Lakeview Rd, Gulshan, Dhaka 1212</p>
+          <div class="mt-4 aspect-[16/9] w-full overflow-hidden rounded-xl border border-slate-200">
+            <!-- Embed map (replace src with your own Google Maps embed link) -->
+            <iframe title="Clinic map" class="w-full h-full" style="border:0" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=Dhaka%20Gulshan&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3 text-sm">
+            <a href="tel:+8801000000000" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50">📞 Call</a>
+            <a href="mailto:clinic@example.com" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50">✉️ Email</a>
+            <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white">🧭 Get Directions</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-10">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-brand-600 text-white grid place-content-center font-semibold">JD</div>
+        <div>
+          <p class="font-semibold">Dr. Shabuddin Hossain Pavel</p>
+          <p class="text-sm text-slate-500">MBBS, FMCH — Internal Medicine</p>
+        </div>
+      </div>
+      <div class="text-sm text-slate-600">
+        <p>© <span id="year"></span> Dr. Shabuddin Hossain Pavel. All rights reserved.</p>
+      </div>
+      <div class="text-sm">
+        <a class="hover:text-brand-600" href="#privacy">Privacy</a>
+        <span class="mx-2 text-slate-400">•</span>
+        <a class="hover:text-brand-600" href="#terms">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile nav
+    const btn = document.getElementById('menuBtn');
+    const menu = document.getElementById('mobileMenu');
+    btn?.addEventListener('click', () => menu.classList.toggle('hidden'));
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+    // Fake form handler (replace with real endpoint)
+    document.querySelector('form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Thanks! We\'ll contact you shortly to confirm your appointment.');
+      e.target.reset();
     });
-
-    // Scroll progress
-    const bar = document.getElementById('progress');
-    function onScroll(){
-      const s = document.documentElement.scrollTop || document.body.scrollTop;
-      const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      bar.style.width = (s/h*100) + '%';
-    }
-    document.addEventListener('scroll', onScroll, {passive:true});
-    onScroll();
   </script>
 
 
@@ -451,4 +609,5 @@ exPid?.addEventListener('input', checkPatient);
 </script>
 
 
-@endpush
+</body>
+</html>

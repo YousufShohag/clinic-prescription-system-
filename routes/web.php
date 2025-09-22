@@ -51,7 +51,11 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 
-
+// !!THIS ROUTER FOR point the signed public route 
+  Route::get('/prescriptions/{prescription}/pdf/public', [PrescriptionPdfController::class, 'mpdf'])
+    ->name('prescriptions.pdf.public')
+    ->middleware('signed');
+    
 
 /* Profile (auth) */
 Route::middleware('auth')->group(function () {

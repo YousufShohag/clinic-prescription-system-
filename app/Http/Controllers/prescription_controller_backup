@@ -161,7 +161,7 @@ class PrescriptionController extends Controller
         return response()->json($tests);
     }
 
-    // ----------------- Helpers -----------------
+    //! ----------------- Helpers -----------------
 
     /**
      * Build [id => ['duration'=>..., 'times_per_day'=>...], ...] for attach/sync

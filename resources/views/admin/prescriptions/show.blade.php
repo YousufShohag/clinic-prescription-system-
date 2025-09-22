@@ -3,6 +3,7 @@
   <div class="container mx-auto  ">
     {{-- Print / Back controls (hidden on print) --}}
     <div class="no-print flex items-center justify-between mb-1 py-4">
+
       <a href="{{ route('prescriptions.index') }}" class="text-blue-600 hover:underline">← Back to prescriptions</a>
       {{-- <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button> --}}
        {{-- <a href="{{ route('prescriptions.pdf.tcpdf', $prescription->id) }}" target="_blank"
@@ -18,12 +19,170 @@
             <a href="{{ route('prescriptions.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ">+ New Prescription</a>
             <a href="{{ route('prescriptions.pdf.mpdf', $prescription->id) }}" target="_blank"
             class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-            Print as PDF (mPDF)
-          </a>
+            Print as PDF (mPDF)</a>
           <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
           {{-- pass the model instance (cleanest with resource routes) --}}
           <a href="{{ route('prescriptions.edit', $prescription) }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Edit</a>
+ @php
+    // Signed link (24h)
+    $pdfUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+        'prescriptions.pdf.public',
+        now()->addHours(24),
+        ['prescription' => $prescription->id]
+    );
 
+    $shareText    = 'Prescription PDF';
+    $emailSubject = "Prescription PDF #{$prescription->id}";
+    $emailBody    = "Please find the prescription PDF here:\n{$pdfUrl}";
+
+    // Patient contacts (optional, used for one-tap WhatsApp/SMS/Call)
+      $pat = $prescription->patient ?? null;
+      $patientPhone = $pat?->phone ? preg_replace('/\D+/', '', $pat->phone) : null; // digits only
+      // Convert local Bangladeshi numbers to intl if needed (basic heuristic)
+      if ($patientPhone && str_starts_with($patientPhone, '0')) {
+          $patientPhoneIntl = '88' . $patientPhone; // "8801XXXXXXXXX" works well
+      } else {
+          $patientPhoneIntl = $patientPhone;
+      }
+
+      $waToPatientUrl = $patientPhoneIntl
+          ? ('https://wa.me/' . $patientPhoneIntl . '?text=' . urlencode($shareText . ' - ' . $pdfUrl))
+          : null;
+
+      $smsToPatientUrl = $patientPhone
+          ? ('sms:' . $patientPhone . '?&body=' . urlencode($shareText . ' - ' . $pdfUrl))
+          : null;
+
+      $callPatientUrl = $patientPhone ? ('tel:' . $patientPhone) : null;
+    @endphp
+
+
+
+    <!-- Trigger -->
+<button type="button" id="openShareModal"
+  class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700">
+  Share
+</button>
+
+<!-- Modal -->
+<div id="shareModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+  <div class="absolute inset-0 bg-black/40" aria-hidden="true"></div>
+
+  <div class="relative bg-white w-full max-w-md mx-4 rounded-2xl shadow-xl p-4">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-semibold">Share Prescription</h3>
+      <button type="button" id="closeShareModal" class="p-1 rounded hover:bg-gray-100">✕</button>
+    </div>
+
+    <!-- Quick patient actions (doctor friendly) -->
+    <div class="mb-3 grid grid-cols-3 gap-2">
+      <a href="{{ $waToPatientUrl ?: '#' }}"
+         @if(!$waToPatientUrl) aria-disabled="true" class="opacity-50 cursor-not-allowed" @endif
+         target="_blank" rel="noopener"
+         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+        <span>🟢</span>
+        <span class="text-xs text-center">WhatsApp to Patient</span>
+      </a>
+
+      <a href="{{ $smsToPatientUrl ?: '#' }}"
+         @if(!$smsToPatientUrl) aria-disabled="true" class="opacity-50 cursor-not-allowed" @endif
+         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+        <span>💬</span>
+        <span class="text-xs text-center">SMS</span>
+      </a>
+
+      <a href="{{ $callPatientUrl ?: '#' }}"
+         @if(!$callPatientUrl) aria-disabled="true" class="opacity-50 cursor-not-allowed" @endif
+         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+        <span>📞</span>
+        <span class="text-xs text-center">Call</span>
+      </a>
+    </div>
+
+    <!-- QR for patient to scan -->
+    <div class="mb-3 border rounded-xl p-3">
+      <div class="flex items-center gap-3">
+        <div id="qrPdf" class="shrink-0"></div>
+        <div class="text-xs text-gray-600">
+          <div class="font-medium text-gray-800">Scan to open PDF</div>
+          <div class="truncate">{{ $pdfUrl }}</div>
+          <div class="mt-1 text-[11px]">Link valid 24 hours.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="shareStatus" class="text-sm text-gray-500 mb-2">Preparing image…</div>
+
+    <!-- Actions -->
+    <div class="grid grid-cols-3 gap-2">
+      <!-- Native share image -->
+      <button id="btnShareNative"
+              class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50 disabled:opacity-50"
+              disabled>
+        <span>📱</span>
+        <span class="text-xs text-center">Share Image</span>
+      </button>
+
+      <!-- Download PNG -->
+      <a id="btnDownloadPng" download="prescription.png"
+         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
+        <span>⬇️</span>
+        <span class="text-xs text-center">Download PNG</span>
+      </a>
+
+      <!-- Copy image -->
+      <button id="btnCopyImage"
+              class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50 disabled:opacity-50"
+              disabled>
+        <span>📋</span>
+        <span class="text-xs text-center">Copy Image</span>
+      </button>
+
+      <!-- Open PDF -->
+      <a href="{{ $pdfUrl }}" target="_blank"
+         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+        <span>📄</span>
+        <span class="text-xs text-center">Open PDF</span>
+      </a>
+
+      <!-- Copy PDF link -->
+      <button id="copyPdfLinkBtn" data-url="{{ $pdfUrl }}"
+              class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+        <span>🔗</span>
+        <span class="text-xs text-center">Copy PDF Link</span>
+      </button>
+
+      <!-- (Optional) Download SVG -->
+      <a id="btnDownloadSvg" download="prescription.svg"
+         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
+        <span>🧩</span>
+        <span class="text-xs text-center">Download SVG</span>
+      </a>
+
+      <!-- Social (link share) -->
+      <a id="btnWhatsApp" target="_blank" rel="noopener"
+         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+        <span>🟢</span><span class="text-xs text-center">WhatsApp (Link)</span>
+      </a>
+      <a id="btnFacebook" target="_blank" rel="noopener"
+         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+        <span>📘</span><span class="text-xs text-center">Facebook (Link)</span>
+      </a>
+      <a id="btnTelegram" target="_blank" rel="noopener"
+         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+        <span>✈️</span><span class="text-xs text-center">Telegram (Link)</span>
+      </a>
+      <a id="btnEmail"
+         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+        <span>✉️</span><span class="text-xs text-center">Email (Link)</span>
+      </a>
+    </div>
+
+    <p class="text-[11px] text-gray-500 mt-3">
+      ফোনে থাকলে “Share Image” চাপলেই WhatsApp/Messenger-এ ছবি যাবে। কম্পিউটারে “Download PNG” ব্যবহার করুন।
+    </p>
+  </div>
+</div>
         </div>
 
     </div>
@@ -559,4 +718,166 @@
 }
 
   </style>
+
+{{-- !!THIS IS FOR SHARE WITH PATIENTS PDF --}}
+ <!-- html-to-image (no build step) -->
+
+
+<!-- libs -->
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+
+<script>
+(function () {
+  // Elements
+  const modal = document.getElementById('shareModal');
+  const openBtn = document.getElementById('openShareModal');
+  const closeBtn = document.getElementById('closeShareModal');
+  const statusEl = document.getElementById('shareStatus');
+
+  const btnShare = document.getElementById('btnShareNative');
+  const btnDownloadPng = document.getElementById('btnDownloadPng');
+  const btnCopyImage = document.getElementById('btnCopyImage');
+  const btnDownloadSvg = document.getElementById('btnDownloadSvg');
+  const copyLinkBtn = document.getElementById('copyPdfLinkBtn');
+
+  const btnWhatsApp = document.getElementById('btnWhatsApp');
+  const btnFacebook = document.getElementById('btnFacebook');
+  const btnTelegram = document.getElementById('btnTelegram');
+  const btnEmail = document.getElementById('btnEmail');
+
+  // Blade data
+  const pdfUrl = @json($pdfUrl);
+  const shareText = @json($shareText);
+  const emailSubject = @json($emailSubject);
+  const emailBody = @json($emailBody);
+
+  // Social link shares
+  if (btnWhatsApp) btnWhatsApp.href = 'https://wa.me/?text=' + encodeURIComponent(shareText + ' - ' + pdfUrl);
+  if (btnFacebook) btnFacebook.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pdfUrl);
+  if (btnTelegram) btnTelegram.href = 'https://t.me/share/url?url=' + encodeURIComponent(pdfUrl) + '&text=' + encodeURIComponent(shareText);
+  if (btnEmail)    btnEmail.href    = 'mailto:?subject=' + encodeURIComponent(emailSubject) + '&body=' + encodeURIComponent(emailBody);
+
+  // QR code (lightweight)
+  const qrEl = document.getElementById('qrPdf');
+  if (qrEl && window.QRCode) {
+    new QRCode(qrEl, {
+      text: pdfUrl,
+      width: 96,
+      height: 96,
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+  }
+
+  // Modal open/close
+  function openModal() {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    prepareImage(); // build image once per session
+  }
+  function closeModal() {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+  openBtn?.addEventListener('click', openModal);
+  closeBtn?.addEventListener('click', closeModal);
+  modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+  // Copy PDF link
+  copyLinkBtn?.addEventListener('click', async () => {
+    const url = copyLinkBtn.dataset.url || pdfUrl;
+    try {
+      if (!window.isSecureContext || !navigator.clipboard) throw new Error();
+      await navigator.clipboard.writeText(url);
+      const label = copyLinkBtn.querySelector('span:nth-child(2)');
+      if (label) { label.textContent = 'Copied!'; setTimeout(() => label.textContent = 'Copy PDF Link', 1200); }
+    } catch {
+      window.prompt('Copy this PDF link:', url);
+    }
+  });
+
+  // Image capture & sharing (iOS-friendly)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let imageBlob = null, imageFile = null, dataUrl = null;
+
+  async function prepareImage() {
+    if (imageBlob) return;
+    if (statusEl) statusEl.textContent = 'Preparing image…';
+    setShareEnabled(false);
+
+    const node = document.getElementById('rx-paper');
+    if (!node) { if (statusEl) statusEl.textContent = 'Could not find prescription area.'; return; }
+
+    const options = {
+      pixelRatio: isIOS ? 1.5 : 2,
+      backgroundColor: '#fff',
+      style: { position: 'static' },
+      filter: (n) => !(n.classList && n.classList.contains('no-print')),
+      quality: 0.9,
+    };
+
+    try {
+      dataUrl = isIOS
+        ? await htmlToImage.toJpeg(node, options)
+        : await htmlToImage.toPng(node, options);
+
+      if (btnDownloadPng) btnDownloadPng.href = dataUrl;
+
+      if (btnDownloadSvg) {
+        try { btnDownloadSvg.href = await htmlToImage.toSvg(node, options); } catch {}
+      }
+
+      const res = await fetch(dataUrl);
+      imageBlob = await res.blob();
+      imageFile = new File([imageBlob], isIOS ? 'prescription.jpg' : 'prescription.png', { type: isIOS ? 'image/jpeg' : 'image/png' });
+
+      const canFileShare = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] }));
+      if (statusEl) statusEl.textContent = canFileShare
+        ? 'Ready to share.'
+        : 'Ready. (On desktop, download PNG or share PDF link.)';
+      setShareEnabled(canFileShare);
+    } catch (e) {
+      console.error(e);
+      if (statusEl) statusEl.textContent = 'Could not prepare image. Use the PDF link or Download PNG.';
+      setShareEnabled(false);
+    }
+  }
+
+  function setShareEnabled(enabled) {
+    btnShare && (btnShare.disabled = !enabled);
+    btnCopyImage && (btnCopyImage.disabled = !(navigator.clipboard && window.ClipboardItem && imageBlob));
+  }
+
+  // Native file share (best on phones)
+  btnShare?.addEventListener('click', async () => {
+    if (imageFile && navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+      try {
+        await navigator.share({ title: 'Prescription', text: 'Prescription image', files: [imageFile] });
+      } catch {}
+    } else if (navigator.share) {
+      // Fallback: share the PDF link if file share not supported
+      try { await navigator.share({ title: 'Prescription PDF', text: 'Open the prescription PDF', url: pdfUrl }); } catch {}
+    } else {
+      // Final fallback: open image in new tab
+      try { window.open(dataUrl, '_blank'); } catch {}
+    }
+  });
+
+  // Copy image to clipboard (desktop Chromium)
+  btnCopyImage?.addEventListener('click', async () => {
+    if (!imageBlob || !navigator.clipboard || !window.ClipboardItem) return;
+    try {
+      await navigator.clipboard.write([ new ClipboardItem({ [imageBlob.type]: imageBlob }) ]);
+      if (statusEl) { statusEl.textContent = 'Image copied to clipboard.'; setTimeout(() => statusEl.textContent = 'Ready to share.', 1200); }
+    } catch {
+      if (statusEl) statusEl.textContent = 'Copy failed. Use Download PNG.';
+    }
+  });
+
+})();
+</script>
+
+
+
+
 </x-app-layout>

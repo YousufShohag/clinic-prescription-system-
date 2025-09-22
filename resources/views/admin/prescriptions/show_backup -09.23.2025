@@ -3,6 +3,67 @@
   <div class="container mx-auto  ">
     {{-- Print / Back controls (hidden on print) --}}
     <div class="no-print flex items-center justify-between mb-1 py-4">
+
+      @php
+        // Absolute URL to the PDF for this prescription
+        // $pdfUrl = route('prescriptions.pdf.mpdf', $prescription->id, true);
+        $pdfUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'prescriptions.pdf.public',
+            now()->addHours(24),
+            ['prescription' => $prescription->id]
+        );
+        $shareText = 'Prescription PDF';
+        $emailSubject = "Prescription PDF #{$prescription->id}";
+        $emailBody = "Please find the prescription PDF here:\n{$pdfUrl}";
+      @endphp
+
+      <div class="flex flex-wrap items-center gap-2">
+        {{-- WhatsApp (opens WhatsApp with prefilled message) --}}
+        <a href="https://wa.me/?text={{ urlencode($shareText.' - '.$pdfUrl) }}"
+          target="_blank" rel="noopener"
+          class="bg-[#25D366] text-white px-3 py-2 rounded hover:opacity-90">
+          Share WhatsApp
+        </a>
+
+        {{-- Facebook (works if the URL is publicly reachable) --}}
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($pdfUrl) }}"
+          target="_blank" rel="noopener"
+          class="bg-[#1877F2] text-white px-3 py-2 rounded hover:opacity-90">
+          Share Facebook
+        </a>
+
+        {{-- Telegram --}}
+        <a href="https://t.me/share/url?url={{ urlencode($pdfUrl) }}&text={{ urlencode($shareText) }}"
+          target="_blank" rel="noopener"
+          class="bg-sky-600 text-white px-3 py-2 rounded hover:bg-sky-700">
+          Share Telegram
+        </a>
+
+        {{-- Email --}}
+        <a href="mailto:?subject={{ urlencode($emailSubject) }}&body={{ urlencode($emailBody) }}"
+          class="bg-gray-700 text-white px-3 py-2 rounded hover:bg-gray-800">
+          Share via Email
+        </a>
+
+        {{-- Copy Link --}}
+        <button type="button" id="copyLinkBtn"
+                data-url="{{ $pdfUrl }}"
+                class="bg-gray-200 text-gray-900 px-3 py-2 rounded hover:bg-gray-300">
+          Copy PDF Link
+        </button>
+
+        {{-- Native Share (Web Share API) --}}
+        <button type="button" id="nativeShareBtn"
+                data-url="{{ $pdfUrl }}"
+                data-title="Prescription PDF #{{ $prescription->id }}"
+                data-text="Prescription PDF"
+                class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700">
+          Share…
+        </button>
+      </div>
+
+
+
       <a href="{{ route('prescriptions.index') }}" class="text-blue-600 hover:underline">← Back to prescriptions</a>
       {{-- <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button> --}}
        {{-- <a href="{{ route('prescriptions.pdf.tcpdf', $prescription->id) }}" target="_blank"
@@ -559,4 +620,48 @@
 }
 
   </style>
+
+{{-- !!THIS IS FOR SHARE WITH PATIENTS PDF --}}
+  <script>
+  (function () {
+    const copyBtn = document.getElementById('copyLinkBtn');
+    const nativeBtn = document.getElementById('nativeShareBtn');
+
+    // Copy PDF link to clipboard
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        const url = copyBtn.getAttribute('data-url');
+        try {
+          await navigator.clipboard.writeText(url);
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => copyBtn.textContent = 'Copy PDF Link', 1500);
+        } catch (e) {
+          // Fallback
+          prompt('Copy this link:', url);
+        }
+      });
+    }
+
+    // Web Share API (mobile + some desktop browsers)
+    if (nativeBtn) {
+      nativeBtn.addEventListener('click', async () => {
+        const url = nativeBtn.getAttribute('data-url');
+        const title = nativeBtn.getAttribute('data-title');
+        const text = nativeBtn.getAttribute('data-text');
+
+        if (navigator.share) {
+          try {
+            await navigator.share({ title, text, url });
+          } catch (e) {
+            // user canceled or share failed; silently ignore
+          }
+        } else {
+          // Fallback: open WhatsApp Web
+          window.open('https://wa.me/?text=' + encodeURIComponent(text + ' - ' + url), '_blank');
+        }
+      });
+    }
+  })();
+</script>
+
 </x-app-layout>

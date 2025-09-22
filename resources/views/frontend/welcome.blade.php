@@ -64,6 +64,7 @@
         <a class="hover:text-brand-600" href="#services">Services</a>
         <a class="hover:text-brand-600" href="#experience">Experience</a>
         <a class="hover:text-brand-600" href="#testimonials">Testimonials</a>
+       <a class="hover:text-brand-600" href="{{ url('/blog') }}">Blog</a>
         <a class="hover:text-brand-600" href="#contact">Contact</a>
       </nav>
       <a href="#contact" class="hidden md:inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-xl shadow-soft transition">
@@ -246,7 +247,7 @@
   <!-- Contact / Appointment -->
   <section id="contact" class="py-16 md:py-24 bg-slate-50 border-y border-slate-200">
     <div class="max-w-6xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-10 items-start">
-       {{-- LEFT: Forms --}}
+       {{-- !LEFT: Forms --}}
       <div>
         <h3 class="text-3xl font-bold text-brand-700">Book Your Appointment</h3>
         <p class="mt-3 text-slate-600">Quick and simple booking — we’ll confirm within 24 hours.</p>
@@ -275,21 +276,24 @@
           <div class="inline-flex rounded-2xl border border-slate-200 bg-white p-1">
             <label class="flex items-center gap-2 px-4 py-2 text-sm font-medium">
               <input class="accent-brand-600" type="radio" name="mode" value="existing" checked>
-              Existing Patient
+              Follow Up Patient
             </label>
             <label class="flex items-center gap-2 px-4 py-2 text-sm font-medium">
               <input class="accent-brand-600" type="radio" name="mode" value="new">
               New Patient
             </label>
           </div>
-          <p id="phone-hint" class="mt-2 text-xs text-slate-500"></p>
+          {{-- <p id="phone-hint" class="mt-5 text-sm text-slate-500 bg-red"></p> --}}
+         <p id="phone-hint"
+   class="hidden mt-5 text-sm font-semibold px-3 py-2 rounded-lg">
+</p>
         </div>
 
         {{-- Existing patient form --}}
         <form id="form-existing" class="mt-8 grid gap-4 bg-white p-6 rounded-2xl shadow-soft border border-slate-200"
               method="POST" action="{{ route('public.appointment.existing') }}" novalidate>
           @csrf
-          <h4 class="text-lg font-semibold">Existing Patient</h4>
+          <h4 class="text-lg font-semibold">Follow Up Patient</h4>
 
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
@@ -311,18 +315,71 @@
               <input id="ex_patient_id" name="patient_id" type="number" inputmode="numeric" value="{{ old('patient_id') }}"
                      class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="Optional">
             </div>
+            {{-- TODO: This is for Show for all doctors --- Start Here--}}
+            {{-- <div>
+              <label for="ex_doctor" class="block text-sm font-medium text-slate-700 mb-1">
+                Doctor <span class="text-rose-600">*</span>
+              </label>
+              <div class="relative">
+                <select id="ex_doctor" name="doctor_id" required
+                        class="w-full appearance-none rounded-xl border border-slate-300 bg-white py-2 px-3 pr-10 text-sm shadow-sm
+                              focus:border-brand-500 focus:ring-brand-500 focus:outline-none">
+                  <option value="">-- Please choose your doctor --</option>
+                  @foreach($doctors as $d)
+                    <option value="{{ $d->id }}" @selected(old('doctor_id') == $d->id)>
+                      {{ $d->name }}
+                    </option>
+                  @endforeach
+                </select>
+                <!-- Custom dropdown arrow -->
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                      viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </div>
+              </div>
+              @error('doctor_id')
+                <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
+              @enderror
+            </div> --}}
+          {{-- TODO: This is for Show for One doctors --- Start  Here--}}
+            {{-- <div>
+              <label for="ex_doctor" class="block text-sm font-medium text-slate-700 mb-1">
+                Doctor <span class="text-rose-600">*</span>
+              </label>
+              <div class="relative">
+                <select id="ex_doctor" name="doctor_id" required disabled
+                        class="w-full appearance-none rounded-xl border border-slate-300 bg-white py-2 px-3 pr-10 text-sm shadow-sm
+                              focus:border-brand-500 focus:ring-brand-500 focus:outline-none">
+                  <option value="">-- Please choose your doctor --</option>
+                  @foreach($doctors as $d)
+                    <option value="{{ $d->id }}"
+                            @if(old('doctor_id', 3) == $d->id) selected @endif>
+                      {{ $d->name }}
+                    </option>
+                  @endforeach
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </div>
+              </div>
+              @error('doctor_id')
+                <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
+              @enderror
+            </div> --}}
+          {{-- TODO: This is for Show for One Doctor doctors --- End Here--}}
+            
             <div>
-              <label class="block text-sm font-medium mb-1" for="ex_doctor">Doctor <span class="text-rose-600">*</span></label>
-              <select id="ex_doctor" name="doctor_id" required
-                      class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
-                <option value="">-- choose --</option>
-                @foreach($doctors as $d)
-                  <option value="{{ $d->id }}" @selected(old('doctor_id') == $d->id)>{{ $d->name }}</option>
-                @endforeach
-              </select>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Doctor</label>
+              <p class="w-full rounded-xl border border-slate-200 bg-gray-50 py-2 px-3 text-sm shadow-sm">
+                {{ $doctors->firstWhere('id', 3)->name }}
+              </p>
+              <input type="hidden" name="doctor_id" value="3">
             </div>
           </div>
-
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium mb-1" for="ex_date">Preferred date <span class="text-rose-600">*</span></label>
@@ -345,7 +402,7 @@
 
           <button type="submit"
                   class="inline-flex justify-center items-center px-5 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-semibold shadow-soft">
-            Book as Existing Patient
+            Book as Follow up Patient
           </button>
           <p class="text-xs text-slate-500">Tip: Enter your phone, then either your DOB or your Patient ID to verify.</p>
         </form>
@@ -384,16 +441,18 @@
 
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium mb-1" for="np_gender">Gender</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1" for="np_gender">Gender</label>
               <select id="np_gender" name="gender"
-                      class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
+                      class="w-full appearance-none rounded-xl border border-slate-300 bg-white py-2 px-3 pr-10 text-sm shadow-sm
+                              focus:border-brand-500 focus:ring-brand-500 focus:outline-none">
                 <option value="">-- choose --</option>
                 <option value="male" @selected(old('gender')=='male')>Male</option>
                 <option value="female" @selected(old('gender')=='female')>Female</option>
                 <option value="other" @selected(old('gender')=='other')>Other</option>
               </select>
             </div>
-            <div>
+            {{-- TODO: All Doctor Show -- Start Here --}}
+            {{-- <div>
               <label class="block text-sm font-medium mb-1" for="np_doctor">Doctor <span class="text-rose-600">*</span></label>
               <select id="np_doctor" name="doctor_id" required
                       class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
@@ -402,6 +461,14 @@
                   <option value="{{ $d->id }}" @selected(old('doctor_id')==$d->id)>{{ $d->name }}</option>
                 @endforeach
               </select>
+            </div> --}}
+            {{-- TODO: All Doctor Show -- End Here --}}
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Doctor</label>
+              <p class="w-full rounded-xl border border-slate-200 bg-gray-50 py-2 px-3 text-sm shadow-sm">
+                {{ $doctors->firstWhere('id', 3)->name }}
+              </p>
+              <input type="hidden" name="doctor_id" value="3">
             </div>
           </div>
 
@@ -485,7 +552,7 @@
     </div>
   </footer>
 
-  <script>
+  {{-- <script>
     // Mobile nav
     const btn = document.getElementById('menuBtn');
     const menu = document.getElementById('mobileMenu');
@@ -498,10 +565,92 @@
       alert('Thanks! We\'ll contact you shortly to confirm your appointment.');
       e.target.reset();
     });
-  </script>
-
-
+  </script> --}}
+  
 <script>
+  // Toggle forms
+  document.querySelectorAll('input[name="mode"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const isExisting = document.querySelector('input[name="mode"]:checked').value === 'existing';
+      document.getElementById('form-existing').style.display = isExisting ? '' : 'none';
+      document.getElementById('form-new').style.display      = isExisting ? 'none' : '';
+      // Hide hint when switching forms
+      hideHint();
+    });
+  });
+
+  // Elements
+  const exPhone = document.getElementById('ex_phone');
+  const exDob   = document.getElementById('ex_dob');
+  const exPid   = document.getElementById('ex_patient_id');
+  const hint    = document.getElementById('phone-hint');
+  let t;
+
+  // Helpers
+  function hideHint() {
+    if (!hint) return;
+    hint.textContent = '';
+    hint.className = 'hidden mt-5 text-sm font-semibold px-3 py-2 rounded-lg';
+  }
+
+  function showHint(message, type = 'error') {
+    if (!hint) return;
+    if (!message) { hideHint(); return; }
+
+    // base classes
+    hint.className = 'mt-5 text-sm font-semibold px-3 py-2 rounded-lg border';
+
+    if (type === 'success') {
+      hint.classList.add('text-green-700','bg-green-100','border-green-300');
+    } else {
+      hint.classList.add('text-red-700','bg-red-100','border-red-300');
+    }
+    hint.textContent = message;
+  }
+
+  async function checkPatient() {
+    clearTimeout(t);
+
+    const phone = exPhone?.value.trim() ?? '';
+    const dob   = exDob?.value ?? '';
+    const pid   = exPid?.value ?? '';
+
+    // If cleared or too short → hide hint and stop
+    if (!phone || phone.length < 6) {
+      hideHint();
+      return;
+    }
+
+    t = setTimeout(async () => {
+      try {
+        const u = new URL(@json(route('public.patients.check')), window.location.origin);
+        u.searchParams.set('phone', phone);
+        if (dob) u.searchParams.set('dob', dob);
+        if (pid) u.searchParams.set('patient_id', pid);
+
+        const r = await fetch(u, { credentials: 'same-origin' });
+        if (!r.ok) { hideHint(); return; }
+
+        const data = await r.json();
+        if (data?.exists) {
+          showHint(`✅ Found: ${data.patient?.name ?? 'match found'}`, 'success');
+        } else {
+          showHint('⚠️ No matching patient found.', 'error');
+        }
+      } catch {
+        hideHint();
+      }
+    }, 400);
+  }
+
+  // Wire events
+  exPhone?.addEventListener('input', checkPatient);
+  exDob?.addEventListener('change', checkPatient);
+  exPid?.addEventListener('input', checkPatient);
+</script>
+
+
+{{-- <script>
   // Toggle forms
   document.querySelectorAll('input[name="mode"]').forEach(r => {
     r.addEventListener('change', () => {
@@ -519,6 +668,31 @@ const hint    = document.getElementById('phone-hint');
 let t;
 
 function checkPatient() {
+
+
+
+  const hint = document.getElementById('phone-hint');
+
+function showHint(message, type = 'error') {
+  if (!message) {
+    hint.classList.add('hidden');
+    return;
+  }
+
+  hint.textContent = message;
+  hint.className = 'mt-5 text-sm font-semibold px-3 py-2 rounded-lg'; // reset
+
+  if (type === 'error') {
+    hint.classList.add('text-red-700','bg-red-100','border','border-red-300');
+  } else {
+    hint.classList.add('text-green-700','bg-green-100','border','border-green-300');
+  }
+
+  hint.classList.remove('hidden');
+}
+
+
+
   clearTimeout(t);
   const phone = exPhone.value.trim();
   const dob   = exDob.value;
@@ -540,9 +714,12 @@ function checkPatient() {
       if (!r.ok) return;
       const data = await r.json();
 
-      hint.textContent = data.exists
-        ? `✅ Found: ${data.patient?.name}`
-        : '⚠️ No matching patient found.';
+      hint.textContent = ''; // clear first
+if (data.exists) {
+  showHint(`✅ Found: ${data.patient?.name}`, 'success');
+} else {
+  showHint('⚠️ No matching patient found.', 'error');
+}
     } catch {}
   }, 400);
 }
@@ -551,7 +728,7 @@ exPhone?.addEventListener('input', checkPatient);
 exDob?.addEventListener('change', checkPatient);
 exPid?.addEventListener('input', checkPatient);
 
-</script>
+</script> --}}
 
 
 </body>

@@ -606,4 +606,10 @@ private function extractMedicinePivot(array $medicines): array
         }
         return is_numeric($fallback) ? round((float) $fallback, 1) : null;
     }
+
+//     public function pdfPublic(Prescription $prescription)
+// {
+//     // authorize read if needed, then render PDF exactly like your mpdf route
+//     return $this->renderMpdf($prescription); // replace with your actual PDF generator
+// }
 }
