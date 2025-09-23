@@ -16,173 +16,46 @@
 </a> --}}
 
         <div class="flex justify-between items-center mb-1 gap-2">
-            <a href="{{ route('prescriptions.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ">+ New Prescription</a>
-            <a href="{{ route('prescriptions.pdf.mpdf', $prescription->id) }}" target="_blank"
+            {{-- <a href="{{ route('prescriptions.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ">+ New Prescription</a> --}}
+            {{-- <a href="{{ route('prescriptions.pdf.mpdf', $prescription->id) }}" target="_blank"
             class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-            Print as PDF (mPDF)</a>
-          <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
+            Print as PDF (mPDF)</a> --}}
+          {{-- <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button> --}}
           {{-- pass the model instance (cleanest with resource routes) --}}
-          <a href="{{ route('prescriptions.edit', $prescription) }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Edit</a>
- @php
-    // Signed link (24h)
-    $pdfUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
-        'prescriptions.pdf.public',
-        now()->addHours(24),
-        ['prescription' => $prescription->id]
-    );
+          {{-- <a href="{{ route('prescriptions.edit', $prescription) }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Edit</a> --}}
+            @php
+                // Signed link (24h)
+                $pdfUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    'prescriptions.pdf.public',
+                    now()->addHours(24),
+                    ['prescription' => $prescription->id]
+                );
 
-    $shareText    = 'Prescription PDF';
-    $emailSubject = "Prescription PDF #{$prescription->id}";
-    $emailBody    = "Please find the prescription PDF here:\n{$pdfUrl}";
+                $shareText    = 'Prescription PDF';
+                $emailSubject = "Prescription PDF #{$prescription->id}";
+                $emailBody    = "Please find the prescription PDF here:\n{$pdfUrl}";
 
-    // Patient contacts (optional, used for one-tap WhatsApp/SMS/Call)
-      $pat = $prescription->patient ?? null;
-      $patientPhone = $pat?->phone ? preg_replace('/\D+/', '', $pat->phone) : null; // digits only
-      // Convert local Bangladeshi numbers to intl if needed (basic heuristic)
-      if ($patientPhone && str_starts_with($patientPhone, '0')) {
-          $patientPhoneIntl = '88' . $patientPhone; // "8801XXXXXXXXX" works well
-      } else {
-          $patientPhoneIntl = $patientPhone;
-      }
+                // Patient contacts (optional, used for one-tap WhatsApp/SMS/Call)
+                  $pat = $prescription->patient ?? null;
+                  $patientPhone = $pat?->phone ? preg_replace('/\D+/', '', $pat->phone) : null; // digits only
+                  // Convert local Bangladeshi numbers to intl if needed (basic heuristic)
+                  if ($patientPhone && str_starts_with($patientPhone, '0')) {
+                      $patientPhoneIntl = '88' . $patientPhone; // "8801XXXXXXXXX" works well
+                  } else {
+                      $patientPhoneIntl = $patientPhone;
+                  }
 
-      $waToPatientUrl = $patientPhoneIntl
-          ? ('https://wa.me/' . $patientPhoneIntl . '?text=' . urlencode($shareText . ' - ' . $pdfUrl))
-          : null;
+                  $waToPatientUrl = $patientPhoneIntl
+                      ? ('https://wa.me/' . $patientPhoneIntl . '?text=' . urlencode($shareText . ' - ' . $pdfUrl))
+                      : null;
 
-      $smsToPatientUrl = $patientPhone
-          ? ('sms:' . $patientPhone . '?&body=' . urlencode($shareText . ' - ' . $pdfUrl))
-          : null;
+                  $smsToPatientUrl = $patientPhone
+                      ? ('sms:' . $patientPhone . '?&body=' . urlencode($shareText . ' - ' . $pdfUrl))
+                      : null;
 
-      $callPatientUrl = $patientPhone ? ('tel:' . $patientPhone) : null;
-    @endphp
-
-
-
-    <!-- Trigger -->
-<button type="button" id="openShareModal"
-  class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700">
-  Share
-</button>
-
-<!-- Modal -->
-<div id="shareModal" class="fixed inset-0 z-50 hidden items-center justify-center">
-  <div class="absolute inset-0 bg-black/40" aria-hidden="true"></div>
-
-  <div class="relative bg-white w-full max-w-md mx-4 rounded-2xl shadow-xl p-4">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-lg font-semibold">Share Prescription</h3>
-      <button type="button" id="closeShareModal" class="p-1 rounded hover:bg-gray-100">✕</button>
-    </div>
-
-    <!-- Quick patient actions (doctor friendly) -->
-    <div class="mb-3 grid grid-cols-3 gap-2">
-      <a href="{{ $waToPatientUrl ?: '#' }}"
-         @if(!$waToPatientUrl) aria-disabled="true" class="opacity-50 cursor-not-allowed" @endif
-         target="_blank" rel="noopener"
-         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
-        <span>🟢</span>
-        <span class="text-xs text-center">WhatsApp to Patient</span>
-      </a>
-
-      <a href="{{ $smsToPatientUrl ?: '#' }}"
-         @if(!$smsToPatientUrl) aria-disabled="true" class="opacity-50 cursor-not-allowed" @endif
-         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
-        <span>💬</span>
-        <span class="text-xs text-center">SMS</span>
-      </a>
-
-      <a href="{{ $callPatientUrl ?: '#' }}"
-         @if(!$callPatientUrl) aria-disabled="true" class="opacity-50 cursor-not-allowed" @endif
-         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
-        <span>📞</span>
-        <span class="text-xs text-center">Call</span>
-      </a>
-    </div>
-
-    <!-- QR for patient to scan -->
-    <div class="mb-3 border rounded-xl p-3">
-      <div class="flex items-center gap-3">
-        <div id="qrPdf" class="shrink-0"></div>
-        <div class="text-xs text-gray-600">
-          <div class="font-medium text-gray-800">Scan to open PDF</div>
-          <div class="truncate">{{ $pdfUrl }}</div>
-          <div class="mt-1 text-[11px]">Link valid 24 hours.</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="shareStatus" class="text-sm text-gray-500 mb-2">Preparing image…</div>
-
-    <!-- Actions -->
-    <div class="grid grid-cols-3 gap-2">
-      <!-- Native share image -->
-      <button id="btnShareNative"
-              class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50 disabled:opacity-50"
-              disabled>
-        <span>📱</span>
-        <span class="text-xs text-center">Share Image</span>
-      </button>
-
-      <!-- Download PNG -->
-      <a id="btnDownloadPng" download="prescription.png"
-         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
-        <span>⬇️</span>
-        <span class="text-xs text-center">Download PNG</span>
-      </a>
-
-      <!-- Copy image -->
-      <button id="btnCopyImage"
-              class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50 disabled:opacity-50"
-              disabled>
-        <span>📋</span>
-        <span class="text-xs text-center">Copy Image</span>
-      </button>
-
-      <!-- Open PDF -->
-      <a href="{{ $pdfUrl }}" target="_blank"
-         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
-        <span>📄</span>
-        <span class="text-xs text-center">Open PDF</span>
-      </a>
-
-      <!-- Copy PDF link -->
-      <button id="copyPdfLinkBtn" data-url="{{ $pdfUrl }}"
-              class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
-        <span>🔗</span>
-        <span class="text-xs text-center">Copy PDF Link</span>
-      </button>
-
-      <!-- (Optional) Download SVG -->
-      <a id="btnDownloadSvg" download="prescription.svg"
-         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
-        <span>🧩</span>
-        <span class="text-xs text-center">Download SVG</span>
-      </a>
-
-      <!-- Social (link share) -->
-      <a id="btnWhatsApp" target="_blank" rel="noopener"
-         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
-        <span>🟢</span><span class="text-xs text-center">WhatsApp (Link)</span>
-      </a>
-      <a id="btnFacebook" target="_blank" rel="noopener"
-         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
-        <span>📘</span><span class="text-xs text-center">Facebook (Link)</span>
-      </a>
-      <a id="btnTelegram" target="_blank" rel="noopener"
-         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
-        <span>✈️</span><span class="text-xs text-center">Telegram (Link)</span>
-      </a>
-      <a id="btnEmail"
-         class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
-        <span>✉️</span><span class="text-xs text-center">Email (Link)</span>
-      </a>
-    </div>
-
-    <p class="text-[11px] text-gray-500 mt-3">
-      ফোনে থাকলে “Share Image” চাপলেই WhatsApp/Messenger-এ ছবি যাবে। কম্পিউটারে “Download PNG” ব্যবহার করুন।
-    </p>
-  </div>
-</div>
+                  $callPatientUrl = $patientPhone ? ('tel:' . $patientPhone) : null;
+                @endphp
+            
         </div>
 
     </div>
@@ -242,8 +115,150 @@
       // QR/signature and header ID only when there is an ID
       $showRxId = filled($prescription->id);
     @endphp
+ <!-- Right-side fixed buttons -->
+    <div class="fixed top-40 right-6 flex flex-col space-y-2 no-print">
+        <a href="{{ route('prescriptions.index') }}" 
+          class="hidden bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow">
+          View Prescriptions
+        </a>
 
-    <div id="rx-paper" class="mx-auto bg-white shadow md:rounded-lg p-6 md:p-8 max-w-4xl">
+        <a href="{{ route('prescriptions.create') }}" 
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow">
+          + New Prescription
+        </a>
+
+          <a href="{{ route('prescriptions.pdf.mpdf', $prescription->id) }}" target="_blank"
+            class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+            Print as PDF (mPDF)</a>
+          <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Print</button>
+          {{-- pass the model instance (cleanest with resource routes) --}}
+          <a href="{{ route('prescriptions.edit', $prescription) }}" class="bg-green-600 text-white text-center px-4 py-2 rounded hover:bg-green-700">Edit</a>
+        <!-- Trigger -->
+    
+          <button type="button" id="openShareModal"
+            class=" bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700">
+            Share
+          </button>
+
+            <!-- Modal -->
+          <div id="shareModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+            <div class="absolute inset-0 bg-black/40" aria-hidden="true"></div>
+
+            <div class="relative bg-white w-full max-w-md mx-4 rounded-2xl shadow-xl p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-semibold">Share Prescription</h3>
+                <button type="button" id="closeShareModal" class="p-1 rounded hover:bg-gray-100">✕</button>
+              </div>
+
+              <!-- Quick patient actions (doctor friendly) -->
+              <div class="mb-3 grid grid-cols-3 gap-2">
+                <a href="{{ $waToPatientUrl ?: '#' }}"
+                  @if(!$waToPatientUrl) aria-disabled="true" class="opacity-50 cursor-not-allowed" @endif
+                  target="_blank" rel="noopener"
+                  class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+                  <span>🟢</span>
+                  <span class="text-xs text-center">WhatsApp to Patient</span>
+                </a>
+
+                <a href="{{ $smsToPatientUrl ?: '#' }}"
+                  @if(!$smsToPatientUrl) aria-disabled="true" class="opacity-50 cursor-not-allowed" @endif
+                  class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+                  <span>💬</span>
+                  <span class="text-xs text-center">SMS</span>
+                </a>
+
+                <a href="{{ $callPatientUrl ?: '#' }}"
+                  @if(!$callPatientUrl) aria-disabled="true" class="opacity-50 cursor-not-allowed" @endif
+                  class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+                  <span>📞</span>
+                  <span class="text-xs text-center">Call</span>
+                </a>
+              </div>
+
+              <!-- QR for patient to scan -->
+              <div class="mb-3 border rounded-xl p-3">
+                <div class="flex items-center gap-3">
+                  <div id="qrPdf" class="shrink-0"></div>
+                  <div class="text-xs text-gray-600">
+                    <div class="font-medium text-gray-800">Scan to open PDF</div>
+                    <div class="truncate">{{ $pdfUrl }}</div>
+                    <div class="mt-1 text-[11px]">Link valid 24 hours.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="shareStatus" class="text-sm text-gray-500 mb-2">Preparing image…</div>
+
+              <!-- Actions -->
+              <div class="grid grid-cols-3 gap-2">
+                <!-- Native share image -->
+                <button id="btnShareNative"
+                        class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50 disabled:opacity-50"
+                        disabled>
+                  <span>📱</span>
+                  <span class="text-xs text-center">Share Image</span>
+                </button>
+
+                <!-- Download PNG -->
+                <a id="btnDownloadPng" download="prescription.png"
+                  class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
+                  <span>⬇️</span>
+                  <span class="text-xs text-center">Download PNG</span>
+                </a>
+
+                <!-- Copy image -->
+                <button id="btnCopyImage"
+                        class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50 disabled:opacity-50"
+                        disabled>
+                  <span>📋</span>
+                  <span class="text-xs text-center">Copy Image</span>
+                </button>
+
+                <!-- Open PDF -->
+                <a href="{{ $pdfUrl }}" target="_blank"
+                  class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+                  <span>📄</span>
+                  <span class="text-xs text-center">Open PDF</span>
+                </a>
+
+                <!-- Copy PDF link -->
+                <button id="copyPdfLinkBtn" data-url="{{ $pdfUrl }}"
+                        class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+                  <span>🔗</span>
+                  <span class="text-xs text-center">Copy PDF Link</span>
+                </button>
+
+
+                <!-- Social (link share) -->
+                <a id="btnWhatsApp" target="_blank" rel="noopener"
+                  class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+                  <span>🟢</span><span class="text-xs text-center">WhatsApp (Link)</span>
+                </a>
+                <a id="btnFacebook" target="_blank" rel="noopener"
+                  class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+                  <span>📘</span><span class="text-xs text-center">Facebook (Link)</span>
+                </a>
+                <a id="btnTelegram" target="_blank" rel="noopener"
+                  class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+                  <span>✈️</span><span class="text-xs text-center">Telegram (Link)</span>
+                </a>
+                <a id="btnEmail"
+                  class="flex flex-col items-center gap-1 border rounded-lg p-3 hover:bg-gray-50">
+                  <span>✉️</span><span class="text-xs text-center">Email (Link)</span>
+                </a>
+              </div>
+
+             
+            </div>
+          </div>
+          
+
+    </div>
+
+   
+
+    <div id="rx-paper" class="mx-auto bg-white shadow md:rounded-lg p-6 md:p-8 max-w-5xl">
+
 
       {{-- Letterhead --}}
       <div class="rx-keep flex items-start justify-between">
@@ -380,7 +395,7 @@
           </div>
         </div>
       </section>
-<div style=" font-size:10px;" class=" text-right">Software Developed By: YoDuPa Limited Chattagram. Email: yodupa@gmail.com</div>
+    <div style=" font-size:10px;" class=" text-right">Software Developed By: YoDuPa Limited Chattagram. Email: yodupa@gmail.com</div>
       {{-- Body: LEFT = Problem, Clinical Findings, Other History, Previous Investigation, Tests. RIGHT = Medicines, Advice, Next Meeting Date, Referred To --}}
       <div id="rx-body" class="mt-4 grid grid-cols-12 gap-6">
         {{-- LEFT column --}}
@@ -584,8 +599,8 @@
     background: #fff !important;
     margin: 0 !important;
     padding: 0 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    /* -webkit-print-color-adjust: exact;
+    print-color-adjust: exact; */
   }
 /* Chrome only CSS */
 @supports (-webkit-touch-callout: none) {
