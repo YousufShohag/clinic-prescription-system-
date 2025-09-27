@@ -116,7 +116,7 @@
       $showRxId = filled($prescription->id);
     @endphp
  <!-- Right-side fixed buttons -->
-    <div class="fixed top-40 right-6 flex flex-col space-y-2 no-print">
+    <div class="fixed top-40 right-6 flex flex-col space-y-2 no-print shadow z-10">
         <a href="{{ route('prescriptions.index') }}" 
           class="hidden bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow">
           View Prescriptions
@@ -735,8 +735,6 @@
   </style>
 
 {{-- !!THIS IS FOR SHARE WITH PATIENTS PDF --}}
- <!-- html-to-image (no build step) -->
-
 
 <!-- libs -->
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>

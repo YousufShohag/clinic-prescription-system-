@@ -45,7 +45,7 @@
   <!-- Top Bar -->
   <div class="hidden md:flex items-center justify-between px-4 md:px-8 py-2 text-sm bg-slate-50 border-b border-slate-200">
     <p class="flex items-center gap-2"><span aria-hidden="true">📍</span> 12 Lakeview Rd, Dhaka</p>
-    <a href="tel:+8801000000000" class="flex items-center gap-2 hover:text-brand-600 transition"><span aria-hidden="true">📞</span> +880 10-0000-0000</a>
+    <a href="tel:+8801000000000" class="flex items-center gap-2 hover:text-brand-600 transition"><span aria-hidden="true">📞</span> +880 1729-548153</a>
   </div>
 
   <!-- Header / Nav -->
@@ -55,7 +55,7 @@
         <div class="h-10 w-10 rounded-xl bg-brand-600 text-white grid place-content-center font-semibold">SHP</div>
         <div>
           <h1 class="text-lg font-semibold leading-tight">Dr. Shabuddin Hossain Pavel</h1>
-          <p class="text-xs text-slate-500">MBBS, FMCH — Internal Medicine</p>
+          <p class="text-xs text-slate-500">MBBS, (FMC, DU) — Internal Medicine</p>
         </div>
       </a>
       <nav class="hidden md:flex gap-6 text-sm">
@@ -131,7 +131,7 @@
         <p class="mt-2 text-slate-600">Credentials & approach</p>
       </div>
       <div class="md:col-span-2 space-y-6">
-        <p>I completed my MBBS at ABC Medical College and MRCP (UK). My practice focuses on preventative care, diabetes, hypertension, thyroid disorders, and comprehensive adult health checks.</p>
+        <p>I am Dr. Shabuddin Hossain Pavel,  committed to providing comprehensive and compassionate care to adults. I completed my MBBS at Faridpur Medical College under Dhaka University. My professional practice focuses on:</p>
         <ul class="grid sm:grid-cols-2 gap-3 text-sm">
           <li class="flex items-start gap-3"><span aria-hidden="true">✅</span> Board‑certified in Internal Medicine</li>
           <li class="flex items-start gap-3"><span aria-hidden="true">✅</span> Member, Bangladesh Medical Association</li>
@@ -186,7 +186,7 @@
   </section>
 
   <!-- Experience / Qualifications -->
-  <section id="experience" class="py-16 md:py-24 bg-slate-50 border-y border-slate-200">
+  <section id="experience" class="py-16 md:py-16 bg-slate-50 border-y border-slate-200">
     <div class="max-w-7xl mx-auto px-4 md:px-8">
       <div class="max-w-2xl">
         <h3 class="text-2xl font-bold">Experience</h3>
@@ -209,19 +209,19 @@
             <li>Patient Choice Award — 2022</li>
           </ul>
         </div>
-        <div class="p-6 rounded-2xl bg-white border border-slate-200 lg:col-span-2">
+        {{-- <div class="p-6 rounded-2xl bg-white border border-slate-200 lg:col-span-2">
           <h4 class="font-semibold">Publications</h4>
           <ul class="mt-3 text-sm space-y-2 list-disc pl-5">
             <li>Doe J, et al. “Hypertension management in South Asia.” <em>Journal of IM</em>, 2021.</li>
             <li>Doe J. “Integrated diabetes care in primary practice.” <em>Clin Med</em>, 2020.</li>
           </ul>
-        </div>
+        </div> --}}
       </div>
     </div>
   </section>
 
   <!-- Testimonials -->
-  <section id="testimonials" class="py-16 md:py-24">
+  <section id="testimonials" class="py-16 md:py-16">
     <div class="max-w-6xl mx-auto px-4 md:px-8">
       <div class="max-w-2xl">
         <h3 class="text-2xl font-bold">What patients say</h3>
@@ -229,16 +229,16 @@
       </div>
       <div class="mt-10 grid md:grid-cols-3 gap-6">
         <figure class="p-6 rounded-2xl border border-slate-200 bg-white">
-          <blockquote class="text-slate-700">“Dr. Doe truly listens. My BP is finally under control.”</blockquote>
-          <figcaption class="mt-3 text-sm text-slate-500">— R. Ahmed</figcaption>
+          <blockquote class="text-slate-700">“I came to Dr. Pavel with uncontrolled diabetes. He listened patiently, explained step by step, and gave me confidence. Today my sugar is under control and I feel healthier than ever.”</blockquote>
+          <figcaption class="mt-3 text-sm text-slate-500">— Patient from Brahmanbaria</figcaption>
         </figure>
         <figure class="p-6 rounded-2xl border border-slate-200 bg-white">
-          <blockquote class="text-slate-700">“Clear guidance and kind support throughout my diabetes journey.”</blockquote>
-          <figcaption class="mt-3 text-sm text-slate-500">— S. Chowdhury</figcaption>
+          <blockquote class="text-slate-700">“He is not only a good doctor, but also a kind listener. I always feel heard and cared for.”</blockquote>
+          <figcaption class="mt-3 text-sm text-slate-500">— Patient from Brahmanbaria</figcaption>
         </figure>
         <figure class="p-6 rounded-2xl border border-slate-200 bg-white">
-          <blockquote class="text-slate-700">“Modern clinic, minimal wait times, excellent care.”</blockquote>
-          <figcaption class="mt-3 text-sm text-slate-500">— N. Islam</figcaption>
+          <blockquote class="text-slate-700">“I was worried about my blood pressure for years. With Dr. Pavel’s guidance, I now have a clear plan and regular check-ups that keep me stable.”</blockquote>
+          <figcaption class="mt-3 text-sm text-slate-500">— Patient from Dhaka</figcaption>
         </figure>
       </div>
     </div>

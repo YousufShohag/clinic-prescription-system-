@@ -86,7 +86,10 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/patients/{patient}/documents', [PatientController::class, 'documents'])
      ->name('patients.documents');
     /* ---- Core Resources ---- */
+    Route::post('/admin/tests/import', [TestController::class, 'import'])->name('tests.import');
     Route::resource('tests', TestController::class);
+    
+
     Route::resource('doctors', DoctorController::class);
     Route::resource('patients', PatientController::class);
 

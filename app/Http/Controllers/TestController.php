@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Test;
 use App\Models\TestCategory;
 
+// This is for import Test
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\TestsImport;
+
 class TestController extends Controller
 {
     /**
@@ -100,4 +104,16 @@ class TestController extends Controller
             'pagination' => [ 'more' => ($page * $per) < $total ],
         ]);
     }
+
+    public function import(Request $request)
+        {
+            $request->validate([
+                'file' => 'required|file|mimes:xlsx,csv,xls',
+            ]);
+
+            Excel::import(new TestsImport, $request->file('file'));
+
+            return redirect()->route('tests.index')->with('success', 'Tests imported successfully!');
+        }
+
 }
