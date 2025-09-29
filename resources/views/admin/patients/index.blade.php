@@ -1,6 +1,7 @@
 {{-- resources/views/patients/index.blade.php --}}
 <x-app-layout>
-    <div class="container mx-auto py-8">
+    <!-- <div class="container mx-auto py-8"> -->
+    <div class="mx-auto py-8 px-4 sm:px-6 lg:px-8 max-w-8xl">
         {{-- Header --}}
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold">Patients</h2>

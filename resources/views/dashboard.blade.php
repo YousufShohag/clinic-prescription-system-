@@ -3,8 +3,8 @@
     <h2 class="font-semibold text-2xl text-gray-800 leading-tight">Dashboard</h2>
   </x-slot>
 
-  <div class="py-8 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
-
+  <!-- <div class="py-8 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8"> -->
+  <div class="py-8 mx-auto sm:px-6 lg:px-8 space-y-8" style="max-width: 1600px;">
     {{-- KPIs --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       <div class="bg-white p-5 rounded-lg shadow">

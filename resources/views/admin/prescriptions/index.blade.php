@@ -1,6 +1,8 @@
 {{-- resources/views/admin/prescriptions/index.blade.php --}}
 <x-app-layout>
-  <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <!-- <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8"> -->
+  <div class="mx-auto py-8 px-4 sm:px-6 lg:px-8 max-w-8xl">
+
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
       <h2 class="text-2xl font-semibold">All Prescriptions</h2>
       <a href="{{ route('prescriptions.create') }}"
