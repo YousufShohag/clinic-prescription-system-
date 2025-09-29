@@ -20,9 +20,16 @@ class TestController extends Controller
         // Load with category relation
         $tests = Test::with('category')
             ->where('status', 'active')
-            ->get();
+            ->orderBy('name')               // optional: stable ordering
+            ->paginate(25)                  // ← show 25 per page
+            ->withQueryString();            // keep current query params on links
+         
 
         return view('admin.tests.index', compact('tests'));
+
+
+
+
     }
 
     /**
